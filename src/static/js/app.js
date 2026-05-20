@@ -15,6 +15,7 @@
     { id: 'water-sensors',    file: 'water-sensors.geojson',    label: 'Live water temperature (Helsinki)',color: '#14b8a6', icon: '\u{1F321}', group: 'swimming-water' },
     { id: 'algae',            file: 'algae.geojson',            label: 'Recent algae observations',        color: '#84cc16', icon: '\u{1F33F}', group: 'swimming-water' },
     { id: 'waterfalls',       file: 'waterfalls.geojson',       label: 'Waterfalls',                       color: '#2e7bd6', icon: '\u{1F30A}', group: 'swimming-water' },
+    { id: 'lakes',            file: 'lakes.geojson',            label: 'Lakes (≥ 0.5 km², Järviwiki)', color: '#0b6fb2', icon: '\u{1F3DE}', group: 'swimming-water' },
     { id: 'breweries',        file: 'breweries.geojson',        label: 'Breweries',                        color: '#d4a017', icon: '\u{1F37A}', group: 'alcohol' },
     { id: 'wineries',         file: 'wineries.geojson',         label: 'Wineries',                         color: '#8a1b3b', icon: '\u{1F377}', group: 'alcohol' },
     { id: 'distilleries',     file: 'distilleries.geojson',     label: 'Distilleries',                     color: '#c97a3d', icon: '\u{1F943}', group: 'alcohol' },

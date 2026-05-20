@@ -258,6 +258,54 @@ button.ghost:hover { background: #1f7a3a; color: #fff; }
 .muted { color: #888; }
 .small { font-size: 12px; }
 
+/* Resources tab: two exclusive accordions (Web resources / Mobile apps) */
+.resource-accordion {
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+.resource-accordion + .resource-accordion { margin-top: 0; }
+.resource-accordion > summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f7a3a;
+  background: #fafaf6;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.resource-accordion > summary::-webkit-details-marker { display: none; }
+.resource-accordion > summary::before {
+  content: "+";
+  width: 14px;
+  height: 14px;
+  line-height: 12px;
+  text-align: center;
+  border: 1px solid #1f7a3a;
+  border-radius: 3px;
+  font-weight: 700;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.resource-accordion[open] > summary::before { content: "−"; }
+.resource-accordion[open] > summary { border-bottom: 1px solid #ececec; }
+.resource-accordion .resource-accordion-body { padding: 8px 10px 4px; }
+.resource-category-label {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #888;
+  margin: 8px 0 4px;
+  font-weight: 600;
+}
+.resource-accordion .resource-accordion-body > .resource-category-label:first-child { margin-top: 2px; }
+
 /* Resource cards - compact density */
 .resource-card {
   border: 1px solid #ececec;

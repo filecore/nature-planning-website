@@ -67,8 +67,8 @@ In rough order of preference (most to least convenient):
    ```
 2. **A "download as GPX / KML / CSV / GeoJSON" link on the site** — laavu.org
    does this at https://laavu.org/lataa.php?paikkakunta=kaikki (returns a
-   single GPX with all ~4500 waypoints). Pikakartta, järviwiki, kyppi.fi
-   often have similar buttons.
+   single GPX with all ~4500 waypoints). Pikakartta and similar tools
+   often have analogous buttons.
 3. **A Google Sheet with public viewing** — append `/export?format=csv` to
    the share URL to get a CSV. Used for the saunas list.
 4. **A WMS / WFS endpoint** — open `GetCapabilities` in the browser to list
@@ -141,9 +141,12 @@ subscription model in 2026 and is no longer parseable for free. It remains
 in `sources.json` as an outbound link. Data dropped into `data/manual/tulikartta.kml` and a small adapter can
 bring the layer back.
 
-Several other interesting datasets are link-only in
-`src/data/sources.json` (järviwiki, kyppi.fi archaeology, winter routes). Promoting any of these to a
-real mapped layer is exactly the workflow above.
+A few other interesting datasets remain link-only in
+`src/data/sources.json` (winter routes, retkipaikka tips, Uuvi list).
+Promoting any of these to a real mapped layer is exactly the workflow
+above. (kyppi.fi is already mapped as the **archaeology** layer via the
+Museovirasto WFS; järviwiki is mapped as the **lakes** layer via its
+Semantic MediaWiki API.)
 
 ## Out of scope
 

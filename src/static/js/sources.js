@@ -13,27 +13,72 @@
     const categories = new Map(DATA.categories.map(c => [c.id, c.label]));
     container.innerHTML = '';
 
-    // Group by category
-    const grouped = new Map();
+    // Two accordions: Web resources (anything whose category does not start
+    // with apps-) and Mobile apps (category starts with apps-). Group by
+    // category within each, in the order categories appear in the manifest.
+    const groupedAll = new Map();
     for (const s of DATA.sources) {
-      if (!grouped.has(s.category)) grouped.set(s.category, []);
-      grouped.get(s.category).push(s);
+      if (!groupedAll.has(s.category)) groupedAll.set(s.category, []);
+      groupedAll.get(s.category).push(s);
     }
 
-    for (const [catId, items] of grouped) {
-      const h = document.createElement('h3');
-      h.textContent = categories.get(catId) || catId;
-      h.style.fontSize = '12px';
-      h.style.textTransform = 'uppercase';
-      h.style.letterSpacing = '0.6px';
-      h.style.color = '#888';
-      h.style.margin = '14px 0 6px';
-      container.appendChild(h);
+    const webGroups = new Map();
+    const appGroups = new Map();
+    for (const [catId, items] of groupedAll) {
+      (catId.startsWith('apps-') ? appGroups : webGroups).set(catId, items);
+    }
 
-      for (const src of items) {
-        container.appendChild(makeCard(src, onInline));
+    const accordions = [
+      { id: 'web',  label: 'Web resources', groups: webGroups },
+      { id: 'apps', label: 'Mobile apps',   groups: appGroups },
+    ];
+
+    for (const acc of accordions) {
+      if (acc.groups.size === 0) continue;
+      const wrap = document.createElement('details');
+      wrap.className = 'resource-accordion';
+      wrap.dataset.accordion = acc.id;
+      if (acc.id === 'web') wrap.open = true;  // start with web open
+
+      const summary = document.createElement('summary');
+      summary.className = 'resource-accordion-summary';
+      summary.textContent = acc.label;
+      wrap.appendChild(summary);
+
+      const body = document.createElement('div');
+      body.className = 'resource-accordion-body';
+      for (const [catId, items] of acc.groups) {
+        const h = document.createElement('h4');
+        h.className = 'resource-category-label';
+        h.textContent = categories.get(catId) || catId;
+        body.appendChild(h);
+        for (const src of items) {
+          body.appendChild(makeCard(src, onInline));
+        }
       }
+      wrap.appendChild(body);
+      container.appendChild(wrap);
     }
+
+    // Exclusive-open behaviour: opening one closes the other, and the
+    // just-opened summary scrolls to the top of the sidebar scroll area.
+    const all = container.querySelectorAll('details.resource-accordion');
+    const scroller = document.getElementById('sidebar-scroll');
+    all.forEach((d) => {
+      d.addEventListener('toggle', () => {
+        if (!d.open) return;
+        all.forEach((other) => { if (other !== d) other.open = false; });
+        if (scroller) {
+          // Use the summary's offset relative to the scroll container so
+          // sticky headers / sibling content don't throw the position off.
+          const summary = d.querySelector('summary');
+          if (summary) {
+            const offsetTop = summary.offsetTop - scroller.offsetTop;
+            scroller.scrollTo({ top: offsetTop, behavior: 'smooth' });
+          }
+        }
+      });
+    });
   }
 
   function makeCard(src, onInline) {
