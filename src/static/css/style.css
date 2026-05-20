@@ -110,54 +110,60 @@ html, body {
   border-bottom-color: #1f7a3a;
 }
 
+/* Single scroll wrapper holds the active tab panel and the footer,
+   so the footer flows after the content instead of stealing a fixed
+   slice at the bottom of the sidebar (which was painful on mobile). */
+.sidebar-scroll {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+}
+
 .tab-panel {
   display: none;
-  padding: 14px 16px;
-  overflow-y: auto;
-  flex: 1 1 auto;
+  padding: 10px 14px 6px;
 }
 
 .tab-panel.active { display: block; }
 
-/* Sidebar footer: always-visible blurb + data freshness, sits below the
-   active tab panel. flex:0 0 auto keeps it out of the scroll area. */
 .sidebar-footer {
-  flex: 0 0 auto;
-  padding: 12px 16px;
+  padding: 10px 14px 14px;
   border-top: 1px solid #ececec;
-  font-size: 12px;
-  color: #555;
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: #666;
   line-height: 1.4;
 }
-.sidebar-footer p { margin: 0 0 6px; }
+.sidebar-footer p { margin: 0 0 5px; }
 .sidebar-footer p:last-child { margin-bottom: 0; }
 .sidebar-footer a { color: #1f7a3a; }
 
-/* Panel blocks */
-.panel-block { margin-bottom: 16px; }
+/* Panel blocks - tightened density */
+.panel-block { margin-bottom: 10px; }
 
 .block-label {
   display: block;
-  font-size: 11px;
+  font-size: 10.5px;
   text-transform: uppercase;
   letter-spacing: 0.6px;
   color: #888;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .checkbox-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 1px;
 }
 
 .checkbox-group label {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 0;
+  gap: 7px;
+  padding: 1px 0;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 12.5px;
+  line-height: 1.3;
 }
 
 .checkbox-group input[type="checkbox"] {
@@ -172,47 +178,48 @@ html, body {
   margin-right: 4px;
 }
 
-.layer-group { margin-top: 6px; }
+.layer-group { margin-top: 2px; }
 .layer-group > summary {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   cursor: pointer;
   list-style: none;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
-  padding: 6px 0;
+  padding: 3px 0;
   user-select: none;
   color: #1f7a3a;
 }
 .layer-group > summary::-webkit-details-marker { display: none; }
-/* Obvious +/- toggle: a 16px square chip that swaps glyph on [open]. */
 .layer-group > summary::before {
   content: "+";
-  width: 16px;
-  height: 16px;
-  line-height: 14px;
+  width: 14px;
+  height: 14px;
+  line-height: 12px;
   text-align: center;
   border: 1px solid #1f7a3a;
   border-radius: 3px;
   color: #1f7a3a;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 12px;
   display: inline-block;
   flex-shrink: 0;
 }
 .layer-group[open] > summary::before { content: "−"; }
 .layer-group .group-label { flex: 1; }
 .layer-group .group-children {
-  padding-left: 24px;
+  padding-left: 18px;
   border-left: 1px dotted #d0d0d0;
-  margin-left: 7px;
+  margin-left: 6px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding-top: 4px;
-  padding-bottom: 6px;
+  gap: 0;
+  padding-top: 2px;
+  padding-bottom: 3px;
 }
+/* Make the parent-toggle checkbox a touch smaller and snug to the label. */
+.layer-group .group-parent { margin: 0; }
 
 input[type="search"], select {
   width: 100%;
@@ -251,37 +258,49 @@ button.ghost:hover { background: #1f7a3a; color: #fff; }
 .muted { color: #888; }
 .small { font-size: 12px; }
 
-/* Resource cards */
+/* Resource cards - compact density */
 .resource-card {
   border: 1px solid #ececec;
-  border-radius: 6px;
-  padding: 10px 12px;
-  margin-bottom: 10px;
+  border-radius: 5px;
+  padding: 6px 9px;
+  margin-bottom: 5px;
   background: #fafaf6;
 }
 
 .resource-card h3 {
-  margin: 0 0 4px;
-  font-size: 14px;
+  margin: 0 0 2px;
+  font-size: 13px;
   font-weight: 600;
 }
 
 .resource-card .blurb {
-  margin: 0 0 8px;
-  font-size: 12px;
+  margin: 0 0 5px;
+  font-size: 11.5px;
   color: #555;
-  line-height: 1.4;
+  line-height: 1.35;
 }
 
 .resource-card .card-actions {
   display: flex;
-  gap: 6px;
+  gap: 5px;
+  flex-wrap: wrap;
 }
 
+.resource-card .card-actions a,
 .resource-card button {
-  font-size: 12px;
-  padding: 5px 10px;
+  font-size: 11.5px;
+  padding: 3px 9px;
+  border-radius: 4px;
+  text-decoration: none;
+  line-height: 1.3;
 }
+.resource-card .card-actions a.ghost {
+  background: transparent;
+  color: #1f7a3a;
+  border: 1px solid #1f7a3a;
+  display: inline-block;
+}
+.resource-card .card-actions a.ghost:hover { background: #1f7a3a; color: #fff; }
 
 /* Favourites list */
 .favourite-entry {
@@ -355,70 +374,104 @@ button.ghost:hover { background: #1f7a3a; color: #fff; }
   width: 100%;
 }
 
-/* Popups */
+/* Popups - jaaskel.com-inspired visual hierarchy */
+.leaflet-popup-content-wrapper { padding: 0; border-radius: 10px; }
 .leaflet-popup-content {
   font-size: 13px;
   line-height: 1.4;
   max-width: 280px;
+  margin: 12px 14px 10px;
 }
 
 .leaflet-popup-content h3 {
-  margin: 0 0 6px;
-  font-size: 14px;
-  font-weight: 600;
+  margin: 0 0 2px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a2533;
+  line-height: 1.25;
 }
 
 .leaflet-popup-content .popup-meta {
-  color: #777;
-  font-size: 11px;
-  margin: 0 0 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
+  color: #7a9ab8;
+  font-size: 11.5px;
+  margin: 0 0 8px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.leaflet-popup-content .popup-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 3px 0;
+  font-size: 12.5px;
+  color: #2a3540;
+}
+.leaflet-popup-content .popup-row .popup-icon {
+  flex-shrink: 0;
+  width: 16px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.3;
 }
 
 .leaflet-popup-content .popup-features {
-  margin: 6px 0;
-  font-size: 12px;
+  margin: 6px 0 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .leaflet-popup-content .popup-features span {
   display: inline-block;
   background: #eef3ec;
   color: #1f7a3a;
-  padding: 2px 6px;
-  border-radius: 10px;
-  margin: 2px 4px 2px 0;
-  font-size: 11px;
-}
-
-.leaflet-popup-content .popup-actions {
-  margin-top: 8px;
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
-
-.leaflet-popup-content .popup-actions a {
-  color: #1f7a3a;
-  text-decoration: none;
+  padding: 2px 8px;
+  border-radius: 11px;
+  font-size: 10.5px;
   font-weight: 500;
 }
 
-.leaflet-popup-content .popup-actions a:hover { text-decoration: underline; }
-
-.star-button {
-  background: transparent;
-  color: #aaa;
-  border: 1px solid #d0d0d0;
-  padding: 3px 8px;
-  font-size: 12px;
-  border-radius: 4px;
+.leaflet-popup-content .popup-actions {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
-.star-button.active {
+.leaflet-popup-content .popup-actions .popup-btn {
+  display: block;
+  text-align: center;
+  border-radius: 7px;
+  padding: 7px 12px;
+  font-weight: 600;
+  font-size: 12.5px;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+}
+.leaflet-popup-content .popup-btn-primary {
+  background: #1a6b9a;
+  color: #fff;
+}
+.leaflet-popup-content .popup-btn-primary:hover { background: #155a83; }
+.leaflet-popup-content .popup-btn-secondary {
+  background: #1f7a3a;
+  color: #fff;
+}
+.leaflet-popup-content .popup-btn-secondary:hover { background: #1a6831; }
+.leaflet-popup-content .popup-btn-star {
+  background: #fff;
+  color: #1a2533;
+  border-color: #d0d0d0;
+}
+.leaflet-popup-content .popup-btn-star.active {
+  background: #fff8e6;
   color: #c89a1f;
   border-color: #c89a1f;
-  background: #fff8e6;
 }
 
 /* Divider: hidden on desktop (sidebar collapse handles the layout),

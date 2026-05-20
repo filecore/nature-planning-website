@@ -5,19 +5,19 @@
   // Every layer belongs to a group. Order of layers within a group, and of
   // groups themselves, follows the GROUP_ORDER list below.
   const LAYERS = [
-    { id: 'national-parks',   file: 'national-parks.geojson',   label: 'National parks and hiking areas', color: '#1f7a3a', letter: 'N', group: 'hiking' },
-    { id: 'laavut',           file: 'laavut.geojson',           label: 'Laavus and kotas',                 color: '#7a4a1f', letter: 'L', group: 'hiking' },
-    { id: 'saunas',           file: 'saunas.geojson',           label: 'Saunas in nature',                 color: '#8a4fcf', letter: 'S', group: 'hiking' },
-    { id: 'uusimaa-classics', file: 'uusimaa-classics.geojson', label: 'Uusimaa classics',                 color: '#facc15', letter: 'C', group: 'hiking' },
-    { id: 'archaeology',    file: 'archaeology.geojson',    label: 'Archaeological sites (VARK)',      color: '#a0292e', letter: 'A', group: 'natural-sites' },
-    { id: 'sacred-sites',   file: 'sacred-sites.geojson',   label: 'Sacred natural sites',             color: '#5b3a8a', letter: 'P', group: 'natural-sites' },
-    { id: 'beaches',        file: 'beaches.geojson',        label: 'Public swimming beaches',          color: '#4ec3e0', letter: 'U', group: 'swimming-water' },
-    { id: 'water-sensors',  file: 'water-sensors.geojson',  label: 'Live water temperature (Helsinki)',color: '#14b8a6', letter: 'T', group: 'swimming-water' },
-    { id: 'algae',          file: 'algae.geojson',          label: 'Recent algae observations',        color: '#84cc16', letter: 'G', group: 'swimming-water' },
-    { id: 'waterfalls',     file: 'waterfalls.geojson',     label: 'Waterfalls',                       color: '#2e7bd6', letter: 'W', group: 'swimming-water' },
-    { id: 'breweries',      file: 'breweries.geojson',      label: 'Breweries',                        color: '#d4a017', letter: 'B', group: 'alcohol' },
-    { id: 'wineries',       file: 'wineries.geojson',       label: 'Wineries',                         color: '#8a1b3b', letter: 'V', group: 'alcohol' },
-    { id: 'distilleries',   file: 'distilleries.geojson',   label: 'Distilleries',                     color: '#c97a3d', letter: 'D', group: 'alcohol' },
+    { id: 'national-parks',   file: 'national-parks.geojson',   label: 'National parks and hiking areas', color: '#1f7a3a', icon: '\u{1F332}', group: 'hiking' },
+    { id: 'laavut',           file: 'laavut.geojson',           label: 'Laavus and kotas',                 color: '#7a4a1f', icon: '\u{1F3D5}', group: 'hiking' },
+    { id: 'saunas',           file: 'saunas.geojson',           label: 'Saunas in nature',                 color: '#8a4fcf', icon: '\u{1F9D6}', group: 'hiking' },
+    { id: 'uusimaa-classics', file: 'uusimaa-classics.geojson', label: 'Uusimaa classics',                 color: '#facc15', icon: '⭐',    group: 'hiking' },
+    { id: 'archaeology',      file: 'archaeology.geojson',      label: 'Archaeological sites (VARK)',      color: '#a0292e', icon: '\u{1F3DB}', group: 'natural-sites' },
+    { id: 'sacred-sites',     file: 'sacred-sites.geojson',     label: 'Sacred natural sites',             color: '#5b3a8a', icon: '✨',    group: 'natural-sites' },
+    { id: 'beaches',          file: 'beaches.geojson',          label: 'Public swimming beaches',          color: '#4ec3e0', icon: '\u{1F3D6}', group: 'swimming-water' },
+    { id: 'water-sensors',    file: 'water-sensors.geojson',    label: 'Live water temperature (Helsinki)',color: '#14b8a6', icon: '\u{1F321}', group: 'swimming-water' },
+    { id: 'algae',            file: 'algae.geojson',            label: 'Recent algae observations',        color: '#84cc16', icon: '\u{1F33F}', group: 'swimming-water' },
+    { id: 'waterfalls',       file: 'waterfalls.geojson',       label: 'Waterfalls',                       color: '#2e7bd6', icon: '\u{1F30A}', group: 'swimming-water' },
+    { id: 'breweries',        file: 'breweries.geojson',        label: 'Breweries',                        color: '#d4a017', icon: '\u{1F37A}', group: 'alcohol' },
+    { id: 'wineries',         file: 'wineries.geojson',         label: 'Wineries',                         color: '#8a1b3b', icon: '\u{1F377}', group: 'alcohol' },
+    { id: 'distilleries',     file: 'distilleries.geojson',     label: 'Distilleries',                     color: '#c97a3d', icon: '\u{1F943}', group: 'alcohol' },
   ];
 
   const GROUPS = {
@@ -185,20 +185,34 @@
     const isFav = Favourites.has(layer.id, featureId);
 
     const container = document.createElement('div');
+    container.className = 'popup';
 
     const title = document.createElement('h3');
-    title.textContent = props.name || '(unnamed)';
+    title.textContent = (layer.icon ? layer.icon + ' ' : '') + (props.name || '(unnamed)');
     container.appendChild(title);
 
-    const meta = document.createElement('p');
-    meta.className = 'popup-meta';
-    meta.textContent = [layer.label, props.region].filter(Boolean).join(' · ');
-    container.appendChild(meta);
+    // City / region subtitle (subdued, like Pekka's "Espoo" line).
+    const subtitle = props.region || layer.label;
+    if (subtitle) {
+      const meta = document.createElement('p');
+      meta.className = 'popup-meta';
+      meta.textContent = subtitle;
+      container.appendChild(meta);
+    }
 
+    // Description gets a paragraph icon prefix unless it duplicates the
+    // layer name verbatim.
     if (props.description) {
-      const desc = document.createElement('p');
-      desc.textContent = props.description;
-      container.appendChild(desc);
+      const row = document.createElement('div');
+      row.className = 'popup-row';
+      const ico = document.createElement('span');
+      ico.className = 'popup-icon';
+      ico.textContent = '\u{1F4DD}';  // memo
+      const txt = document.createElement('span');
+      txt.textContent = props.description;
+      row.appendChild(ico);
+      row.appendChild(txt);
+      container.appendChild(row);
     }
 
     if (Array.isArray(props.features) && props.features.length > 0) {
@@ -212,6 +226,7 @@
       container.appendChild(featBox);
     }
 
+    // Stacked button column at the bottom, matching jaaskel.com.
     const actions = document.createElement('div');
     actions.className = 'popup-actions';
 
@@ -220,13 +235,15 @@
       link.href = props.source_url;
       link.target = '_blank';
       link.rel = 'noopener';
-      link.textContent = 'View source';
+      link.className = 'popup-btn popup-btn-primary';
+      link.textContent = 'View source ↗';
       actions.appendChild(link);
     }
 
     const star = document.createElement('button');
-    star.className = 'star-button' + (isFav ? ' active' : '');
-    star.textContent = isFav ? 'Saved' : 'Save';
+    star.type = 'button';
+    star.className = 'popup-btn popup-btn-star' + (isFav ? ' active' : '');
+    star.textContent = isFav ? '★ Saved' : '☆ Save to favourites';
     star.addEventListener('click', () => {
       const [favLat, favLon] = featureCentroid(feature);
       Favourites.toggle({
@@ -239,7 +256,7 @@
       });
       const nowFav = Favourites.has(layer.id, featureId);
       star.classList.toggle('active', nowFav);
-      star.textContent = nowFav ? 'Saved' : 'Save';
+      star.textContent = nowFav ? '★ Saved' : '☆ Save to favourites';
       renderFavourites();
     });
     actions.appendChild(star);

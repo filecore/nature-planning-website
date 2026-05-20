@@ -44,26 +44,33 @@
     title.textContent = src.title;
     card.appendChild(title);
 
-    const blurb = document.createElement('p');
-    blurb.className = 'blurb';
-    blurb.textContent = src.blurb;
-    card.appendChild(blurb);
+    if (src.blurb) {
+      const blurb = document.createElement('p');
+      blurb.className = 'blurb';
+      blurb.textContent = src.blurb;
+      card.appendChild(blurb);
+    }
 
     const actions = document.createElement('div');
     actions.className = 'card-actions';
 
-    const openLink = document.createElement('a');
-    openLink.href = src.url;
-    openLink.target = '_blank';
-    openLink.rel = 'noopener';
-    const openBtn = document.createElement('button');
-    openBtn.textContent = 'Open site';
-    openBtn.className = 'ghost';
-    openBtn.addEventListener('click', () => window.open(src.url, '_blank', 'noopener'));
-    actions.appendChild(openBtn);
+    // Dual store links for Play-Store-backed apps; a single "Open site"
+    // button for everything else.
+    if (src.android_url || src.ios_url) {
+      if (src.android_url) actions.appendChild(makeStoreLink('Android', src.android_url, 'ghost'));
+      if (src.ios_url)     actions.appendChild(makeStoreLink('iOS',     src.ios_url,     'ghost'));
+    } else {
+      const openBtn = document.createElement('button');
+      openBtn.type = 'button';
+      openBtn.textContent = 'Open site';
+      openBtn.className = 'ghost';
+      openBtn.addEventListener('click', () => window.open(src.url, '_blank', 'noopener'));
+      actions.appendChild(openBtn);
+    }
 
     if (src.inline) {
       const inlineBtn = document.createElement('button');
+      inlineBtn.type = 'button';
       inlineBtn.textContent = 'Open inline';
       inlineBtn.addEventListener('click', () => onInline(src));
       actions.appendChild(inlineBtn);
@@ -71,6 +78,16 @@
 
     card.appendChild(actions);
     return card;
+  }
+
+  function makeStoreLink(label, url, cls) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.className = cls || '';
+    a.textContent = label;
+    return a;
   }
 
   window.Sources = { load, renderList };

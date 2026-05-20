@@ -1,21 +1,69 @@
 {
   "categories": [
-    {"id": "hiking-map", "label": "Hiking maps"},
-    {"id": "destination-list", "label": "Destination lists"},
-    {"id": "tips", "label": "Tips and stories"},
-    {"id": "winter", "label": "Winter routes"},
-    {"id": "places-of-interest", "label": "Places of interest"},
-    {"id": "lakes", "label": "Lakes and waterways"},
-    {"id": "waterfalls", "label": "Waterfalls"},
-    {"id": "food-drink", "label": "Food and drink"},
-    {"id": "heritage", "label": "Cultural heritage"},
-    {"id": "tools", "label": "Tools"},
-    {"id": "weather", "label": "Weather"},
-    {"id": "apps-emergency", "label": "Apps - Emergency"},
-    {"id": "apps-info", "label": "Apps - Info"},
-    {"id": "apps-location", "label": "Apps - Location"},
-    {"id": "apps-geocaching", "label": "Apps - Geocaching"},
-    {"id": "apps-photography", "label": "Apps - Photography"}
+    {
+      "id": "hiking-map",
+      "label": "Hiking maps"
+    },
+    {
+      "id": "destination-list",
+      "label": "Destination lists"
+    },
+    {
+      "id": "tips",
+      "label": "Tips and stories"
+    },
+    {
+      "id": "winter",
+      "label": "Winter routes"
+    },
+    {
+      "id": "places-of-interest",
+      "label": "Places of interest"
+    },
+    {
+      "id": "lakes",
+      "label": "Lakes and waterways"
+    },
+    {
+      "id": "waterfalls",
+      "label": "Waterfalls"
+    },
+    {
+      "id": "food-drink",
+      "label": "Food and drink"
+    },
+    {
+      "id": "heritage",
+      "label": "Cultural heritage"
+    },
+    {
+      "id": "tools",
+      "label": "Tools"
+    },
+    {
+      "id": "weather",
+      "label": "Weather"
+    },
+    {
+      "id": "apps-emergency",
+      "label": "Apps - Emergency"
+    },
+    {
+      "id": "apps-info",
+      "label": "Apps - Info"
+    },
+    {
+      "id": "apps-location",
+      "label": "Apps - Location"
+    },
+    {
+      "id": "apps-geocaching",
+      "label": "Apps - Geocaching"
+    },
+    {
+      "id": "apps-photography",
+      "label": "Apps - Photography"
+    }
   ],
   "sources": [
     {
@@ -144,7 +192,9 @@
       "blurb": "Gives your GPS location to the emergency dispatcher, plus shortcuts to maritime rescue and other useful numbers.",
       "category": "apps-emergency",
       "inline": false,
-      "language": "en"
+      "language": "en",
+      "android_url": "https://play.google.com/store/apps/details?id=fi.digia.suomi112",
+      "ios_url": "https://apps.apple.com/fi/app/112-suomi/id998281396?uo=4"
     },
     {
       "id": "app-sja-firstaid",
@@ -153,7 +203,9 @@
       "blurb": "First aid reference for adults.",
       "category": "apps-emergency",
       "inline": false,
-      "language": "en"
+      "language": "en",
+      "android_url": "https://play.google.com/store/apps/details?id=com.sja.firstaid",
+      "ios_url": "https://apps.apple.com/fi/search?term=St+John+Ambulance+First+Aid"
     },
     {
       "id": "app-baby-child-first-aid",
@@ -162,7 +214,9 @@
       "blurb": "First aid reference for babies and children.",
       "category": "apps-emergency",
       "inline": false,
-      "language": "en"
+      "language": "en",
+      "android_url": "https://play.google.com/store/apps/details?id=com.cube.rca.bcfa",
+      "ios_url": "https://apps.apple.com/fi/search?term=Baby+%26+Child+First+Aid"
     },
     {
       "id": "app-useful-knots",
@@ -171,7 +225,9 @@
       "blurb": "Animated guide to knots, categorised by use.",
       "category": "apps-info",
       "inline": false,
-      "language": "en"
+      "language": "en",
+      "android_url": "https://play.google.com/store/apps/details?id=com.neptuns.usefulknots",
+      "ios_url": "https://apps.apple.com/fi/search?term=Useful+Knots"
     },
     {
       "id": "app-rewindr",
@@ -180,7 +236,9 @@
       "blurb": "Trail tracking and related statistics.",
       "category": "apps-location",
       "inline": false,
-      "language": "en"
+      "language": "en",
+      "android_url": "https://play.google.com/store/apps/details?id=com.outstoke.rewindr",
+      "ios_url": "https://apps.apple.com/fi/app/rewindr-fun-reverse-audio/id6757102317?uo=4"
     },
     {
       "id": "app-heavens-above",
@@ -189,7 +247,9 @@
       "blurb": "Camera-based AR for stars, satellites, and constellations in real time.",
       "category": "apps-location",
       "inline": false,
-      "language": "en"
+      "language": "en",
+      "android_url": "https://play.google.com/store/apps/details?id=com.heavens_above.viewer",
+      "ios_url": "https://apps.apple.com/fi/app/sky-live-heavens-above-viewer/id693905898?uo=4"
     },
     {
       "id": "app-gps-status",
@@ -198,7 +258,9 @@
       "blurb": "A toolkit for the device GPS receiver: satellite info, signal quality, raw coordinates.",
       "category": "apps-location",
       "inline": false,
-      "language": "en"
+      "language": "en",
+      "android_url": "https://play.google.com/store/apps/details?id=com.eclipsim.gpsstatus2",
+      "ios_url": "https://apps.apple.com/fi/app/gps-status-coordinates/id1254805862?uo=4"
     },
     {
       "id": "app-retkikartta",
@@ -234,7 +296,9 @@
       "blurb": "Browse Finnish topographical maps, including offline use.",
       "category": "apps-location",
       "inline": false,
-      "language": "fi"
+      "language": "fi",
+      "android_url": "https://play.google.com/store/apps/details?id=com.accelbit.karttaselain&hl=en_US&gl=US",
+      "ios_url": "https://apps.apple.com/fi/app/karttaselain-maastokartta/id366054373?uo=4"
     },
     {
       "id": "app-custom-maps",
@@ -243,7 +307,9 @@
       "blurb": "Adds GPS overlay to any ad-hoc image of a map.",
       "category": "apps-location",
       "inline": false,
-      "language": "en"
+      "language": "en",
+      "android_url": "https://play.google.com/store/apps/details?id=com.custommapsapp.android&hl=en_GB",
+      "ios_url": "https://apps.apple.com/fi/search?term=Custom+Maps"
     },
     {
       "id": "app-tulipaikka",
@@ -261,7 +327,9 @@
       "blurb": "Unofficial geocaching app with rich offline support.",
       "category": "apps-geocaching",
       "inline": false,
-      "language": "en"
+      "language": "en",
+      "android_url": "https://play.google.com/store/apps/details?id=cgeo.geocaching",
+      "ios_url": "https://apps.apple.com/fi/search?term=c%3Ageo"
     },
     {
       "id": "app-geocaching",
@@ -270,7 +338,9 @@
       "blurb": "Official Geocaching.com app.",
       "category": "apps-geocaching",
       "inline": false,
-      "language": "en"
+      "language": "en",
+      "android_url": "https://play.google.com/store/apps/details?id=com.groundspeak.geocaching.intro",
+      "ios_url": "https://apps.apple.com/fi/app/geocaching/id329541503?uo=4"
     },
     {
       "id": "app-camera-fv5",
@@ -279,7 +349,9 @@
       "blurb": "Manual-control camera app with many photographic options.",
       "category": "apps-photography",
       "inline": false,
-      "language": "en"
+      "language": "en",
+      "android_url": "https://play.google.com/store/apps/details?id=com.flavionet.android.camera.lite",
+      "ios_url": "https://apps.apple.com/fi/search?term=Camera+FV-5"
     },
     {
       "id": "app-airdata-uav",
@@ -288,7 +360,9 @@
       "blurb": "Drone flight log + weather prediction.",
       "category": "apps-photography",
       "inline": false,
-      "language": "en"
+      "language": "en",
+      "android_url": "https://play.google.com/store/apps/details?id=com.airdata.uav.app",
+      "ios_url": "https://apps.apple.com/fi/app/airdata-uav/id1486407422?uo=4"
     },
     {
       "id": "app-uav-forecast",
@@ -297,7 +371,9 @@
       "blurb": "Drone-specific weather and flight-suitability forecast.",
       "category": "apps-photography",
       "inline": false,
-      "language": "en"
+      "language": "en",
+      "android_url": "https://play.google.com/store/apps/details?id=com.uavforecast",
+      "ios_url": "https://apps.apple.com/fi/app/uav-forecast/id1050023752?uo=4"
     },
     {
       "id": "app-airmap",
@@ -306,7 +382,9 @@
       "blurb": "Airspace regulation data for drone pilots.",
       "category": "apps-photography",
       "inline": false,
-      "language": "en"
+      "language": "en",
+      "android_url": "https://play.google.com/store/apps/details?id=com.airmap.airmap",
+      "ios_url": "https://apps.apple.com/fi/app/drone-uav-fly-forecast-airmap/id6737102940?uo=4"
     },
     {
       "id": "app-aviamaps",
