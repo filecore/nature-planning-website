@@ -17,18 +17,32 @@ set -a; source .env; set +a
 echo "Syncing source to ${REMOTE_HOST}:${REMOTE_DIR}/"
 ssh "$REMOTE_HOST" "mkdir -p '$REMOTE_DIR'"
 
-rsync -av --delete \
+# Stage to a tempdir and rewrite the __BUILD__ cache-buster placeholder
+# in index.html with the current epoch seconds so every deploy
+# invalidates Cloudflare + browser caches for the static asset list.
+STAGE_DIR="$(mktemp -d)"
+trap 'rm -rf "${STAGE_DIR}"' EXIT
+rsync -a \
   --exclude='.git/' \
   --exclude='.venv/' \
   --exclude='__pycache__/' \
   --exclude='*.pyc' \
-  ./ "$REMOTE_HOST:$REMOTE_DIR/"
+  ./ "${STAGE_DIR}/"
+BUILD_ID="$(date +%s)"
+sed -i "s/__BUILD__/${BUILD_ID}/g" "${STAGE_DIR}/src/index.html"
+
+rsync -av --delete \
+  "${STAGE_DIR}/" "$REMOTE_HOST:$REMOTE_DIR/"
+
+echo "Build id: ${BUILD_ID}"
 
 echo "Starting / restarting container"
 ssh "$REMOTE_HOST" "cd '$REMOTE_DIR' && docker compose up -d"
 
-# nginx.conf is bind-mounted, so a config edit will not be detected by
-# 'compose up -d' on its own. Reload nginx in-place to pick up any changes.
-ssh "$REMOTE_HOST" "docker exec nature nginx -s reload" >/dev/null 2>&1 || true
+# rsync replaces files via tmp + rename, which gives nginx.conf a new
+# inode. The bind mount in the container still points at the old one,
+# so 'nginx -s reload' would re-read the old contents. Restart the
+# container to pick up the freshly-written file.
+ssh "$REMOTE_HOST" "docker restart nature" >/dev/null
 
 echo "Done. Site: https://${NATURE_DOMAIN}/"
