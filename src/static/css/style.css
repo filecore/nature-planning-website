@@ -52,12 +52,17 @@ html, body {
 
 #sidebar-toggle {
   background: transparent;
-  border: 1px solid #d0d0d0;
+  color: #1f7a3a;
+  border: 1px solid #1f7a3a;
   border-radius: 4px;
-  padding: 4px 8px;
+  padding: 2px 9px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  min-width: 28px;
 }
+#sidebar-toggle:hover { background: #eef3ec; }
 
 /* Toggle button stays accessible when sidebar collapsed */
 .sidebar-toggle-floating {
@@ -66,12 +71,16 @@ html, body {
   left: 14px;
   z-index: 500;
   background: #fff;
-  border: 1px solid #d0d0d0;
+  color: #1f7a3a;
+  border: 1px solid #1f7a3a;
   border-radius: 4px;
-  padding: 6px 10px;
+  padding: 6px 12px;
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+  font-weight: 600;
+  font-size: 14px;
 }
+.sidebar-toggle-floating:hover { background: #eef3ec; }
 
 /* Tabs */
 .tabs {

@@ -23,6 +23,46 @@
   };
   const GROUP_ORDER = ['hiking', 'natural-sites', 'alcohol'];
 
+  // Default ON layers on first visit so the user is not greeted by a
+  // blank map. Anything not listed here starts unchecked.
+  const DEFAULT_ON_LAYERS = new Set(['national-parks']);
+
+  /* ---------- Persistent filter state ---------- */
+  // Single localStorage blob holding every checkbox + select state so the
+  // sidebar restores exactly as the user left it on the next visit.
+  const PREFS_KEY = 'nature.prefs.v1';
+
+  function loadPrefs() {
+    try {
+      const raw = localStorage.getItem(PREFS_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function savePrefs() {
+    const layers = {};
+    for (const layer of LAYERS) {
+      layers[layer.id] = Filters.state.layers.has(layer.id);
+    }
+    const prefs = {
+      layers,
+      features: Array.from(Filters.state.features),
+      region: Filters.state.region,
+      search: Filters.state.search,
+    };
+    try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) {}
+  }
+
+  function initialLayerChecked(layerId) {
+    const prefs = loadPrefs();
+    if (prefs && prefs.layers && Object.prototype.hasOwnProperty.call(prefs.layers, layerId)) {
+      return Boolean(prefs.layers[layerId]);
+    }
+    return DEFAULT_ON_LAYERS.has(layerId);
+  }
+
   const FINLAND_CENTER = [64.5, 26.0];
   const FINLAND_ZOOM = 6;
 
@@ -244,6 +284,11 @@
       opt.textContent = r;
       sel.appendChild(opt);
     }
+    // Re-apply the saved region now that the option exists.
+    if (sel.dataset.pending) {
+      sel.value = sel.dataset.pending;
+      delete sel.dataset.pending;
+    }
   }
 
   function updateFreshness() {
@@ -308,15 +353,19 @@
             Filters.setLayer(layer.id, parentCb.checked);
           }
         }
+        savePrefs();
       });
 
       // Reflect children -> parent: all/some/none indeterminate state.
-      childWrap.addEventListener('change', () => {
+      const syncParent = () => {
         const childCbs = Array.from(childWrap.querySelectorAll('input[type="checkbox"]'));
         const checkedCount = childCbs.filter(c => c.checked).length;
         parentCb.checked = checkedCount === childCbs.length;
         parentCb.indeterminate = checkedCount > 0 && checkedCount < childCbs.length;
-      });
+      };
+      childWrap.addEventListener('change', syncParent);
+      // Initial sync so the parent reflects the restored child states.
+      syncParent();
     }
   }
 
@@ -325,10 +374,12 @@
     const cb = document.createElement('input');
     cb.type = 'checkbox';
     cb.value = layer.id;
-    cb.checked = false;
-    Filters.setLayer(layer.id, false);
+    const initial = initialLayerChecked(layer.id);
+    cb.checked = initial;
+    Filters.setLayer(layer.id, initial);
     cb.addEventListener('change', () => {
       Filters.setLayer(layer.id, cb.checked);
+      savePrefs();
     });
     const swatch = document.createElement('span');
     swatch.className = 'layer-swatch';
@@ -340,23 +391,51 @@
   }
 
   function wireFilters() {
-    document.getElementById('search-box').addEventListener('input', (e) => {
+    const prefs = loadPrefs() || {};
+    const searchBox = document.getElementById('search-box');
+    const regionSel = document.getElementById('region-select');
+
+    // Restore non-layer prefs.
+    if (typeof prefs.search === 'string') {
+      searchBox.value = prefs.search;
+      Filters.set({ search: prefs.search });
+    }
+    if (Array.isArray(prefs.features)) {
+      for (const tag of prefs.features) Filters.setFeature(tag, true);
+      document.querySelectorAll('#feature-toggles input[type="checkbox"]').forEach(cb => {
+        cb.checked = prefs.features.includes(cb.value);
+      });
+    }
+    if (typeof prefs.region === 'string' && prefs.region) {
+      // Region values are populated later from layer data, but the saved
+      // string can be set immediately; the select shows it once populateRegionSelect runs.
+      regionSel.dataset.pending = prefs.region;
+      Filters.set({ region: prefs.region });
+    }
+
+    searchBox.addEventListener('input', (e) => {
       Filters.set({ search: e.target.value });
+      savePrefs();
     });
 
     document.querySelectorAll('#feature-toggles input[type="checkbox"]').forEach(cb => {
-      cb.addEventListener('change', () => Filters.setFeature(cb.value, cb.checked));
+      cb.addEventListener('change', () => {
+        Filters.setFeature(cb.value, cb.checked);
+        savePrefs();
+      });
     });
 
-    document.getElementById('region-select').addEventListener('change', (e) => {
+    regionSel.addEventListener('change', (e) => {
       Filters.set({ region: e.target.value });
+      savePrefs();
     });
 
     document.getElementById('clear-filters').addEventListener('click', () => {
-      document.getElementById('search-box').value = '';
+      searchBox.value = '';
       document.querySelectorAll('#feature-toggles input[type="checkbox"]').forEach(cb => cb.checked = false);
-      document.getElementById('region-select').value = '';
+      regionSel.value = '';
       Filters.clear();
+      savePrefs();
     });
 
     Filters.onChange(applyFilters);
@@ -497,7 +576,9 @@
       sidebar.classList.remove('open');
       floating = document.createElement('button');
       floating.className = 'sidebar-toggle-floating';
-      floating.textContent = 'Menu';
+      floating.setAttribute('aria-label', 'Open sidebar');
+      // U+203A single right-pointing angle quotation: "open / expand"
+      floating.innerHTML = '&#x203A; Menu';
       floating.addEventListener('click', () => {
         sidebar.classList.add('open');
         floating.remove();
