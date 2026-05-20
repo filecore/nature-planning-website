@@ -2,21 +2,26 @@
   // Layer registry. Each entry maps a GeoJSON file in data/layers/ to a
   // user-facing label and a marker color. Adding a new mapped source is a
   // one-liner here plus a new adapter that writes the matching file.
+  // Every layer belongs to a group. Order of layers within a group, and of
+  // groups themselves, follows the GROUP_ORDER list below.
   const LAYERS = [
-    { id: 'national-parks', file: 'national-parks.geojson', label: 'National parks and hiking areas', color: '#1f7a3a', letter: 'N' },
-    { id: 'laavut',         file: 'laavut.geojson',         label: 'Laavus and kotas',                 color: '#7a4a1f', letter: 'L' },
-    { id: 'saunas',         file: 'saunas.geojson',         label: 'Saunas in nature',                 color: '#8a4fcf', letter: 'S' },
-    { id: 'waterfalls',     file: 'waterfalls.geojson',     label: 'Waterfalls',                       color: '#2e7bd6', letter: 'W' },
-    { id: 'archaeology',    file: 'archaeology.geojson',    label: 'Archaeological sites (VARK)',      color: '#a0292e', letter: 'A' },
-    { id: 'sacred-sites',   file: 'sacred-sites.geojson',   label: 'Sacred natural sites',             color: '#5b3a8a', letter: 'P' },
+    { id: 'national-parks', file: 'national-parks.geojson', label: 'National parks and hiking areas', color: '#1f7a3a', letter: 'N', group: 'hiking' },
+    { id: 'laavut',         file: 'laavut.geojson',         label: 'Laavus and kotas',                 color: '#7a4a1f', letter: 'L', group: 'hiking' },
+    { id: 'saunas',         file: 'saunas.geojson',         label: 'Saunas in nature',                 color: '#8a4fcf', letter: 'S', group: 'hiking' },
+    { id: 'archaeology',    file: 'archaeology.geojson',    label: 'Archaeological sites (VARK)',      color: '#a0292e', letter: 'A', group: 'natural-sites' },
+    { id: 'sacred-sites',   file: 'sacred-sites.geojson',   label: 'Sacred natural sites',             color: '#5b3a8a', letter: 'P', group: 'natural-sites' },
+    { id: 'waterfalls',     file: 'waterfalls.geojson',     label: 'Waterfalls',                       color: '#2e7bd6', letter: 'W', group: 'natural-sites' },
     { id: 'breweries',      file: 'breweries.geojson',      label: 'Breweries',                        color: '#d4a017', letter: 'B', group: 'alcohol' },
     { id: 'wineries',       file: 'wineries.geojson',       label: 'Wineries',                         color: '#8a1b3b', letter: 'V', group: 'alcohol' },
     { id: 'distilleries',   file: 'distilleries.geojson',   label: 'Distilleries',                     color: '#c97a3d', letter: 'D', group: 'alcohol' },
   ];
 
   const GROUPS = {
-    alcohol: { label: 'Alcohol' },
+    'hiking':         { label: 'Hiking' },
+    'natural-sites':  { label: 'Natural sites' },
+    'alcohol':        { label: 'Alcohol' },
   };
+  const GROUP_ORDER = ['hiking', 'natural-sites', 'alcohol'];
 
   const FINLAND_CENTER = [64.5, 26.0];
   const FINLAND_ZOOM = 6;
@@ -253,24 +258,25 @@
     const container = document.getElementById('layer-toggles');
     container.innerHTML = '';
 
-    const ungrouped = LAYERS.filter(l => !l.group);
-    for (const layer of ungrouped) {
-      container.appendChild(makeLayerLabel(layer));
+    // Every layer is grouped. Render in GROUP_ORDER so the sidebar order
+    // is deterministic regardless of LAYERS array order.
+    const groupedByKey = new Map();
+    for (const layer of LAYERS) {
+      const g = layer.group || 'other';
+      if (!groupedByKey.has(g)) groupedByKey.set(g, []);
+      groupedByKey.get(g).push(layer);
+    }
+    const orderedGroups = GROUP_ORDER.filter(g => groupedByKey.has(g));
+    for (const k of groupedByKey.keys()) {
+      if (!orderedGroups.includes(k)) orderedGroups.push(k);
     }
 
-    // Group rendering: one parent checkbox + nested children. Children sit in
-    // a labelled <details> so the group can collapse, mirroring the
-    // breweries/wineries/distilleries shape of the underlying KML.
-    const groupedByKey = new Map();
-    for (const layer of LAYERS.filter(l => l.group)) {
-      if (!groupedByKey.has(layer.group)) groupedByKey.set(layer.group, []);
-      groupedByKey.get(layer.group).push(layer);
-    }
-    for (const [groupId, layers] of groupedByKey) {
+    for (const groupId of orderedGroups) {
+      const layers = groupedByKey.get(groupId);
       const meta = GROUPS[groupId] || { label: groupId };
       const wrap = document.createElement('details');
       wrap.className = 'layer-group';
-      wrap.open = false;
+      wrap.open = true;
 
       const summary = document.createElement('summary');
       const parentCb = document.createElement('input');
