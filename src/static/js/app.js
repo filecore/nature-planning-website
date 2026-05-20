@@ -5,9 +5,10 @@
   // Every layer belongs to a group. Order of layers within a group, and of
   // groups themselves, follows the GROUP_ORDER list below.
   const LAYERS = [
-    { id: 'national-parks', file: 'national-parks.geojson', label: 'National parks and hiking areas', color: '#1f7a3a', letter: 'N', group: 'hiking' },
-    { id: 'laavut',         file: 'laavut.geojson',         label: 'Laavus and kotas',                 color: '#7a4a1f', letter: 'L', group: 'hiking' },
-    { id: 'saunas',         file: 'saunas.geojson',         label: 'Saunas in nature',                 color: '#8a4fcf', letter: 'S', group: 'hiking' },
+    { id: 'national-parks',   file: 'national-parks.geojson',   label: 'National parks and hiking areas', color: '#1f7a3a', letter: 'N', group: 'hiking' },
+    { id: 'laavut',           file: 'laavut.geojson',           label: 'Laavus and kotas',                 color: '#7a4a1f', letter: 'L', group: 'hiking' },
+    { id: 'saunas',           file: 'saunas.geojson',           label: 'Saunas in nature',                 color: '#8a4fcf', letter: 'S', group: 'hiking' },
+    { id: 'uusimaa-classics', file: 'uusimaa-classics.geojson', label: 'Uusimaa classics',                 color: '#facc15', letter: 'C', group: 'hiking' },
     { id: 'archaeology',    file: 'archaeology.geojson',    label: 'Archaeological sites (VARK)',      color: '#a0292e', letter: 'A', group: 'natural-sites' },
     { id: 'sacred-sites',   file: 'sacred-sites.geojson',   label: 'Sacred natural sites',             color: '#5b3a8a', letter: 'P', group: 'natural-sites' },
     { id: 'beaches',        file: 'beaches.geojson',        label: 'Public swimming beaches',          color: '#4ec3e0', letter: 'U', group: 'swimming-water' },
@@ -29,7 +30,7 @@
 
   // Default ON layers on first visit so the user is not greeted by a
   // blank map. Anything not listed here starts unchecked.
-  const DEFAULT_ON_LAYERS = new Set(['national-parks']);
+  const DEFAULT_ON_LAYERS = new Set(['national-parks', 'uusimaa-classics']);
 
   /* ---------- Persistent filter state ---------- */
   // Single localStorage blob holding every checkbox + select state so the

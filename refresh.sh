@@ -36,6 +36,7 @@ ADAPTERS=(
   breweries
   archaeology
   sacred_sites
+  uusimaa_classics
 )
 
 failed=()
