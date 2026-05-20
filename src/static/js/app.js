@@ -7,12 +7,16 @@
     { id: 'laavut',         file: 'laavut.geojson',         label: 'Laavus and kotas',                 color: '#7a4a1f', letter: 'L' },
     { id: 'saunas',         file: 'saunas.geojson',         label: 'Saunas in nature',                 color: '#8a4fcf', letter: 'S' },
     { id: 'waterfalls',     file: 'waterfalls.geojson',     label: 'Waterfalls',                       color: '#2e7bd6', letter: 'W' },
-    { id: 'breweries',      file: 'breweries.geojson',      label: 'Breweries',                        color: '#d4a017', letter: 'B' },
-    { id: 'wineries',       file: 'wineries.geojson',       label: 'Wineries',                         color: '#8a1b3b', letter: 'V' },
-    { id: 'distilleries',   file: 'distilleries.geojson',   label: 'Distilleries',                     color: '#c97a3d', letter: 'D' },
     { id: 'archaeology',    file: 'archaeology.geojson',    label: 'Archaeological sites (VARK)',      color: '#a0292e', letter: 'A' },
     { id: 'sacred-sites',   file: 'sacred-sites.geojson',   label: 'Sacred natural sites',             color: '#5b3a8a', letter: 'P' },
+    { id: 'breweries',      file: 'breweries.geojson',      label: 'Breweries',                        color: '#d4a017', letter: 'B', group: 'alcohol' },
+    { id: 'wineries',       file: 'wineries.geojson',       label: 'Wineries',                         color: '#8a1b3b', letter: 'V', group: 'alcohol' },
+    { id: 'distilleries',   file: 'distilleries.geojson',   label: 'Distilleries',                     color: '#c97a3d', letter: 'D', group: 'alcohol' },
   ];
+
+  const GROUPS = {
+    alcohol: { label: 'Alcohol' },
+  };
 
   const FINLAND_CENTER = [64.5, 26.0];
   const FINLAND_ZOOM = 6;
@@ -248,24 +252,85 @@
   function buildLayerToggles() {
     const container = document.getElementById('layer-toggles');
     container.innerHTML = '';
-    for (const layer of LAYERS) {
-      const label = document.createElement('label');
-      const cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.value = layer.id;
-      cb.checked = true;
-      Filters.setLayer(layer.id, true);
-      cb.addEventListener('change', () => {
-        Filters.setLayer(layer.id, cb.checked);
-      });
-      const swatch = document.createElement('span');
-      swatch.className = 'layer-swatch';
-      swatch.style.background = layer.color;
-      label.appendChild(cb);
-      label.appendChild(swatch);
-      label.appendChild(document.createTextNode(layer.label));
-      container.appendChild(label);
+
+    const ungrouped = LAYERS.filter(l => !l.group);
+    for (const layer of ungrouped) {
+      container.appendChild(makeLayerLabel(layer));
     }
+
+    // Group rendering: one parent checkbox + nested children. Children sit in
+    // a labelled <details> so the group can collapse, mirroring the
+    // breweries/wineries/distilleries shape of the underlying KML.
+    const groupedByKey = new Map();
+    for (const layer of LAYERS.filter(l => l.group)) {
+      if (!groupedByKey.has(layer.group)) groupedByKey.set(layer.group, []);
+      groupedByKey.get(layer.group).push(layer);
+    }
+    for (const [groupId, layers] of groupedByKey) {
+      const meta = GROUPS[groupId] || { label: groupId };
+      const wrap = document.createElement('details');
+      wrap.className = 'layer-group';
+      wrap.open = false;
+
+      const summary = document.createElement('summary');
+      const parentCb = document.createElement('input');
+      parentCb.type = 'checkbox';
+      parentCb.className = 'group-parent';
+      parentCb.checked = false;
+      summary.appendChild(parentCb);
+      const summaryText = document.createElement('span');
+      summaryText.className = 'group-label';
+      summaryText.textContent = meta.label;
+      summary.appendChild(summaryText);
+      // Clicking the checkbox shouldn't also toggle the details open/close.
+      parentCb.addEventListener('click', (e) => e.stopPropagation());
+      wrap.appendChild(summary);
+
+      const childWrap = document.createElement('div');
+      childWrap.className = 'group-children';
+      for (const layer of layers) {
+        childWrap.appendChild(makeLayerLabel(layer));
+      }
+      wrap.appendChild(childWrap);
+      container.appendChild(wrap);
+
+      parentCb.addEventListener('change', () => {
+        for (const layer of layers) {
+          const childCb = childWrap.querySelector(`input[value="${layer.id}"]`);
+          if (childCb) {
+            childCb.checked = parentCb.checked;
+            Filters.setLayer(layer.id, parentCb.checked);
+          }
+        }
+      });
+
+      // Reflect children -> parent: all/some/none indeterminate state.
+      childWrap.addEventListener('change', () => {
+        const childCbs = Array.from(childWrap.querySelectorAll('input[type="checkbox"]'));
+        const checkedCount = childCbs.filter(c => c.checked).length;
+        parentCb.checked = checkedCount === childCbs.length;
+        parentCb.indeterminate = checkedCount > 0 && checkedCount < childCbs.length;
+      });
+    }
+  }
+
+  function makeLayerLabel(layer) {
+    const label = document.createElement('label');
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.value = layer.id;
+    cb.checked = false;
+    Filters.setLayer(layer.id, false);
+    cb.addEventListener('change', () => {
+      Filters.setLayer(layer.id, cb.checked);
+    });
+    const swatch = document.createElement('span');
+    swatch.className = 'layer-swatch';
+    swatch.style.background = layer.color;
+    label.appendChild(cb);
+    label.appendChild(swatch);
+    label.appendChild(document.createTextNode(layer.label));
+    return label;
   }
 
   function wireFilters() {
@@ -327,6 +392,93 @@
         });
       });
     });
+  }
+
+  /* ---------- Mobile resizable divider ---------- */
+  // Mirrors the summer.togneri.net pattern: on mobile the sidebar lives
+  // above the map and a 14px row-resize bar lets the user choose how much
+  // vertical space each gets. Position persists in localStorage.
+
+  const MOBILE_BP = 768;
+  const STORAGE_KEY_VH = 'nature.sidebar_vh';
+
+  function isMobile() { return window.innerWidth <= MOBILE_BP; }
+
+  function clampVh(v) { return Math.min(80, Math.max(15, v)); }
+
+  function applySidebarSize() {
+    const sidebar = document.getElementById('sidebar');
+    if (isMobile()) {
+      const vh = parseFloat(localStorage.getItem(STORAGE_KEY_VH) || '40');
+      sidebar.style.height = clampVh(vh) + 'vh';
+    } else {
+      sidebar.style.height = '';
+    }
+  }
+
+  function wireDivider() {
+    const divider = document.getElementById('divider');
+    const sidebar = document.getElementById('sidebar');
+    if (!divider) return;
+
+    let resizing = false;
+
+    function endDrag() {
+      if (!resizing) return;
+      resizing = false;
+      divider.classList.remove('active');
+      const vh = parseFloat(sidebar.style.height) || 40;
+      localStorage.setItem(STORAGE_KEY_VH, clampVh(vh));
+      // Leaflet needs a nudge when its container resizes mid-gesture
+      if (typeof map !== 'undefined' && map) map.invalidateSize();
+    }
+
+    function moveTo(clientY) {
+      // The sidebar sits at the top of the viewport; its height equals the
+      // pointer's Y position minus any offset above (none here since #app
+      // fills the viewport). Subtract a small fudge for the divider itself.
+      const vh = (clientY / window.innerHeight) * 100;
+      sidebar.style.height = clampVh(vh) + 'vh';
+      if (typeof map !== 'undefined' && map) map.invalidateSize();
+    }
+
+    divider.addEventListener('touchstart', (e) => {
+      if (!isMobile()) return;
+      resizing = true;
+      divider.classList.add('active');
+      e.preventDefault();
+    }, { passive: false });
+
+    document.addEventListener('touchmove', (e) => {
+      if (!resizing) return;
+      moveTo(e.touches[0].clientY);
+      e.preventDefault();
+    }, { passive: false });
+
+    document.addEventListener('touchend', endDrag);
+    document.addEventListener('touchcancel', endDrag);
+
+    // Mouse drag for desktop-mode testing in narrow windows.
+    divider.addEventListener('mousedown', (e) => {
+      if (!isMobile()) return;
+      resizing = true;
+      divider.classList.add('active');
+      document.body.style.userSelect = 'none';
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (!resizing) return;
+      if (e.buttons === 0) { endDrag(); return; }
+      moveTo(e.clientY);
+    }, true);
+    document.addEventListener('mouseup', () => {
+      if (!resizing) return;
+      document.body.style.userSelect = '';
+      endDrag();
+    }, true);
+
+    applySidebarSize();
+    window.addEventListener('resize', applySidebarSize);
   }
 
   /* ---------- Sidebar toggle ---------- */
@@ -453,6 +605,7 @@
     wireFilters();
     wireTabs();
     wireSidebar();
+    wireDivider();
     wireInlinePanel();
     wireFavourites();
     await wireResources();
