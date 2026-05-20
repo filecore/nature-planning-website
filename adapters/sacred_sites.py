@@ -1,18 +1,27 @@
 """Adapter for "Suomen luonnon pyhäpaikat" (Finnish natural sacred sites).
 
-This is a manual-export adapter: the upstream is a private / unlisted
-Google My Maps whose ``mid`` is not derivable from the public Facebook
-post that links to it. Drop a KML export at
-``data/manual/pyhat_paikat.kml`` (see ``data/manual/README.md`` for the
-download steps) and this adapter will parse it.
+This is a manual-export adapter. The upstream is a Google Maps *List*
+(distinct from My Maps), and Google does not expose List pin data over
+any public endpoint -- there is no KML export and the page renders
+pins client-side after a private RPC. The realistic ways to populate
+this layer are, in order of effort:
 
-If the manual file is absent, the adapter exits cleanly (zero features +
-informative message) rather than failing the whole refresh -- the layer
-just stays empty until the file appears.
+1. Browser extension. Install something like "Maps List Export" or
+   "Map Exporter for Google Maps" in Chrome, open the list, export to
+   CSV or KML, save the result at ``data/manual/pyhat_paikat.csv``
+   (or ``.kml``).
+2. Hand-curate. Edit ``data/manual/pyhat_paikat.csv`` with the columns
+   ``name,lat,lon,description`` (description optional). Pasting in
+   coordinates one place at a time is tedious but reliable.
+
+This adapter accepts EITHER ``pyhat_paikat.kml`` OR
+``pyhat_paikat.csv``; the CSV wins if both are present. If neither
+file exists, the adapter soft-skips so ``refresh.sh`` stays green.
 """
 
 from __future__ import annotations
 
+import csv
 import os
 import pathlib
 import re
@@ -24,7 +33,9 @@ from common import make_feature, run, write_layer
 NAME = "sacred-sites"
 SOURCE = "Suomen luonnon pyhapaikat (manual export)"
 SITE_URL = "https://www.facebook.com/pyhatpaikat/"
-MANUAL_PATH = pathlib.Path(__file__).resolve().parent.parent / "data" / "manual" / "pyhat_paikat.kml"
+MANUAL_DIR = pathlib.Path(__file__).resolve().parent.parent / "data" / "manual"
+KML_PATH = MANUAL_DIR / "pyhat_paikat.kml"
+CSV_PATH = MANUAL_DIR / "pyhat_paikat.csv"
 
 KML_NS = {"k": "http://www.opengis.net/kml/2.2"}
 
@@ -76,14 +87,69 @@ def _parse_kml(payload: bytes) -> list[dict]:
     return out
 
 
-def fetch_features() -> list[dict]:
-    path_override = os.environ.get("NATURE_SACRED_KML")
-    path = pathlib.Path(path_override) if path_override else MANUAL_PATH
-    if not path.exists():
-        raise MissingManualFile(
-            f"No manual KML at {path}. See data/manual/README.md for export steps."
+def _parse_csv(text: str) -> list[dict]:
+    """Accept a CSV with columns name,lat,lon,description (order flexible)."""
+    out: list[dict] = []
+    reader = csv.DictReader(text.splitlines())
+    if not reader.fieldnames:
+        return out
+    # Normalise headers to lowercase for tolerance.
+    headers = {h.lower().strip(): h for h in reader.fieldnames if h}
+    name_h = headers.get("name") or headers.get("nimi")
+    lat_h = headers.get("lat") or headers.get("latitude") or headers.get("leveysaste")
+    lon_h = headers.get("lon") or headers.get("lng") or headers.get("longitude") or headers.get("pituusaste")
+    desc_h = headers.get("description") or headers.get("kuvaus") or headers.get("notes")
+    if not (name_h and lat_h and lon_h):
+        raise RuntimeError(
+            "CSV must have at least name, lat, lon columns "
+            "(description optional). Got headers: " + ", ".join(reader.fieldnames or [])
         )
-    return _parse_kml(path.read_bytes())
+
+    for row in reader:
+        name = (row.get(name_h) or "").strip()
+        if not name:
+            continue
+        try:
+            lat = float((row.get(lat_h) or "").replace(",", "."))
+            lon = float((row.get(lon_h) or "").replace(",", "."))
+        except ValueError:
+            continue
+        desc = (row.get(desc_h) or "").strip() if desc_h else ""
+        feature_id = "sacred-" + re.sub(r"[^a-z0-9]+", "-", name.lower())[:60] + f"-{lat:.4f}-{lon:.4f}"
+        f = make_feature(
+            feature_id=feature_id,
+            name=name,
+            lat=lat,
+            lon=lon,
+            category="sacred-site",
+            source=SOURCE,
+            source_url=SITE_URL,
+            features=[],
+            description=desc[:400],
+        )
+        if f:
+            out.append(f)
+    return out
+
+
+def fetch_features() -> list[dict]:
+    # CSV takes precedence over KML so hand-curated edits beat a stale export.
+    if CSV_PATH.exists():
+        return _parse_csv(CSV_PATH.read_text(encoding="utf-8-sig"))
+    if KML_PATH.exists():
+        return _parse_kml(KML_PATH.read_bytes())
+
+    path_override = os.environ.get("NATURE_SACRED_KML")
+    if path_override and pathlib.Path(path_override).exists():
+        p = pathlib.Path(path_override)
+        if p.suffix.lower() == ".csv":
+            return _parse_csv(p.read_text(encoding="utf-8-sig"))
+        return _parse_kml(p.read_bytes())
+
+    raise MissingManualFile(
+        f"No manual export at {KML_PATH} or {CSV_PATH}. "
+        "See data/manual/README.md."
+    )
 
 
 def main():

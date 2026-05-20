@@ -12,7 +12,7 @@ build the layer without manual steps.
 
 | Adapter | Manual file | Format | Where to obtain |
 |---|---|---|---|
-| `adapters/sacred_sites.py` | `pyhat_paikat.kml` | KML | Open the "Suomen luonnon pyhäpaikat" Google My Maps in a browser. Click the three-dot menu next to the map title and choose "Download KML" -> "Keep data up to date" off, "Export to a .KML file". Save the result here. |
+| `adapters/sacred_sites.py` | `pyhat_paikat.csv` (preferred) or `pyhat_paikat.kml` | CSV with `name,lat,lon,description`; or KML | The upstream is a Google Maps **List** (not My Maps); Google does not expose List pin data and there is no KML export. Two options: (a) install a Chrome extension such as "Maps List Export" or "Map Exporter for Google Maps", open the list, export to CSV, save here; or (b) hand-curate the CSV using `pyhat_paikat.csv.example` as a template. CSV wins if both files are present. |
 | `adapters/uuvi_csv.py` | `uuvi.csv` | CSV (`name,lat,lon,services`) | uuvi.fi has no public coord feed. Either curate by hand or run a one-off geocode of the destination names through Nominatim and drop the result here. |
 | `adapters/tulikartta_archive.py` | `tulikartta.kml` | KML | Optional: if you have a pre-paywall KML download of fire-spots from when tulikartta.fi was free, drop it here and the layer comes back. |
 
