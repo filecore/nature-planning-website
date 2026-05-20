@@ -156,9 +156,9 @@ def _to_feature(page: dict, fallback_id: int) -> dict | None:
 
     area_km2 = _qty(props.get("Pinta-ala"))
     elev_m = _qty(props.get("Korkeustaso"))
-    region = _wpg_label(props.get("Maakunta")) or ""
-    if region.endswith(" maakunta"):
-        region = region[: -len(" maakunta")]
+    # Järviwiki uses Finnish genitive case ("Lapin maakunta"). Drop the
+    # region here and let make_feature derive a nominative-case name from
+    # the coordinate so it matches the region values our other layers use.
     municipality = _wpg_label(props.get("Kunta")) or ""
     if municipality.endswith(" (kunta)"):
         municipality = municipality[: -len(" (kunta)")]
@@ -191,7 +191,6 @@ def _to_feature(page: dict, fallback_id: int) -> dict | None:
         source_url=page.get("fullurl") or SITE_URL,
         features=[],
         description=description[:600],
-        region=region,
     )
 
 
