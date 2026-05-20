@@ -179,11 +179,79 @@
     return lyr;
   }
 
+  // Map a leading keyword in a description segment to a single emoji icon.
+  // The adapter still produces plain "key: value · key: value" text; the
+  // popup splits and inserts an icon per row. Falls back to a generic dot
+  // when nothing matches.
+  const POPUP_ROW_ICONS = [
+    [/^area\b|^pinta-ala\b/i,                      '\u{1F4CF}'],  // 📏
+    [/^elevation\b|^korkeustaso\b/i,               '\u{1F4D0}'],  // 📐
+    [/^watercourse\b|^p[äa]{1,2}vesist[öo]\b/i,    '\u{1F30A}'],  // 🌊
+    [/^ecological status\b|^water type\b|^freshwater\b|^coastal\b/i, '\u{1F33F}'],  // 🌿
+    [/^water temperature\b|^water[: ]\b/i,         '\u{1F321}'],  // 🌡
+    [/^read\b|^observed\b|^updated\b/i,            '\u{1F552}'],  // 🕒
+    [/^algae level\b/i,                            '\u{1F33F}'],  // 🌿
+    [/^iucn\b/i,                                   '\u{1F4DC}'],  // 📜
+    [/^established\b/i,                            '\u{1F4C5}'],  // 📅
+    [/^address\b|^osoite\b/i,                      '\u{1F4CD}'],  // 📍
+    [/^coords printed\b|^pin at\b/i,               '\u{1F4CD}'],  // 📍
+    [/^sauna in\b/i,                               '\u{1F9D6}'],  // 🧖
+    [/^near\b|^l[äa]hell[äa]\b/i,                  '\u{1F4CD}'],  // 📍
+    [/^eu-regulated\b|^small bathing\b/i,          '\u{2705}'],   // ✅
+  ];
+
+  function pickRowIcon(text) {
+    for (const [re, icon] of POPUP_ROW_ICONS) {
+      if (re.test(text)) return icon;
+    }
+    return '\u{1F539}';  // small blue diamond as neutral bullet
+  }
+
+  function splitDescription(raw) {
+    if (!raw) return { rows: [], prose: '' };
+    const sepRe = /\s+·\s+/;
+    const lines = raw.split(/\n+/);
+    // If a description has multiple lines, the last block becomes the
+    // free-text "prose" excerpt (this is how the lakes adapter emits its
+    // Excerpt_fi). Earlier blocks split on " · " into individual rows.
+    let prose = '';
+    const rowSource = [];
+    for (let i = 0; i < lines.length; i++) {
+      const ln = lines[i].trim();
+      if (!ln) continue;
+      if (i === lines.length - 1 && !sepRe.test(ln) && lines.length > 1) {
+        prose = ln;
+      } else {
+        rowSource.push(ln);
+      }
+    }
+    const rows = [];
+    for (const block of rowSource) {
+      if (sepRe.test(block)) {
+        for (const part of block.split(sepRe)) {
+          if (part.trim()) rows.push(part.trim());
+        }
+      } else {
+        rows.push(block);
+      }
+    }
+    return { rows, prose };
+  }
+
+  function mapsLink(lat, lon, name) {
+    // Universal Google Maps deeplink with a label. Works on desktop and
+    // hands off cleanly to the native maps app on iOS / Android.
+    const q = encodeURIComponent(`${lat},${lon}`);
+    const label = name ? '+' + encodeURIComponent(`(${name})`) : '';
+    return `https://www.google.com/maps/search/?api=1&query=${q}${label}`;
+  }
+
   function buildPopup(feature, layer) {
     const props = feature.properties || {};
     const featureId = props.id || (props.name + ':' + feature.geometry.coordinates.join(','));
     const favEntryId = Favourites.makeId(layer.id, featureId);
     const isFav = Favourites.has(layer.id, featureId);
+    const [centroidLat, centroidLon] = featureCentroid(feature);
 
     const container = document.createElement('div');
     container.className = 'popup';
@@ -192,7 +260,6 @@
     title.textContent = (layer.icon ? layer.icon + ' ' : '') + (props.name || '(unnamed)');
     container.appendChild(title);
 
-    // City / region subtitle (subdued, like Pekka's "Espoo" line).
     const subtitle = props.region || layer.label;
     if (subtitle) {
       const meta = document.createElement('p');
@@ -201,19 +268,29 @@
       container.appendChild(meta);
     }
 
-    // Description gets a paragraph icon prefix unless it duplicates the
-    // layer name verbatim.
-    if (props.description) {
-      const row = document.createElement('div');
-      row.className = 'popup-row';
-      const ico = document.createElement('span');
-      ico.className = 'popup-icon';
-      ico.textContent = '\u{1F4DD}';  // memo
-      const txt = document.createElement('span');
-      txt.textContent = props.description;
-      row.appendChild(ico);
-      row.appendChild(txt);
-      container.appendChild(row);
+    const { rows, prose } = splitDescription(props.description);
+    if (rows.length) {
+      const rowsBox = document.createElement('div');
+      rowsBox.className = 'popup-rows';
+      for (const text of rows) {
+        const row = document.createElement('div');
+        row.className = 'popup-row';
+        const ico = document.createElement('span');
+        ico.className = 'popup-icon';
+        ico.textContent = pickRowIcon(text);
+        const txt = document.createElement('span');
+        txt.textContent = text;
+        row.appendChild(ico);
+        row.appendChild(txt);
+        rowsBox.appendChild(row);
+      }
+      container.appendChild(rowsBox);
+    }
+    if (prose) {
+      const p = document.createElement('p');
+      p.className = 'popup-prose';
+      p.textContent = prose;
+      container.appendChild(p);
     }
 
     if (Array.isArray(props.features) && props.features.length > 0) {
@@ -227,16 +304,25 @@
       container.appendChild(featBox);
     }
 
-    // Stacked button column at the bottom, matching jaaskel.com.
     const actions = document.createElement('div');
     actions.className = 'popup-actions';
+
+    if (isFinite(centroidLat) && isFinite(centroidLon)) {
+      const mapBtn = document.createElement('a');
+      mapBtn.href = mapsLink(centroidLat, centroidLon, props.name);
+      mapBtn.target = '_blank';
+      mapBtn.rel = 'noopener';
+      mapBtn.className = 'popup-btn popup-btn-primary';
+      mapBtn.textContent = 'Open in maps ↗';
+      actions.appendChild(mapBtn);
+    }
 
     if (props.source_url) {
       const link = document.createElement('a');
       link.href = props.source_url;
       link.target = '_blank';
       link.rel = 'noopener';
-      link.className = 'popup-btn popup-btn-primary';
+      link.className = 'popup-btn popup-btn-secondary';
       link.textContent = 'View source ↗';
       actions.appendChild(link);
     }

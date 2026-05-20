@@ -107,15 +107,11 @@ def fetch_features() -> list[dict]:
 
         name = (props.get("name") or "").strip()
         location = (props.get("location") or "").strip()
-        district = (props.get("district") or "").strip()
-        display_parts = [p for p in (location, name) if p]
-        display = " / ".join(display_parts) if display_parts else "Uiras sensor"
+        display = location or name or "Uiras sensor"
         descriptor_parts = [
-            f"Water temperature: {temp} °C",
+            f"Water: {temp} °C",
             f"Read: {when.astimezone().strftime('%Y-%m-%d %H:%M')}",
         ]
-        if district and district not in display:
-            descriptor_parts.append(district)
         description = " · ".join(descriptor_parts)
 
         f = make_feature(

@@ -93,6 +93,10 @@ def _parse_gpx(payload: bytes) -> list[dict]:
             continue
         seen.add(feature_id)
 
+        # Drop the "Picnic Area" / "Campground" sym blob from descriptions
+        # -- the category and marker colour already convey type. Leaves
+        # the popup as just title + region, which matches the source's own
+        # information density.
         f = make_feature(
             feature_id=feature_id,
             name=display or raw_name,
@@ -102,7 +106,7 @@ def _parse_gpx(payload: bytes) -> list[dict]:
             source=SOURCE,
             source_url=SITE_URL,
             features=flags,
-            description=sym,
+            description="",
         )
         if f:
             out.append(f)

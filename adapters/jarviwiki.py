@@ -154,27 +154,16 @@ def _to_feature(page: dict, fallback_id: int) -> dict | None:
     except (TypeError, ValueError):
         return None
 
+    # Two facts only -- area and ecological status. The wiki-style
+    # excerpt carries the rest (watercourse, municipality, depth) in prose
+    # form which renders nicer than a bag of stacked fields.
     area_km2 = _qty(props.get("Pinta-ala"))
-    elev_m = _qty(props.get("Korkeustaso"))
-    # Järviwiki uses Finnish genitive case ("Lapin maakunta"). Drop the
-    # region here and let make_feature derive a nominative-case name from
-    # the coordinate so it matches the region values our other layers use.
-    municipality = _wpg_label(props.get("Kunta")) or ""
-    if municipality.endswith(" (kunta)"):
-        municipality = municipality[: -len(" (kunta)")]
-    main_watercourse = _wpg_label(props.get("Päävesistö")) or ""
     status = _first(props.get("Ecological status")) or ""
     excerpt = _strip_wikilinks(_first(props.get("Excerpt fi")) or "")
 
     desc_bits = []
     if area_km2 is not None:
         desc_bits.append(f"Area: {area_km2:.2f} km²")
-    if elev_m is not None:
-        desc_bits.append(f"Elevation: {elev_m:.0f} m")
-    if municipality:
-        desc_bits.append(municipality)
-    if main_watercourse:
-        desc_bits.append(f"Watercourse: {main_watercourse}")
     if status:
         desc_bits.append(f"Ecological status: {status}")
     description = " · ".join(desc_bits)

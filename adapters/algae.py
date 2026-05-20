@@ -183,10 +183,10 @@ def fetch_features() -> list[dict]:
         if prev and prev["aika"] >= aika:
             continue
 
-        bits = [f"Algae level {level}/3 ({label_fi})", f"Observed: {date_part}"]
-        if comment:
-            bits.append(comment[:160])
+        bits = [f"Algae level: {level}/3 ({label_fi})", f"Observed: {date_part}"]
         description = " · ".join(bits)
+        if comment:
+            description = description + "\n" + comment[:200]
 
         feat = make_feature(
             feature_id=f"algae-{pid}-{date_part}-{level}",

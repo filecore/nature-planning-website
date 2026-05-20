@@ -64,23 +64,18 @@ def _category_for(tyyppi: str, ajoitus: str) -> str:
 
 
 def _description(props: dict) -> str:
-    bits: list[str] = []
-    monument = (props.get("Mj_kohde") or "").strip()
+    """Two icon rows: 'Established: <period>' and 'Type: <typ>'."""
     period = (props.get("Ajoitus") or "").strip()
     period2 = (props.get("Ajoitus2") or "").strip()
     typ = (props.get("Tyyppi") or "").strip().rstrip(",")
     subtyp = (props.get("Alatyyppi") or "").strip().rstrip(",")
-    municipality = (props.get("Kunta") or "").strip()
 
-    if monument and monument != props.get("VARK_nimi"):
-        bits.append(monument)
-    if typ:
-        bits.append(typ + (f" ({subtyp})" if subtyp and subtyp != "ei määritelty" else ""))
+    bits: list[str] = []
     if period:
-        bits.append(period + (f" - {period2}" if period2 else ""))
-    if municipality:
-        bits.append(municipality)
-    return ", ".join(b for b in bits if b)
+        bits.append("Established: " + period + (f" ({period2})" if period2 else ""))
+    if typ:
+        bits.append("Type: " + typ + (f" ({subtyp})" if subtyp and subtyp != "ei määritelty" else ""))
+    return " · ".join(bits)
 
 
 def _normalise_props(raw: dict) -> dict:

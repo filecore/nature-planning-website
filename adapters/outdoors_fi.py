@@ -82,19 +82,18 @@ def _region_for(props: dict, geometry: dict) -> str:
 
 
 def _description(props: dict) -> str:
+    """One row per fact: IUCN class, established year, plus any lisatieto."""
     bits = []
-    if props.get("tyyppinimi"):
-        bits.append(props["tyyppinimi"])
     if props.get("iucnluokkanimi"):
         bits.append(f"IUCN: {props['iucnluokkanimi']}")
     if props.get("voimaantulopvm"):
         year = re.match(r"(\d{4})", props["voimaantulopvm"])
         if year:
-            bits.append(f"established {year.group(1)}")
+            bits.append(f"Established: {year.group(1)}")
     extra = (props.get("lisatieto") or "").strip()
     if extra:
         bits.append(extra)
-    return ". ".join(bits)
+    return " · ".join(bits)
 
 
 def _ingest(geo: dict) -> list[dict]:
