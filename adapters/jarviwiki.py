@@ -41,7 +41,7 @@ ASK_QUERY = (
     "|?Maakunta|?Kunta|?Päävesistö|?Ecological_status|?Excerpt_fi"
 )
 PAGE_LIMIT = 500
-REQUEST_DELAY = 1.0
+REQUEST_DELAY = 0.35
 MIN_AREA_KM2_DEFAULT = 0.5
 USER_AGENT = "nature-aggregator/0.1 (+https://nature.togneri.net)"
 
@@ -58,28 +58,49 @@ def _http_get(params: dict) -> dict:
 
 
 def _scrape_all() -> list[dict]:
-    """Paginate the Luokka:Järvi category via SMW ask."""
+    """Paginate the Luokka:Järvi category via SMW ask.
+
+    Saves a checkpoint after every page so a partial run is recoverable.
+    Resumes from the checkpoint if NATURE_JARVIWIKI_RESUME=1 is set.
+    """
+    import pathlib as _pl
+    ckpt = _pl.Path("/tmp/jarviwiki.checkpoint.jsonl")
+    resume = os.environ.get("NATURE_JARVIWIKI_RESUME") == "1"
     out: list[dict] = []
     offset = 0
-    while True:
-        body = _http_get({
-            "action": "ask",
-            "query": f"{ASK_QUERY}|limit={PAGE_LIMIT}|offset={offset}",
-            "format": "json",
-        })
-        results = (body.get("query") or {}).get("results") or {}
-        if not results:
-            break
-        for title, page in results.items():
-            page["__title__"] = title
-            out.append(page)
-        next_offset = body.get("query-continue-offset")
-        if not next_offset:
-            break
-        offset = int(next_offset)
-        if offset % 5000 == 0:
-            print(f"    scraped {offset} / ~55875")
-        time.sleep(REQUEST_DELAY)
+    if resume and ckpt.exists():
+        with ckpt.open() as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    out.append(json.loads(line))
+        offset = len(out)
+        print(f"    resuming from checkpoint at offset {offset} ({len(out)} pages)")
+
+    fh = ckpt.open("a", buffering=1)  # line-buffered append
+    try:
+        while True:
+            body = _http_get({
+                "action": "ask",
+                "query": f"{ASK_QUERY}|limit={PAGE_LIMIT}|offset={offset}",
+                "format": "json",
+            })
+            results = (body.get("query") or {}).get("results") or {}
+            if not results:
+                break
+            for title, page in results.items():
+                page["__title__"] = title
+                out.append(page)
+                fh.write(json.dumps(page, ensure_ascii=False) + "\n")
+            next_offset = body.get("query-continue-offset")
+            if not next_offset:
+                break
+            offset = int(next_offset)
+            if offset % 2000 == 0:
+                print(f"    scraped {offset} / ~55875")
+            time.sleep(REQUEST_DELAY)
+    finally:
+        fh.close()
     return out
 
 

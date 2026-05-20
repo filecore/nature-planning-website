@@ -38,23 +38,41 @@
       const wrap = document.createElement('details');
       wrap.className = 'resource-accordion';
       wrap.dataset.accordion = acc.id;
-      if (acc.id === 'web') wrap.open = true;  // start with web open
+      // Both top-level accordions start collapsed; the user opens what
+      // they want explicitly.
 
       const summary = document.createElement('summary');
       summary.className = 'resource-accordion-summary';
-      summary.textContent = acc.label;
+      const countN = Array.from(acc.groups.values()).reduce((n, items) => n + items.length, 0);
+      summary.innerHTML = `<span class="resource-accordion-label">${acc.label}</span>` +
+                         `<span class="resource-accordion-count">${countN}</span>`;
       wrap.appendChild(summary);
 
       const body = document.createElement('div');
       body.className = 'resource-accordion-body';
+
+      // One nested <details> per category so the user can drill in further
+      // without scrolling through every category at once.
       for (const [catId, items] of acc.groups) {
-        const h = document.createElement('h4');
-        h.className = 'resource-category-label';
-        h.textContent = categories.get(catId) || catId;
-        body.appendChild(h);
+        const sub = document.createElement('details');
+        sub.className = 'resource-subgroup';
+        sub.dataset.subgroup = catId;
+        // Subgroups also start collapsed.
+
+        const subSummary = document.createElement('summary');
+        subSummary.className = 'resource-subgroup-summary';
+        const label = (categories.get(catId) || catId).replace(/^Apps - /, '');
+        subSummary.innerHTML = `<span class="resource-subgroup-label">${label}</span>` +
+                               `<span class="resource-subgroup-count">${items.length}</span>`;
+        sub.appendChild(subSummary);
+
+        const subBody = document.createElement('div');
+        subBody.className = 'resource-subgroup-body';
         for (const src of items) {
-          body.appendChild(makeCard(src, onInline));
+          subBody.appendChild(makeCard(src, onInline));
         }
+        sub.appendChild(subBody);
+        body.appendChild(sub);
       }
       wrap.appendChild(body);
       container.appendChild(wrap);
