@@ -1,7 +1,7 @@
 # nature.togneri.net
 
 One-stop aggregator for Finnish outdoor planning resources. Pure static site
-(Leaflet + vanilla JS) served by nginx behind Traefik on the homelab server at
+(Leaflet + vanilla JS) served at
 https://nature.togneri.net/.
 
 ## What it does
@@ -20,52 +20,6 @@ https://nature.togneri.net/.
 - Data layers: pre-built GeoJSON files in `src/data/layers/`, produced locally
   by Python adapters in `adapters/`. Refresh is a manual step; see below.
 - Reverse proxy: Traefik on the homelab server, subdomain routed via Cloudflare Companion.
-
-## Layout
-
-```
-nature/
-  docker-compose.yml      nginx:alpine + Traefik labels (uses ${NATURE_DOMAIN})
-  nginx.conf              site config bind-mounted into the container
-  .env.example            copy to .env and fill in
-  deploy.sh               rsync to the homelab server + docker compose up -d
-  refresh.sh              run all adapters, write src/data/layers/*.geojson
-  adapters/
-    common.py             shared schema, helpers, polygon simplification
-    outdoors_fi.py        National parks + wilderness areas (SYKE WFS)
-    laavu_org.py          Laavus and kotas across Finland (laavu.org GPX)
-    saunas_sheet.py       Saunas joined to parks (Google Sheet CSV)
-    waterfalls.py         Finnish waterfalls (suomenvesiputoukset.fi HTML scrape)
-    breweries.py          One KML download split into 3 layers
-                          (breweries, wineries, distilleries)
-    archaeology.py        VARK nationally-significant archaeological sites (Museovirasto WFS)
-    sacred_sites.py       Offline-export adapter; reads data/manual/pyhat_paikat.kml
-    beaches.py            EU-regulated public swimming beaches (SYKE WFS)
-  data/
-    manual/               Hand-placed source files (KML/GPX/CSV) for adapters
-                          whose upstream cannot be fetched live; see README inside.
-  src/
-    index.html
-    static/
-      css/style.css
-      js/app.js           bootstrap, layer load, popups, polygon + point rendering
-      js/filters.js       client-side filter logic
-      js/favourites.js    localStorage CRUD
-      js/sources.js       link-directory rendering + iframe panel
-    data/
-      sources.json        link directory (hand-curated)
-      layers/             written by refresh.sh, gitignored except .gitkeep
-```
-
-## Local smoke test
-
-```
-cp .env.example .env
-sed -i 's/^NATURE_DOMAIN=.*/NATURE_DOMAIN=localhost/' .env
-cd src && python3 -m http.server 9888
-# Open http://localhost:9888 in a browser. Layer data must already exist in
-# src/data/layers/ for the map to show markers.
-```
 
 ## Refresh data
 
@@ -184,13 +138,11 @@ adapter that reads it. The pattern is captured in `adapters/sacred_sites.py`:
 
 The site at https://www.tulikartta.fi/ (fire spots) moved to a paid
 subscription model in 2026 and is no longer parseable for free. It remains
-in `sources.json` as an outbound link. If you have a pre-paywall KML
-export, drop it at `data/manual/tulikartta.kml` and a small adapter can
+in `sources.json` as an outbound link. Data dropped into `data/manual/tulikartta.kml` and a small adapter can
 bring the layer back.
 
 Several other interesting datasets are link-only in
-`src/data/sources.json` (waterfalls, järviwiki, kyppi.fi archaeology,
-small breweries, winter routes, sacred sites). Promoting any of these to a
+`src/data/sources.json` (järviwiki, kyppi.fi archaeology, winter routes). Promoting any of these to a
 real mapped layer is exactly the workflow above.
 
 ## Out of scope
