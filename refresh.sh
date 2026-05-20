@@ -29,6 +29,8 @@ ADAPTERS=(
   outdoors_fi
   laavu_org
   saunas_sheet
+  waterfalls
+  breweries
 )
 
 failed=()

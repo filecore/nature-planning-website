@@ -18,7 +18,7 @@ frontend can consume without per-source special-casing. The schema is:
           "category": "national-park",
           "region": "Uusimaa",
           "description": "Optional short description",
-          "features": ["has-sauna", "has-fire-pit", "accessible"],
+          "features": ["has-sauna", "has-fire-pit"],
           "source": "outdoors.fi",
           "source_url": "https://www.nationalparks.fi/nuuksionp"
         }

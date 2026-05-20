@@ -8,7 +8,7 @@ https://nature.togneri.net/.
 
 - Renders an interactive map with waypoints from multiple Finnish outdoor datasets.
 - Lets you filter waypoints by category, region, and features
-  (sauna / fire pit / laavu / accessible / winter route).
+  (sauna / fire pit / laavu / kota).
 - Curated link directory for resources that cannot reasonably be mapped
   (tools, wikis, weather radar, Google My Maps lists, GPS-device maps).
 - Local-only favourites via browser localStorage.
@@ -35,6 +35,8 @@ nature/
     outdoors_fi.py        National parks + wilderness areas (SYKE WFS)
     laavu_org.py          Laavus and kotas across Finland (laavu.org GPX)
     saunas_sheet.py       Saunas joined to parks (Google Sheet CSV)
+    waterfalls.py         Finnish waterfalls (suomenvesiputoukset.fi HTML scrape)
+    breweries.py          Breweries / wineries / distilleries (Google My Maps KML)
   src/
     index.html
     static/
@@ -140,8 +142,8 @@ Every adapter must:
 - Emit `Point` (use `common.make_feature`) or `Polygon` / `MultiPolygon`
   (use `common.make_polygon_feature` which auto-simplifies coordinates).
 - Set normalised feature tags like `has-sauna`, `has-fire-pit`,
-  `has-laavu`, `enclosed-fire`, `accessible`, `dogs-allowed`,
-  `winter-route` so the frontend filter chips light up correctly.
+  `has-laavu`, `enclosed-fire` so the frontend filter chips light up
+  correctly.
 - Read its primary URL from an env var override (e.g. `NATURE_<NAME>_FEED`)
   so the source can be redirected without editing code.
 - Fail loudly via `RuntimeError` if the source returns zero features, so a
