@@ -36,8 +36,13 @@ nature/
     laavu_org.py          Laavus and kotas across Finland (laavu.org GPX)
     saunas_sheet.py       Saunas joined to parks (Google Sheet CSV)
     waterfalls.py         Finnish waterfalls (suomenvesiputoukset.fi HTML scrape)
-    breweries.py          Breweries / wineries / distilleries (Google My Maps KML)
+    breweries.py          One KML download split into 3 layers
+                          (breweries, wineries, distilleries)
     archaeology.py        VARK nationally-significant archaeological sites (Museovirasto WFS)
+    sacred_sites.py       Offline-export adapter; reads data/manual/pyhat_paikat.kml
+  data/
+    manual/               Hand-placed source files (KML/GPX/CSV) for adapters
+                          whose upstream cannot be fetched live; see README inside.
   src/
     index.html
     static/
@@ -159,11 +164,28 @@ Every adapter must:
    that lives alongside the mapped data.
 4. `bash refresh.sh && bash deploy.sh`.
 
+### Offline-export adapters
+
+Some sources cannot be live-fetched (paid APIs, unlisted Google My Maps,
+sites that load coordinates from a JS-only endpoint). For these, drop a
+hand-exported file at `data/manual/<name>.<ext>` and write a thin
+adapter that reads it. The pattern is captured in `adapters/sacred_sites.py`:
+
+- The adapter raises a sentinel exception when the manual file is missing
+  and its `main()` soft-skips (prints a notice, exits clean) so the rest
+  of `refresh.sh` is unaffected. The layer just stays empty until the
+  file appears.
+- `data/manual/README.md` lists every expected file with download steps.
+- Manual files ARE committed to git so a fresh clone can rebuild the
+  layer without a re-export.
+
 ### Sources currently outside the map
 
 The site at https://www.tulikartta.fi/ (fire spots) moved to a paid
 subscription model in 2026 and is no longer parseable for free. It remains
-in `sources.json` as an outbound link.
+in `sources.json` as an outbound link. If you have a pre-paywall KML
+export, drop it at `data/manual/tulikartta.kml` and a small adapter can
+bring the layer back.
 
 Several other interesting datasets are link-only in
 `src/data/sources.json` (waterfalls, järviwiki, kyppi.fi archaeology,

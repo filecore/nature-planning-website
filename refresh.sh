@@ -32,6 +32,7 @@ ADAPTERS=(
   waterfalls
   breweries
   archaeology
+  sacred_sites
 )
 
 failed=()

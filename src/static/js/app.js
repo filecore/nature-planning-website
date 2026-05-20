@@ -7,8 +7,11 @@
     { id: 'laavut',         file: 'laavut.geojson',         label: 'Laavus and kotas',                 color: '#7a4a1f', letter: 'L' },
     { id: 'saunas',         file: 'saunas.geojson',         label: 'Saunas in nature',                 color: '#8a4fcf', letter: 'S' },
     { id: 'waterfalls',     file: 'waterfalls.geojson',     label: 'Waterfalls',                       color: '#2e7bd6', letter: 'W' },
-    { id: 'breweries',      file: 'breweries.geojson',      label: 'Breweries, wineries, distilleries',color: '#d4a017', letter: 'B' },
+    { id: 'breweries',      file: 'breweries.geojson',      label: 'Breweries',                        color: '#d4a017', letter: 'B' },
+    { id: 'wineries',       file: 'wineries.geojson',       label: 'Wineries',                         color: '#8a1b3b', letter: 'V' },
+    { id: 'distilleries',   file: 'distilleries.geojson',   label: 'Distilleries',                     color: '#c97a3d', letter: 'D' },
     { id: 'archaeology',    file: 'archaeology.geojson',    label: 'Archaeological sites (VARK)',      color: '#a0292e', letter: 'A' },
+    { id: 'sacred-sites',   file: 'sacred-sites.geojson',   label: 'Sacred natural sites',             color: '#5b3a8a', letter: 'P' },
   ];
 
   const FINLAND_CENTER = [64.5, 26.0];
