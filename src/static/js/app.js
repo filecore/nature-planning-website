@@ -10,21 +10,22 @@
     { id: 'saunas',         file: 'saunas.geojson',         label: 'Saunas in nature',                 color: '#8a4fcf', letter: 'S', group: 'hiking' },
     { id: 'archaeology',    file: 'archaeology.geojson',    label: 'Archaeological sites (VARK)',      color: '#a0292e', letter: 'A', group: 'natural-sites' },
     { id: 'sacred-sites',   file: 'sacred-sites.geojson',   label: 'Sacred natural sites',             color: '#5b3a8a', letter: 'P', group: 'natural-sites' },
-    { id: 'waterfalls',     file: 'waterfalls.geojson',     label: 'Waterfalls',                       color: '#2e7bd6', letter: 'W', group: 'natural-sites' },
-    { id: 'beaches',        file: 'beaches.geojson',        label: 'Public swimming beaches',          color: '#4ec3e0', letter: 'U', group: 'natural-sites' },
-    { id: 'water-sensors',  file: 'water-sensors.geojson',  label: 'Live water temperature (Helsinki)',color: '#14b8a6', letter: 'T', group: 'natural-sites' },
-    { id: 'algae',          file: 'algae.geojson',          label: 'Recent algae observations',        color: '#84cc16', letter: 'G', group: 'natural-sites' },
+    { id: 'beaches',        file: 'beaches.geojson',        label: 'Public swimming beaches',          color: '#4ec3e0', letter: 'U', group: 'swimming-water' },
+    { id: 'water-sensors',  file: 'water-sensors.geojson',  label: 'Live water temperature (Helsinki)',color: '#14b8a6', letter: 'T', group: 'swimming-water' },
+    { id: 'algae',          file: 'algae.geojson',          label: 'Recent algae observations',        color: '#84cc16', letter: 'G', group: 'swimming-water' },
+    { id: 'waterfalls',     file: 'waterfalls.geojson',     label: 'Waterfalls',                       color: '#2e7bd6', letter: 'W', group: 'swimming-water' },
     { id: 'breweries',      file: 'breweries.geojson',      label: 'Breweries',                        color: '#d4a017', letter: 'B', group: 'alcohol' },
     { id: 'wineries',       file: 'wineries.geojson',       label: 'Wineries',                         color: '#8a1b3b', letter: 'V', group: 'alcohol' },
     { id: 'distilleries',   file: 'distilleries.geojson',   label: 'Distilleries',                     color: '#c97a3d', letter: 'D', group: 'alcohol' },
   ];
 
   const GROUPS = {
-    'hiking':         { label: 'Hiking' },
-    'natural-sites':  { label: 'Natural sites' },
-    'alcohol':        { label: 'Alcohol' },
+    'hiking':          { label: 'Hiking' },
+    'natural-sites':   { label: 'Natural sites' },
+    'swimming-water':  { label: 'Swimming and water' },
+    'alcohol':         { label: 'Alcohol' },
   };
-  const GROUP_ORDER = ['hiking', 'natural-sites', 'alcohol'];
+  const GROUP_ORDER = ['hiking', 'natural-sites', 'swimming-water', 'alcohol'];
 
   // Default ON layers on first visit so the user is not greeted by a
   // blank map. Anything not listed here starts unchecked.
