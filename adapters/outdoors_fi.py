@@ -82,14 +82,24 @@ def _region_for(props: dict, geometry: dict) -> str:
 
 
 def _description(props: dict) -> str:
-    """One row per fact: IUCN class, established year, plus any lisatieto."""
+    """One row per fact: IUCN class, established year, plus any lisatieto.
+
+    'voimaantulopvm' is the effective date of the most recent administrative
+    law (every park currently reads 2023-06-01 from a 2023 reform), so we
+    use 'paatpvm' for the original founding decision instead. The 9999-12-31
+    sentinel SYKE uses for "unknown / pending" is filtered out.
+    """
     bits = []
     if props.get("iucnluokkanimi"):
         bits.append(f"IUCN: {props['iucnluokkanimi']}")
-    if props.get("voimaantulopvm"):
-        year = re.match(r"(\d{4})", props["voimaantulopvm"])
-        if year:
-            bits.append(f"Established: {year.group(1)}")
+    for date_field in ("paatpvm", "voimaantulopvm"):
+        raw = props.get(date_field) or ""
+        if not raw or raw.startswith("9999"):
+            continue
+        match = re.match(r"(\d{4})", raw)
+        if match:
+            bits.append(f"Established: {match.group(1)}")
+            break
     extra = (props.get("lisatieto") or "").strip()
     if extra:
         bits.append(extra)
