@@ -40,6 +40,7 @@ nature/
                           (breweries, wineries, distilleries)
     archaeology.py        VARK nationally-significant archaeological sites (Museovirasto WFS)
     sacred_sites.py       Offline-export adapter; reads data/manual/pyhat_paikat.kml
+    beaches.py            EU-regulated public swimming beaches (SYKE WFS)
   data/
     manual/               Hand-placed source files (KML/GPX/CSV) for adapters
                           whose upstream cannot be fetched live; see README inside.

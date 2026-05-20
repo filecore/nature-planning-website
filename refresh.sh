@@ -30,6 +30,7 @@ ADAPTERS=(
   laavu_org
   saunas_sheet
   waterfalls
+  beaches
   breweries
   archaeology
   sacred_sites
