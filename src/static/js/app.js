@@ -8,6 +8,7 @@
     { id: 'saunas',         file: 'saunas.geojson',         label: 'Saunas in nature',                 color: '#8a4fcf', letter: 'S' },
     { id: 'waterfalls',     file: 'waterfalls.geojson',     label: 'Waterfalls',                       color: '#2e7bd6', letter: 'W' },
     { id: 'breweries',      file: 'breweries.geojson',      label: 'Breweries, wineries, distilleries',color: '#d4a017', letter: 'B' },
+    { id: 'archaeology',    file: 'archaeology.geojson',    label: 'Archaeological sites (VARK)',      color: '#a0292e', letter: 'A' },
   ];
 
   const FINLAND_CENTER = [64.5, 26.0];

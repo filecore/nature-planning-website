@@ -31,6 +31,7 @@ ADAPTERS=(
   saunas_sheet
   waterfalls
   breweries
+  archaeology
 )
 
 failed=()

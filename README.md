@@ -37,6 +37,7 @@ nature/
     saunas_sheet.py       Saunas joined to parks (Google Sheet CSV)
     waterfalls.py         Finnish waterfalls (suomenvesiputoukset.fi HTML scrape)
     breweries.py          Breweries / wineries / distilleries (Google My Maps KML)
+    archaeology.py        VARK nationally-significant archaeological sites (Museovirasto WFS)
   src/
     index.html
     static/
