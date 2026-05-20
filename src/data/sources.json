@@ -1,0 +1,145 @@
+{
+  "categories": [
+    {"id": "hiking-map", "label": "Hiking maps"},
+    {"id": "destination-list", "label": "Destination lists"},
+    {"id": "tips", "label": "Tips and stories"},
+    {"id": "winter", "label": "Winter routes"},
+    {"id": "places-of-interest", "label": "Places of interest"},
+    {"id": "lakes", "label": "Lakes and waterways"},
+    {"id": "waterfalls", "label": "Waterfalls"},
+    {"id": "food-drink", "label": "Food and drink"},
+    {"id": "heritage", "label": "Cultural heritage"},
+    {"id": "tools", "label": "Tools"},
+    {"id": "weather", "label": "Weather"}
+  ],
+  "sources": [
+    {
+      "id": "retkikartta",
+      "title": "Retkikartta",
+      "url": "https://retkikartta.fi/",
+      "blurb": "Metsahallitus hiking maps with filterable overlays. The gold standard for trail-level detail in national parks and state hiking areas.",
+      "category": "hiking-map",
+      "inline": true,
+      "language": "fi"
+    },
+    {
+      "id": "outdoors-fi",
+      "title": "outdoors.fi",
+      "url": "https://www.outdoors.fi/",
+      "blurb": "Metsahallitus's English-language portal for national parks and hiking areas. Backs the national-parks layer on the map.",
+      "category": "hiking-map",
+      "inline": false,
+      "language": "en"
+    },
+    {
+      "id": "uuvi",
+      "title": "Uuvi (Uusimaa)",
+      "url": "https://uuvi.fi/fi/lista-kaikista-virkistys-ulkoilu-ja-luontokohteet-uudellamaalla/",
+      "blurb": "Full list of recreation, outdoor, and nature destinations in Uusimaa. Useful when planning short trips around Helsinki.",
+      "category": "destination-list",
+      "inline": true,
+      "language": "fi"
+    },
+    {
+      "id": "retkipaikka",
+      "title": "Retkipaikka",
+      "url": "https://retkipaikka.fi/",
+      "blurb": "User-written hiking destination tips and trip reports. Good for trail-condition narratives and lesser-known spots.",
+      "category": "tips",
+      "inline": false,
+      "language": "fi"
+    },
+    {
+      "id": "ulkoliikunta",
+      "title": "Ulkoliikunta winter map",
+      "url": "https://ulkoliikunta.fi/",
+      "blurb": "Map of winter routes for cross-country skiing, skating, and ice swimming across Finland.",
+      "category": "winter",
+      "inline": true,
+      "language": "fi"
+    },
+    {
+      "id": "pyhat-paikat",
+      "title": "Suomen luonnon pyhapaikat",
+      "url": "https://www.google.com/maps/d/u/0/viewer?mid=1JFlmZvP7e_RrejFW-3FOl9KMnjg",
+      "embedUrl": "https://www.google.com/maps/d/embed?mid=1JFlmZvP7e_RrejFW-3FOl9KMnjg",
+      "blurb": "Curated Google My Maps list of Finnish natural sacred sites.",
+      "category": "places-of-interest",
+      "inline": true,
+      "language": "fi"
+    },
+    {
+      "id": "jarviwiki",
+      "title": "Jarviwiki",
+      "url": "https://www.jarviwiki.fi/wiki/Main_page",
+      "blurb": "Citizen-maintained wiki of Finnish lakes with water-quality data, observations, and lake-specific articles.",
+      "category": "lakes",
+      "inline": false,
+      "language": "fi"
+    },
+    {
+      "id": "suomen-vesiputoukset",
+      "title": "Suomen vesiputoukset",
+      "url": "https://www.suomenvesiputoukset.fi/",
+      "blurb": "Catalogue of Finnish waterfalls with photos and access notes.",
+      "category": "waterfalls",
+      "inline": false,
+      "language": "fi"
+    },
+    {
+      "id": "viinitilat",
+      "title": "Viinitilat",
+      "url": "https://www.viinitilat.net/",
+      "blurb": "Finnish small wineries directory. Often combine well with weekend countryside trips.",
+      "category": "food-drink",
+      "inline": false,
+      "language": "fi"
+    },
+    {
+      "id": "small-breweries",
+      "title": "Finnish small breweries (Google My Maps)",
+      "url": "https://www.google.com/maps/d/u/0/edit?mid=1NtD_h1CjndFVmV77m1chR3Mjhko",
+      "embedUrl": "https://www.google.com/maps/d/embed?mid=1NtD_h1CjndFVmV77m1chR3Mjhko",
+      "blurb": "Crowd-curated map of Finnish small breweries.",
+      "category": "food-drink",
+      "inline": true,
+      "language": "fi"
+    },
+    {
+      "id": "kyppi",
+      "title": "Kyppi (Museovirasto archaeology)",
+      "url": "https://www.kyppi.fi/palveluikkuna/mjreki/read/asp/r_default.aspx",
+      "blurb": "Finnish Heritage Agency database of archaeological sites and protected built heritage.",
+      "category": "heritage",
+      "inline": false,
+      "language": "fi"
+    },
+    {
+      "id": "pikakartta",
+      "title": "Pikakartta",
+      "url": "https://pikakartta.fi/",
+      "blurb": "Generate a printable A4 trail map of any area in seconds. Useful as a paper backup.",
+      "category": "tools",
+      "inline": true,
+      "language": "fi"
+    },
+    {
+      "id": "hylly-kartat",
+      "title": "Offline maps for Garmin / Android / iOS",
+      "url": "https://kartat.hylly.org/#lataukset",
+      "blurb": "Whole-Finland topographic map files for Garmin (IMG / MapSource), Android (Mapsforge: Oruxmaps, Locus), and iOS (Cartograph). Includes OSM-sourced marked hiking routes, laavus, and wilderness huts. Refreshed regularly. Use these for offline navigation when the phone is out of range.",
+      "category": "tools",
+      "inline": false,
+      "language": "fi"
+    },
+    {
+      "id": "tutka",
+      "title": "Finnish weather radar",
+      "url": "https://tutka.geocache.fi/",
+      "blurb": "Weather and precipitation radar for Finland.",
+      "category": "weather",
+      "inline": true,
+      "language": "fi"
+    }
+  ]
+}

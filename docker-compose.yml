@@ -1,0 +1,31 @@
+services:
+  nature:
+    image: nginx:alpine
+    container_name: nature
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      TZ: Europe/Helsinki
+    volumes:
+      - ./src:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    expose:
+      - "80"
+    networks:
+      - reverse-proxy
+      - default
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.nature.rule=Host(`${NATURE_DOMAIN}`)
+      - traefik.http.routers.nature.entrypoints=websecure
+      - traefik.http.routers.nature.tls=true
+      - traefik.http.routers.nature.tls.certresolver=cloudflare
+      - traefik.http.services.nature.loadbalancer.server.port=80
+      - kuma.nature.http.name=Nature aggregator
+      - kuma.nature.http.url=https://${NATURE_DOMAIN}/healthz
+      - com.centurylinklabs.watchtower.enable=false
+
+networks:
+  reverse-proxy:
+    external: true
+  default:
