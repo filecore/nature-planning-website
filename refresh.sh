@@ -31,6 +31,8 @@ ADAPTERS=(
   saunas_sheet
   waterfalls
   beaches
+  water_sensors
+  algae
   breweries
   archaeology
   sacred_sites
