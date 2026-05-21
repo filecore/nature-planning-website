@@ -30,14 +30,11 @@ SOURCE = "SYKE / Metsahallitus open data (luonnonsuojelu-ja-eramaa-alueet)"
 SITE_URL = "https://avoindata.suomi.fi/data/en_GB/dataset/luonnonsuojelu-ja-eramaa-alueet"
 WFS_BASE = "https://paikkatiedot.ymparisto.fi/geoserver/inspire_ps/wfs"
 
-REGION_OVERRIDES = {
-    # Map the source's "lpalue" hint onto our normalised maakunta names.
-    "lappi, lp": "Lappi",
-    "pohjanmaa-kainuu, lp": "Kainuu",
-    "etela-suomi, lp": "Uusimaa",
-    "rannikko, lp": "Varsinais-Suomi",
-    "jarvi-suomi, lp": "Etela-Savo",
-}
+# Note: SYKE's 'lpalue' field is the Metsähallitus *service area* name, not
+# a maakunta. 'Rannikko, LP' covers Uusimaa + Varsinais-Suomi + Kymenlaakso
+# in one bucket, so mapping it to any single maakunta is wrong (Nuuksio
+# and Sipoonkorpi previously got tagged 'Varsinais-Suomi' that way). We
+# now rely on the polygon bbox centroid + region_for() exclusively.
 
 
 def _wfs_query(type_names: str, cql_filter: str | None = None) -> dict:
@@ -72,9 +69,6 @@ def _category_for(tyyppi_lyhenne: str | None, tyyppi_nimi: str | None) -> str:
 
 
 def _region_for(props: dict, geometry: dict) -> str:
-    raw = (props.get("lpalue") or "").strip().lower()
-    if raw in REGION_OVERRIDES:
-        return REGION_OVERRIDES[raw]
     centroid = polygon_bbox_centroid(geometry)
     if centroid:
         return region_for(*centroid)
