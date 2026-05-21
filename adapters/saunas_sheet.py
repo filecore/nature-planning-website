@@ -86,7 +86,7 @@ NOMINATIM_UA = "nature-aggregator/0.1 (https://nature.togneri.net)"
 # "Kolin kansallispuisto".
 PLACE_LAYERS = [
     "national-parks",
-    "hiking-areas",
+    "wilderness-areas",
 ]
 
 

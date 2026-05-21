@@ -1,6 +1,7 @@
 {
   "national-parks": "public",
-  "hiking-areas": "public",
+  "wilderness-areas": "public",
+  "nature-reserves": "public",
   "lean-tos": "public",
   "wilderness-huts": "public",
   "saunas": "public",

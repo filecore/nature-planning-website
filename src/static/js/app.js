@@ -5,10 +5,11 @@
   // Every layer belongs to a group. Order of layers within a group, and of
   // groups themselves, follows the GROUP_ORDER list below.
   const LAYERS = [
-    { id: 'national-parks',   file: 'national-parks.geojson',   label: 'National parks',                   color: '#1f7a3a', icon: '\u{1F332}', group: 'hiking' },
-    { id: 'hiking-areas',     file: 'hiking-areas.geojson',     label: 'Hiking areas',                     color: '#5c7a3f', icon: '\u{1F97E}', group: 'hiking' },
-    { id: 'lean-tos',         file: 'lean-tos.geojson',         label: 'Lean-tos (laavu)',                 color: '#7a4a1f', icon: '\u{1F3D5}', group: 'hiking' },
-    { id: 'wilderness-huts',  file: 'wilderness-huts.geojson',  label: 'Wilderness huts (kota)',           color: '#4a3520', icon: '\u{1F3E0}', group: 'hiking' },
+    { id: 'national-parks',    file: 'national-parks.geojson',    label: 'National parks',                  color: '#1f7a3a', icon: '\u{1F332}', group: 'hiking' },
+    { id: 'wilderness-areas',  file: 'wilderness-areas.geojson',  label: 'Wilderness areas (erämaa)',       color: '#5c7a3f', icon: '\u{1F97E}', group: 'hiking' },
+    { id: 'nature-reserves',   file: 'nature-reserves.geojson',   label: 'Nature reserves (luonnonsuojelu)',color: '#3a6b7a', icon: '\u{1F33F}', group: 'hiking' },
+    { id: 'lean-tos',          file: 'lean-tos.geojson',          label: 'Lean-tos (laavu)',                color: '#7a4a1f', icon: '\u{1F3D5}', group: 'hiking' },
+    { id: 'wilderness-huts',   file: 'wilderness-huts.geojson',   label: 'Wilderness huts (kota)',          color: '#4a3520', icon: '\u{1F3E0}', group: 'hiking' },
     { id: 'saunas',           file: 'saunas.geojson',           label: 'Saunas in nature',                 color: '#8a4fcf', icon: '\u{1F9D6}', group: 'hiking' },
     { id: 'uusimaa-classics', file: 'uusimaa-classics.geojson', label: 'Uusimaa classics',                 color: '#facc15', icon: '⭐',    group: 'hiking', pane: 'uusimaaPane' },
     { id: 'bucket-list',      file: 'bucket-list.geojson',      label: 'Bucket list',                      color: '#ec4899', icon: '\u{1F3AF}', group: 'hiking', pane: 'uusimaaPane' },

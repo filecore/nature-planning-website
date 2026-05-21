@@ -226,8 +226,16 @@ def make_polygon_feature(
     description: str = "",
     region: str | None = None,
     coord_precision: int = 4,
+    min_step: float = 0.001,
 ) -> dict | None:
-    """Emit a Polygon/MultiPolygon feature with the same property schema as Points."""
+    """Emit a Polygon/MultiPolygon feature with the same property schema as Points.
+
+    ``coord_precision`` controls decimal-rounding (default 4 -> ~11 m at
+    Finland's latitude). ``min_step`` is the Manhattan-distance threshold
+    for the cheap decimator (default 0.001 -> ~110 m). Bump both for
+    layers with many small polygons that don't need fine detail at
+    country-level zoom.
+    """
     if geometry.get("type") not in ("Polygon", "MultiPolygon"):
         return None
     centroid = polygon_bbox_centroid(geometry)
@@ -238,7 +246,7 @@ def make_polygon_feature(
         return None
     if region is None:
         region = region_for(lat, lon)
-    geometry = _simplify_geometry(geometry, precision=coord_precision)
+    geometry = _simplify_geometry(geometry, precision=coord_precision, min_step=min_step)
     if not geometry.get("coordinates"):
         return None
     return {
