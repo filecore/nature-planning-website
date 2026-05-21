@@ -717,18 +717,29 @@
 
   const MOBILE_BP = 768;
   const STORAGE_KEY_VH = 'nature.sidebar_vh';
+  const STORAGE_KEY_PX = 'nature.sidebar_width_px';
 
   function isMobile() { return window.innerWidth <= MOBILE_BP; }
 
   function clampVh(v) { return Math.min(80, Math.max(15, v)); }
+  function clampPx(v) {
+    const maxPx = Math.max(300, window.innerWidth - 200);
+    return Math.min(maxPx, Math.max(220, v));
+  }
 
   function applySidebarSize() {
     const sidebar = document.getElementById('sidebar');
     if (isMobile()) {
       const vh = parseFloat(localStorage.getItem(STORAGE_KEY_VH) || '40');
       sidebar.style.height = clampVh(vh) + 'vh';
+      sidebar.style.width = '';
+      sidebar.style.flexBasis = '';
     } else {
       sidebar.style.height = '';
+      const px = parseFloat(localStorage.getItem(STORAGE_KEY_PX) || '340');
+      const w = clampPx(px) + 'px';
+      sidebar.style.width = w;
+      sidebar.style.flexBasis = w;
     }
   }
 
@@ -743,40 +754,47 @@
       if (!resizing) return;
       resizing = false;
       divider.classList.remove('active');
-      const vh = parseFloat(sidebar.style.height) || 40;
-      localStorage.setItem(STORAGE_KEY_VH, clampVh(vh));
-      // Leaflet needs a nudge when its container resizes mid-gesture
+      if (isMobile()) {
+        const vh = parseFloat(sidebar.style.height) || 40;
+        localStorage.setItem(STORAGE_KEY_VH, clampVh(vh));
+      } else {
+        const px = parseFloat(sidebar.style.width) || 340;
+        localStorage.setItem(STORAGE_KEY_PX, clampPx(px));
+      }
+      document.body.style.userSelect = '';
       if (typeof map !== 'undefined' && map) map.invalidateSize();
     }
 
-    function moveTo(clientY) {
-      // The sidebar sits at the top of the viewport; its height equals the
-      // pointer's Y position minus any offset above (none here since #app
-      // fills the viewport). Subtract a small fudge for the divider itself.
+    function moveToY(clientY) {
       const vh = (clientY / window.innerHeight) * 100;
       sidebar.style.height = clampVh(vh) + 'vh';
       if (typeof map !== 'undefined' && map) map.invalidateSize();
     }
 
+    function moveToX(clientX) {
+      const w = clampPx(clientX) + 'px';
+      sidebar.style.width = w;
+      sidebar.style.flexBasis = w;
+      if (typeof map !== 'undefined' && map) map.invalidateSize();
+    }
+
+    // Touch - mobile only
     divider.addEventListener('touchstart', (e) => {
       if (!isMobile()) return;
       resizing = true;
       divider.classList.add('active');
       e.preventDefault();
     }, { passive: false });
-
     document.addEventListener('touchmove', (e) => {
       if (!resizing) return;
-      moveTo(e.touches[0].clientY);
+      moveToY(e.touches[0].clientY);
       e.preventDefault();
     }, { passive: false });
-
     document.addEventListener('touchend', endDrag);
     document.addEventListener('touchcancel', endDrag);
 
-    // Mouse drag for desktop-mode testing in narrow windows.
+    // Mouse - desktop + mobile
     divider.addEventListener('mousedown', (e) => {
-      if (!isMobile()) return;
       resizing = true;
       divider.classList.add('active');
       document.body.style.userSelect = 'none';
@@ -785,11 +803,11 @@
     document.addEventListener('mousemove', (e) => {
       if (!resizing) return;
       if (e.buttons === 0) { endDrag(); return; }
-      moveTo(e.clientY);
+      if (isMobile()) moveToY(e.clientY);
+      else            moveToX(e.clientX);
     }, true);
     document.addEventListener('mouseup', () => {
       if (!resizing) return;
-      document.body.style.userSelect = '';
       endDrag();
     }, true);
 

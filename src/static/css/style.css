@@ -16,7 +16,9 @@ html, body {
   width: 100vw;
 }
 
-/* Sidebar */
+/* Sidebar - width set inline by JS so the desktop divider can resize it.
+   Default is 340px on first visit; localStorage 'nature.sidebar_width_px'
+   takes over on subsequent loads. */
 .sidebar {
   width: 340px;
   flex: 0 0 340px;
@@ -24,7 +26,6 @@ html, body {
   border-right: 1px solid #d8d8d2;
   display: flex;
   flex-direction: column;
-  transition: flex-basis 0.18s ease, width 0.18s ease;
   overflow: hidden;
 }
 
@@ -645,12 +646,35 @@ button.ghost:hover { background: #1f7a3a; color: #fff; }
   border-color: #c89a1f;
 }
 
-/* Divider: hidden on desktop (sidebar collapse handles the layout),
-   appears on mobile as a draggable row-resize handle between the
-   stacked sidebar and the map. */
+/* Divider:
+   - Desktop: thin vertical bar between sidebar and map; col-resize.
+   - Mobile: short horizontal bar between stacked sidebar and map;
+     row-resize. Both persist their offset in localStorage. */
 #divider {
-  display: none;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8e8e0;
+  border-left: 1px solid #d8d8d2;
+  border-right: 1px solid #d8d8d2;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  transition: background 0.12s;
+  touch-action: none;
+  user-select: none;
 }
+#divider:hover,
+#divider.active { background: #c0d4b9; }
+#divider::after {
+  content: '';
+  width: 2px;
+  height: 32px;
+  background: #888;
+  border-radius: 1px;
+}
+.sidebar:not(.open) ~ #divider { display: none; }
 
 /* Mobile */
 @media (max-width: 768px) {
@@ -665,30 +689,18 @@ button.ghost:hover { background: #1f7a3a; color: #fff; }
   .sidebar:not(.open) { height: 0; flex: 0 0 0; }
 
   #divider {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 auto;
     width: 100%;
     height: 14px;
     cursor: row-resize;
-    background: #e8e8e0;
+    border-left: none;
+    border-right: none;
     border-top: 1px solid #d8d8d2;
     border-bottom: 1px solid #d8d8d2;
-    transition: background 0.12s;
-    touch-action: none;
   }
-  #divider:hover,
-  #divider.active { background: #d4d4c8; }
   #divider::after {
-    content: '';
     width: 36px;
     height: 3px;
-    background: #888;
-    border-radius: 2px;
   }
-  /* Hide the divider entirely when the sidebar is collapsed */
-  .sidebar:not(.open) ~ #divider { display: none; }
 
   #map-container { flex: 1; height: auto; min-height: 0; }
   .inline-panel { width: 100%; min-width: 0; }
