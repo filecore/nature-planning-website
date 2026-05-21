@@ -929,9 +929,41 @@
     renderFavourites();
   }
 
+  /* ---------- Visibility filter (public vs personal map) ---------- */
+
+  // Two faces of the site share the same static files:
+  //   nature.togneri.net   -> public view (no auth); only "public" layers
+  //   nature.nightjar.cc/map -> personal view (TinyAuth); all non-hidden
+  // visibility.json (data/visibility.json) maps layer id -> "public" |
+  // "personal" | "hidden". Edited via the nature-editor admin app.
+  const PERSONAL_HOST = 'nature.nightjar.cc';
+  const PERSONAL_MODE = (
+    window.location.hostname === PERSONAL_HOST ||
+    new URLSearchParams(window.location.search).get('personal') === '1'
+  );
+
+  async function applyVisibilityFilter() {
+    try {
+      const r = await fetch('data/visibility.json', { cache: 'no-cache' });
+      if (!r.ok) return;
+      const vis = await r.json();
+      const before = LAYERS.length;
+      // Mutate LAYERS in place to drop entries the current view shouldn't see.
+      for (let i = LAYERS.length - 1; i >= 0; i--) {
+        const v = vis[LAYERS[i].id] || 'public';
+        const keep = PERSONAL_MODE ? v !== 'hidden' : v === 'public';
+        if (!keep) LAYERS.splice(i, 1);
+      }
+      console.log(`visibility: ${PERSONAL_MODE ? 'personal' : 'public'} view, kept ${LAYERS.length}/${before} layers`);
+    } catch (e) {
+      console.warn('visibility.json load failed:', e);
+    }
+  }
+
   /* ---------- Boot ---------- */
 
   document.addEventListener('DOMContentLoaded', async () => {
+    await applyVisibilityFilter();
     initMap();
     buildLayerToggles();
     wireFilters();

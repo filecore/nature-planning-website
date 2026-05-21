@@ -1,0 +1,19 @@
+{
+  "national-parks": "public",
+  "laavut": "public",
+  "saunas": "public",
+  "uusimaa-classics": "personal",
+  "archaeology": "public",
+  "sacred-sites": "public",
+  "caves": "public",
+  "beaches": "public",
+  "water-sensors": "public",
+  "algae": "public",
+  "lakes": "public",
+  "waterfalls": "public",
+  "breweries": "public",
+  "wineries": "public",
+  "distilleries": "public",
+  "bucket-list": "personal",
+  "local-beaches": "personal"
+}
