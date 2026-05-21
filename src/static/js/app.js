@@ -684,6 +684,15 @@
         const styleOff = { opacity: 0, fillOpacity: 0 };
         const apply = (sub) => {
           if (typeof sub.setStyle === 'function') sub.setStyle(match ? styleOn : styleOff);
+          // setStyle only changes paint; the SVG path still receives
+          // pointer events at opacity 0, which leaves stale tooltips on
+          // screen. Block pointer events on hidden markers and force any
+          // currently-open tooltip / popup to dismiss.
+          if (sub._path) sub._path.style.pointerEvents = match ? '' : 'none';
+          if (!match) {
+            if (typeof sub.closeTooltip === 'function') sub.closeTooltip();
+            if (typeof sub.closePopup === 'function') sub.closePopup();
+          }
         };
         if (typeof lyr.eachLayer === 'function') {
           lyr.eachLayer(apply);
