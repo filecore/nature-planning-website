@@ -737,7 +737,11 @@
       sidebar.style.flexBasis = '';
     } else {
       sidebar.style.height = '';
-      const px = parseFloat(localStorage.getItem(STORAGE_KEY_PX) || '340');
+      // Default sidebar takes 35% of the viewport on first visit so the
+      // data-source / resources panes have room to breathe; user-resized
+      // values persist in localStorage and override the default.
+      const stored = localStorage.getItem(STORAGE_KEY_PX);
+      const px = stored !== null ? parseFloat(stored) : Math.round(window.innerWidth * 0.35);
       const w = clampPx(px) + 'px';
       sidebar.style.width = w;
       sidebar.style.flexBasis = w;
