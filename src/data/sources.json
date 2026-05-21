@@ -400,13 +400,22 @@
       "language": "en"
     },
     {
-      "id": "tutka",
-      "title": "Finnish weather radar",
-      "url": "https://tutka.geocache.fi/",
-      "blurb": "Weather and precipitation radar for Finland.",
+      "id": "supersaa",
+      "title": "Supersää",
+      "url": "https://www.is.fi/supersaa/",
+      "blurb": "Iltasanomat Supersää -- detailed forecast and radar across Finland.",
       "category": "weather",
       "inline": true,
       "language": "fi"
+    },
+    {
+      "id": "fmi-testbed",
+      "title": "FMI (detailed Uusimaa weather)",
+      "url": "https://testbed.fmi.fi/",
+      "blurb": "Finnish Meteorological Institute testbed dashboard with fine-grained Uusimaa weather observations and short-range model output.",
+      "category": "weather",
+      "inline": true,
+      "language": "en"
     }
   ]
 }
