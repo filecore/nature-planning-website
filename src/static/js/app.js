@@ -8,7 +8,7 @@
     { id: 'national-parks',   file: 'national-parks.geojson',   label: 'National parks and hiking areas', color: '#1f7a3a', icon: '\u{1F332}', group: 'hiking' },
     { id: 'laavut',           file: 'laavut.geojson',           label: 'Laavus and kotas',                 color: '#7a4a1f', icon: '\u{1F3D5}', group: 'hiking' },
     { id: 'saunas',           file: 'saunas.geojson',           label: 'Saunas in nature',                 color: '#8a4fcf', icon: '\u{1F9D6}', group: 'hiking' },
-    { id: 'uusimaa-classics', file: 'uusimaa-classics.geojson', label: 'Uusimaa classics',                 color: '#facc15', icon: '⭐',    group: 'hiking' },
+    { id: 'uusimaa-classics', file: 'uusimaa-classics.geojson', label: 'Uusimaa classics',                 color: '#facc15', icon: '⭐',    group: 'hiking', pane: 'uusimaaPane' },
     { id: 'archaeology',      file: 'archaeology.geojson',      label: 'Archaeological sites (VARK)',      color: '#a0292e', icon: '\u{1F3DB}', group: 'natural-sites' },
     { id: 'sacred-sites',     file: 'sacred-sites.geojson',     label: 'Sacred natural sites',             color: '#5b3a8a', icon: '✨',    group: 'natural-sites' },
     { id: 'caves',            file: 'caves.geojson',            label: 'Caves',                            color: '#5a4a36', icon: '\u{1F573}️', group: 'natural-sites' },
@@ -91,6 +91,12 @@
     });
     L.control.zoom({ position: 'topright' }).addTo(map);
 
+    // Custom pane for layers we want to float above the default marker stack.
+    // Default markerPane is z-index 600; popupPane is 700. 650 keeps our
+    // curated overlay above other markers but below open popups.
+    map.createPane('uusimaaPane');
+    map.getPane('uusimaaPane').style.zIndex = 650;
+
     const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -159,23 +165,27 @@
 
     if (feature.geometry && feature.geometry.type === 'Point') {
       const [lat, lon] = featureCentroid(feature);
-      lyr = L.circleMarker([lat, lon], {
+      const opts = {
         radius: 7,
         color: '#fff',
         weight: 1.5,
         fillColor: layer.color,
         fillOpacity: 0.85,
-      });
+      };
+      if (layer.pane) opts.pane = layer.pane;
+      lyr = L.circleMarker([lat, lon], opts);
       lyr._kind = 'point';
     } else {
-      lyr = L.geoJSON(feature, {
+      const geoJSONOpts = {
         style: {
           color: layer.color,
           weight: 1.5,
           fillColor: layer.color,
           fillOpacity: 0.18,
         },
-      });
+      };
+      if (layer.pane) geoJSONOpts.pane = layer.pane;
+      lyr = L.geoJSON(feature, geoJSONOpts);
       lyr._kind = 'polygon';
     }
 
