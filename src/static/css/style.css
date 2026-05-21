@@ -529,6 +529,7 @@ button.ghost:hover { background: #1f7a3a; color: #fff; }
   font-size: 13.5px;
   line-height: 1.35;
 }
+.leaflet-popup-content .popup-weather-loading { color: #999; }
 .leaflet-popup-content .popup-prose {
   margin: 6px 0 2px;
   font-size: 12px;

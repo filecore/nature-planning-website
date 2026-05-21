@@ -238,6 +238,95 @@
     return { rows, prose };
   }
 
+  // Open-Meteo lookup. Free, no API key, ~10k requests per IP per day,
+  // which is plenty for popup-on-demand use. Cache by 3-decimal-rounded
+  // coordinate (~100 m) so the same area never re-fetches in one session,
+  // and de-dupe in-flight promises so two popups opened on neighbouring
+  // markers only fire one network call.
+  const WEATHER_CACHE = new Map();
+  const WEATHER_INFLIGHT = new Map();
+  const WMO = {
+    0:  ['☀️',   'Clear'],
+    1:  ['\u{1F324}️','Mainly clear'],
+    2:  ['⛅',          'Partly cloudy'],
+    3:  ['☁️',   'Overcast'],
+    45: ['\u{1F32B}️','Fog'],
+    48: ['\u{1F32B}️','Freezing fog'],
+    51: ['\u{1F326}️','Light drizzle'],
+    53: ['\u{1F326}️','Drizzle'],
+    55: ['\u{1F326}️','Heavy drizzle'],
+    56: ['\u{1F326}️','Freezing drizzle'],
+    57: ['\u{1F326}️','Freezing drizzle'],
+    61: ['\u{1F327}️','Light rain'],
+    63: ['\u{1F327}️','Rain'],
+    65: ['\u{1F327}️','Heavy rain'],
+    66: ['\u{1F327}️','Freezing rain'],
+    67: ['\u{1F327}️','Freezing rain'],
+    71: ['❄️',    'Light snow'],
+    73: ['❄️',    'Snow'],
+    75: ['❄️',    'Heavy snow'],
+    77: ['❄️',    'Snow grains'],
+    80: ['\u{1F326}️','Rain showers'],
+    81: ['\u{1F327}️','Rain showers'],
+    82: ['\u{1F327}️','Heavy rain showers'],
+    85: ['❄️',    'Snow showers'],
+    86: ['❄️',    'Heavy snow showers'],
+    95: ['⛈️',   'Thunderstorm'],
+    96: ['⛈️',   'Thunderstorm with hail'],
+    99: ['⛈️',   'Thunderstorm with heavy hail'],
+  };
+
+  function weatherKey(lat, lon) {
+    return lat.toFixed(3) + ',' + lon.toFixed(3);
+  }
+
+  function fetchWeather(lat, lon) {
+    const key = weatherKey(lat, lon);
+    if (WEATHER_CACHE.has(key)) return Promise.resolve(WEATHER_CACHE.get(key));
+    if (WEATHER_INFLIGHT.has(key)) return WEATHER_INFLIGHT.get(key);
+
+    const url = 'https://api.open-meteo.com/v1/forecast?' +
+      'latitude=' + lat.toFixed(4) +
+      '&longitude=' + lon.toFixed(4) +
+      '&current=temperature_2m,weather_code,wind_speed_10m' +
+      '&timezone=auto';
+    const p = fetch(url)
+      .then(r => r.ok ? r.json() : null)
+      .then(j => {
+        if (!j || !j.current) return null;
+        const c = j.current;
+        const out = {
+          temp: c.temperature_2m,
+          code: c.weather_code,
+          wind: c.wind_speed_10m,
+          unit: (j.current_units && j.current_units.temperature_2m) || '°C',
+        };
+        WEATHER_CACHE.set(key, out);
+        return out;
+      })
+      .catch(() => null)
+      .finally(() => WEATHER_INFLIGHT.delete(key));
+    WEATHER_INFLIGHT.set(key, p);
+    return p;
+  }
+
+  function renderWeatherInto(row, weather) {
+    if (!weather) {
+      row.remove();
+      return;
+    }
+    const [emoji, label] = WMO[weather.code] || ['\u{1F321}️', 'Weather'];
+    const ico = document.createElement('span');
+    ico.className = 'popup-icon';
+    ico.textContent = emoji;
+    const txt = document.createElement('span');
+    const t = typeof weather.temp === 'number' ? Math.round(weather.temp) + weather.unit : '';
+    txt.textContent = [t, label].filter(Boolean).join(', ');
+    row.innerHTML = '';
+    row.appendChild(ico);
+    row.appendChild(txt);
+  }
+
   function mapsLink(lat, lon, name) {
     // Universal Google Maps deeplink with a label. Works on desktop and
     // hands off cleanly to the native maps app on iOS / Android.
@@ -269,23 +358,42 @@
     }
 
     const { rows, prose } = splitDescription(props.description);
-    if (rows.length) {
-      const rowsBox = document.createElement('div');
-      rowsBox.className = 'popup-rows';
-      for (const text of rows) {
-        const row = document.createElement('div');
-        row.className = 'popup-row';
-        const ico = document.createElement('span');
-        ico.className = 'popup-icon';
-        ico.textContent = pickRowIcon(text);
-        const txt = document.createElement('span');
-        txt.textContent = text;
-        row.appendChild(ico);
-        row.appendChild(txt);
-        rowsBox.appendChild(row);
-      }
-      container.appendChild(rowsBox);
+    const rowsBox = document.createElement('div');
+    rowsBox.className = 'popup-rows';
+
+    // Weather row goes first (after region subtitle) so the
+    // most-time-sensitive information is at eye-level. Starts as a
+    // placeholder "..." while the fetch completes.
+    if (isFinite(centroidLat) && isFinite(centroidLon)) {
+      const weatherRow = document.createElement('div');
+      weatherRow.className = 'popup-row popup-weather';
+      const wIco = document.createElement('span');
+      wIco.className = 'popup-icon';
+      wIco.textContent = '\u{1F321}️';
+      const wTxt = document.createElement('span');
+      wTxt.className = 'popup-weather-loading';
+      wTxt.textContent = '…';
+      weatherRow.appendChild(wIco);
+      weatherRow.appendChild(wTxt);
+      rowsBox.appendChild(weatherRow);
+      fetchWeather(centroidLat, centroidLon)
+        .then(w => renderWeatherInto(weatherRow, w))
+        .catch(() => weatherRow.remove());
     }
+
+    for (const text of rows) {
+      const row = document.createElement('div');
+      row.className = 'popup-row';
+      const ico = document.createElement('span');
+      ico.className = 'popup-icon';
+      ico.textContent = pickRowIcon(text);
+      const txt = document.createElement('span');
+      txt.textContent = text;
+      row.appendChild(ico);
+      row.appendChild(txt);
+      rowsBox.appendChild(row);
+    }
+    if (rowsBox.children.length) container.appendChild(rowsBox);
     if (prose) {
       const p = document.createElement('p');
       p.className = 'popup-prose';
