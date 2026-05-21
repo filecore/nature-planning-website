@@ -280,11 +280,19 @@ def write_layer(name: str, source: str, source_url: str, features: list[dict]) -
 
 
 def run(adapter_fn, *, name: str) -> int:
-    """Standard CLI entry point for an adapter module."""
+    """Standard CLI entry point for an adapter module.
+
+    ``adapter_fn`` may return a single path (single-layer adapter) or a list
+    of paths (an adapter that produces multiple layers from one source).
+    """
     print(f"[{name}] starting")
     try:
-        path = adapter_fn()
-        print(f"[{name}] ok -> {path}")
+        result = adapter_fn()
+        if isinstance(result, (list, tuple)):
+            for path in result:
+                print(f"[{name}] ok -> {path}")
+        else:
+            print(f"[{name}] ok -> {result}")
         return 0
     except Exception as e:
         print(f"[{name}] FAILED: {e}", file=sys.stderr)

@@ -6,6 +6,14 @@ waypoint shown on the map (~4500 entries). We fetch it, parse the
 ``<wpt>`` elements, and categorise each one by the two-letter Finnish
 suffix appended to the name (e.g. "Oopakka LA" -> laavu).
 
+The two main shelter types (laavu lean-tos and kota enclosed-fire huts)
+are emitted as **separate layer files** so the frontend can toggle them
+independently:
+
+* ``lean-tos.geojson``   -- open lean-tos (LA + kammi-style structures
+  flagged as lean-to-like)
+* ``wilderness-huts.geojson`` -- kotas and other enclosed shelters
+
 The feed is refreshed monthly at most; cache aggressively when calling
 this adapter from cron.
 """
@@ -20,10 +28,18 @@ from xml.etree import ElementTree as ET
 
 from common import make_feature, run, write_layer
 
-NAME = "laavut"
+NAME = "laavu-org"  # adapter identifier for logs; produces two layer files
+LAYER_LAAVU = "lean-tos"
+LAYER_KOTA = "wilderness-huts"
 SOURCE = "laavu.org"
 SITE_URL = "http://laavu.org/"
 GPX_URL = "https://laavu.org/lataa.php?paikkakunta=kaikki"
+
+# Which shelter categories belong in each output layer. Categories not in
+# either set are dropped (none currently observed in the live feed beyond
+# laavu / kota; keep this explicit so a future schema change is visible).
+LAAVU_CATEGORIES = {"laavu", "kammi"}
+KOTA_CATEGORIES = {"kota", "autiotupa", "varaustupa", "paivatupa", "tupa", "tulipaikka", "rakennelma"}
 
 GPX_NS = {"g": "http://www.topografix.com/GPX/1/0"}
 
@@ -122,7 +138,14 @@ def fetch_features() -> list[dict]:
 
 
 def main():
-    return write_layer(NAME, SOURCE, SITE_URL, fetch_features())
+    feats = fetch_features()
+    laavu_feats = [f for f in feats if f["properties"]["category"] in LAAVU_CATEGORIES]
+    kota_feats = [f for f in feats if f["properties"]["category"] in KOTA_CATEGORIES]
+    print(f"  split: {len(laavu_feats)} lean-tos, {len(kota_feats)} wilderness huts")
+    paths = []
+    paths.append(write_layer(LAYER_LAAVU, SOURCE, SITE_URL, laavu_feats))
+    paths.append(write_layer(LAYER_KOTA, SOURCE, SITE_URL, kota_feats))
+    return paths
 
 
 if __name__ == "__main__":

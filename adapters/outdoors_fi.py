@@ -1,14 +1,17 @@
-"""Adapter for Finnish national parks and wilderness areas.
+"""Adapter for Finnish national parks and hiking areas.
 
 Source: SYKE / Metsahallitus "Luonnonsuojelu- ja eramaa-alueet" open data,
 catalogued at avoindata.suomi.fi. The underlying spatial service is a
 GeoServer WFS at https://paikkatiedot.ymparisto.fi/geoserver/inspire_ps/wfs
-which serves GeoJSON when asked. We pull two feature subsets:
+which serves GeoJSON when asked. We pull two feature subsets and emit them
+as **two separate layers** so the frontend can toggle them independently:
 
-* National parks: typeNames=...ValtionOmistamaLuonnonsuojelualue with a
-  CQL filter picking only kohdetyyppi (object type) codes for KPU
+* ``national-parks.geojson``: typeNames=...ValtionOmistamaLuonnonsuojelualue
+  with a CQL filter picking only kohdetyyppi codes for KPU
   ("Kansallispuisto") and KPM ("Kansallispuisto - other custodian").
-* Wilderness areas: typeNames=...EramaaAlue (all 12, no filter needed).
+  Matches the 41 NPs listed on luontoon.fi (plus 1 KPM-custodian park).
+* ``hiking-areas.geojson``: typeNames=...EramaaAlue (the 12 wilderness
+  areas, the other major Metsahallitus hiking destination type).
 
 Each polygon comes through with attributes including nimi (name),
 tyyppinimi (type label), lpalue (region), and paaturl (link to source).
@@ -25,7 +28,9 @@ import urllib.request
 
 from common import make_polygon_feature, polygon_bbox_centroid, region_for, run, write_layer
 
-NAME = "national-parks"
+NAME = "outdoors-fi"  # adapter identifier for logs; produces two layer files
+LAYER_NP = "national-parks"
+LAYER_HIKING = "hiking-areas"
 SOURCE = "SYKE / Metsahallitus open data (luonnonsuojelu-ja-eramaa-alueet)"
 SITE_URL = "https://avoindata.suomi.fi/data/en_GB/dataset/luonnonsuojelu-ja-eramaa-alueet"
 WFS_BASE = "https://paikkatiedot.ymparisto.fi/geoserver/inspire_ps/wfs"
@@ -133,14 +138,20 @@ def _ingest(geo: dict) -> list[dict]:
     return out
 
 
-def fetch_features() -> list[dict]:
+def fetch_features() -> tuple[list[dict], list[dict]]:
+    """Return (national_parks, hiking_areas) feature lists."""
     override = os.environ.get("NATURE_OUTDOORS_GEOJSON")
     if override:
-        # Allow a fully external GeoJSON URL to bypass the WFS plumbing.
+        # Override path is single-file by design (for offline testing). Split
+        # the ingested features on category so the same override still gives
+        # us the two layers downstream.
         req = urllib.request.Request(override, headers={"User-Agent": "nature-aggregator/0.1"})
         with urllib.request.urlopen(req, timeout=60) as resp:
             geo = json.loads(resp.read())
-        return _ingest(geo)
+        feats = _ingest(geo)
+        np = [f for f in feats if f["properties"]["category"] == "national-park"]
+        hk = [f for f in feats if f["properties"]["category"] == "wilderness-area"]
+        return np, hk
 
     print("  fetching national parks via WFS (CQL filter for KPU/KPM)")
     np = _wfs_query(
@@ -155,11 +166,15 @@ def fetch_features() -> list[dict]:
     em_feats = _ingest(em)
     print(f"    {len(em_feats)} wilderness areas")
 
-    return np_feats + em_feats
+    return np_feats, em_feats
 
 
 def main():
-    return write_layer(NAME, SOURCE, SITE_URL, fetch_features())
+    np_feats, hk_feats = fetch_features()
+    paths = []
+    paths.append(write_layer(LAYER_NP, SOURCE, SITE_URL, np_feats))
+    paths.append(write_layer(LAYER_HIKING, SOURCE, SITE_URL, hk_feats))
+    return paths
 
 
 if __name__ == "__main__":

@@ -5,8 +5,10 @@
   // Every layer belongs to a group. Order of layers within a group, and of
   // groups themselves, follows the GROUP_ORDER list below.
   const LAYERS = [
-    { id: 'national-parks',   file: 'national-parks.geojson',   label: 'National parks and hiking areas', color: '#1f7a3a', icon: '\u{1F332}', group: 'hiking' },
-    { id: 'laavut',           file: 'laavut.geojson',           label: 'Laavus and kotas',                 color: '#7a4a1f', icon: '\u{1F3D5}', group: 'hiking' },
+    { id: 'national-parks',   file: 'national-parks.geojson',   label: 'National parks',                   color: '#1f7a3a', icon: '\u{1F332}', group: 'hiking' },
+    { id: 'hiking-areas',     file: 'hiking-areas.geojson',     label: 'Hiking areas',                     color: '#5c7a3f', icon: '\u{1F97E}', group: 'hiking' },
+    { id: 'lean-tos',         file: 'lean-tos.geojson',         label: 'Lean-tos (laavu)',                 color: '#7a4a1f', icon: '\u{1F3D5}', group: 'hiking' },
+    { id: 'wilderness-huts',  file: 'wilderness-huts.geojson',  label: 'Wilderness huts (kota)',           color: '#4a3520', icon: '\u{1F3E0}', group: 'hiking' },
     { id: 'saunas',           file: 'saunas.geojson',           label: 'Saunas in nature',                 color: '#8a4fcf', icon: '\u{1F9D6}', group: 'hiking' },
     { id: 'uusimaa-classics', file: 'uusimaa-classics.geojson', label: 'Uusimaa classics',                 color: '#facc15', icon: '⭐',    group: 'hiking', pane: 'uusimaaPane' },
     { id: 'bucket-list',      file: 'bucket-list.geojson',      label: 'Bucket list',                      color: '#ec4899', icon: '\u{1F3AF}', group: 'hiking', pane: 'uusimaaPane' },
@@ -57,7 +59,6 @@
     }
     const prefs = {
       layers,
-      features: Array.from(Filters.state.features),
       region: Filters.state.region,
       search: Filters.state.search,
     };
@@ -634,12 +635,6 @@
       searchBox.value = prefs.search;
       Filters.set({ search: prefs.search });
     }
-    if (Array.isArray(prefs.features)) {
-      for (const tag of prefs.features) Filters.setFeature(tag, true);
-      document.querySelectorAll('#feature-toggles input[type="checkbox"]').forEach(cb => {
-        cb.checked = prefs.features.includes(cb.value);
-      });
-    }
     if (typeof prefs.region === 'string' && prefs.region) {
       // Region values are populated later from layer data, but the saved
       // string can be set immediately; the select shows it once populateRegionSelect runs.
@@ -652,13 +647,6 @@
       savePrefs();
     });
 
-    document.querySelectorAll('#feature-toggles input[type="checkbox"]').forEach(cb => {
-      cb.addEventListener('change', () => {
-        Filters.setFeature(cb.value, cb.checked);
-        savePrefs();
-      });
-    });
-
     regionSel.addEventListener('change', (e) => {
       Filters.set({ region: e.target.value });
       savePrefs();
@@ -666,7 +654,6 @@
 
     document.getElementById('clear-filters').addEventListener('click', () => {
       searchBox.value = '';
-      document.querySelectorAll('#feature-toggles input[type="checkbox"]').forEach(cb => cb.checked = false);
       regionSel.value = '';
       Filters.clear();
       savePrefs();
