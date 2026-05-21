@@ -18,8 +18,8 @@
     { id: 'caves',            file: 'caves.geojson',            label: 'Caves',                            color: '#5a4a36', icon: '\u{1F573}️', group: 'natural-sites' },
     { id: 'beaches',          file: 'beaches.geojson',          label: 'Public swimming beaches',          color: '#4ec3e0', icon: '\u{1F3D6}', group: 'swimming-water' },
     { id: 'local-beaches',    file: 'local-beaches.geojson',    label: 'Local beaches (personal)',         color: '#06b6d4', icon: '\u{1F3CA}', group: 'swimming-water', pane: 'uusimaaPane' },
-    { id: 'water-sensors',    file: 'water-sensors.geojson',    label: 'Live water temperature (Helsinki)',color: '#14b8a6', icon: '\u{1F321}', group: 'swimming-water' },
-    { id: 'algae',            file: 'algae.geojson',            label: 'Recent algae observations',        color: '#84cc16', icon: '\u{1F33F}', group: 'swimming-water' },
+    { id: 'water-sensors',    file: 'water-sensors.geojson',    label: 'Live water temperature (Helsinki)',color: '#14b8a6', icon: '\u{1F321}', group: 'quality' },
+    { id: 'algae',            file: 'algae.geojson',            label: 'Recent algae observations',        color: '#84cc16', icon: '\u{1F33F}', group: 'quality' },
     { id: 'lakes',            file: 'lakes.geojson',            label: 'Lakes (≥ 0.5 km²)',            color: '#0b6fb2', icon: '\u{1F3DE}', group: 'swimming-water' },
     { id: 'waterfalls',       file: 'waterfalls.geojson',       label: 'Waterfalls',                       color: '#2e7bd6', icon: '\u{1F30A}', group: 'swimming-water' },
     { id: 'breweries',        file: 'breweries.geojson',        label: 'Breweries',                        color: '#d4a017', icon: '\u{1F37A}', group: 'alcohol' },
@@ -31,9 +31,10 @@
     'hiking':          { label: 'Hiking' },
     'natural-sites':   { label: 'Natural sites' },
     'swimming-water':  { label: 'Swimming and water' },
+    'quality':         { label: 'Quality' },
     'alcohol':         { label: 'Alcohol' },
   };
-  const GROUP_ORDER = ['hiking', 'natural-sites', 'swimming-water', 'alcohol'];
+  const GROUP_ORDER = ['hiking', 'natural-sites', 'swimming-water', 'quality', 'alcohol'];
 
   // Default ON layers on first visit so the user is not greeted by a
   // blank map. Anything not listed here starts unchecked.
