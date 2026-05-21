@@ -40,6 +40,7 @@ ADAPTERS=(
   uusimaa_classics
   caves
   crags
+  geo_sites
   local_beaches
   bucket_list
 )
