@@ -38,6 +38,8 @@ ADAPTERS=(
   sacred_sites
   uusimaa_classics
   caves
+  local_beaches
+  bucket_list
 )
 
 failed=()
