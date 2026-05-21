@@ -84,8 +84,12 @@
     map = L.map('map', {
       center: FINLAND_CENTER,
       zoom: FINLAND_ZOOM,
-      zoomControl: true,
+      // Suppress the default top-left zoom control; we add it back in the
+      // top-right so the collapsed-sidebar "Menu" floating button has the
+      // top-left corner to itself.
+      zoomControl: false,
     });
+    L.control.zoom({ position: 'topright' }).addTo(map);
 
     const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
