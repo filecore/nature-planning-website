@@ -114,6 +114,62 @@ def fetch_features() -> list[dict]:
     return _parse_kml(payload)
 
 
+def _load_winery_supplement():
+    """Merge in any rows from data/manual/wineries_supplement.csv. The
+    upstream Google My Maps KML only covers ~15 wineries; the supplement
+    is a hand-curated extension. Rows are deduplicated against the KML
+    output by coord proximity (200 m)."""
+    import csv as _csv, io as _io, math as _math, pathlib as _pl, re as _re
+    supplement = _pl.Path(__file__).resolve().parent.parent / "data" / "manual" / "wineries_supplement.csv"
+    if not supplement.exists():
+        return []
+    text = supplement.read_text(encoding="utf-8-sig")
+    out = []
+    gmaps_re = _re.compile(r"/maps/(?:place/[^/]+/)?@(-?\d+\.\d+),(-?\d+\.\d+)")
+    for row in _csv.DictReader(_io.StringIO(text)):
+        name = (row.get("Name") or "").strip()
+        if not name:
+            continue
+        url = (row.get("Google Maps URL") or "").strip()
+        m = gmaps_re.search(url)
+        if not m:
+            continue
+        try:
+            lat, lon = float(m.group(1)), float(m.group(2))
+        except ValueError:
+            continue
+        out.append({
+            "name": name,
+            "lat": lat, "lon": lon,
+            "description": (row.get("Details") or "").strip(),
+        })
+    return out
+
+
+def _dedupe_supplement(kml_feats, supplement):
+    """Drop supplement rows whose coord lies within 200 m of an existing
+    KML feature."""
+    import math as _math
+    def hav(a, b, c, d):
+        R = 6371000
+        p1, p2 = _math.radians(a), _math.radians(c)
+        return 2*R*_math.asin(_math.sqrt(_math.sin(_math.radians(c-a)/2)**2 + _math.cos(p1)*_math.cos(p2)*_math.sin(_math.radians(d-b)/2)**2))
+    out = []
+    for s in supplement:
+        too_close = False
+        for f in kml_feats:
+            try:
+                fl, fln = f["geometry"]["coordinates"][1], f["geometry"]["coordinates"][0]
+            except (KeyError, TypeError, IndexError):
+                continue
+            if hav(s["lat"], s["lon"], fl, fln) < 200:
+                too_close = True
+                break
+        if not too_close:
+            out.append(s)
+    return out
+
+
 def main():
     """Fetch once, write three layer files."""
     all_features = fetch_features()
@@ -123,6 +179,28 @@ def main():
         layer = LAYER_FOR_CATEGORY.get(cat)
         if layer:
             buckets[layer].append(f)
+
+    # Merge supplemental wineries (hand-curated CSV) into the wineries
+    # bucket, deduplicated by coord proximity.
+    supplement = _load_winery_supplement()
+    if supplement:
+        new = _dedupe_supplement(buckets["wineries"], supplement)
+        for s in new:
+            import re as _re
+            slug = _re.sub(r"[^a-z0-9]+", "-", s["name"].lower())[:60]
+            feat = make_feature(
+                feature_id=f"winery-extra-{slug}",
+                name=s["name"],
+                lat=s["lat"], lon=s["lon"],
+                category="winery",
+                source="Wineries supplement (data/manual/wineries_supplement.csv)",
+                source_url="https://www.viinitilat.net/",
+                features=[],
+                description=s["description"],
+            )
+            if feat:
+                buckets["wineries"].append(feat)
+        print(f"  wineries supplement: {len(new)}/{len(supplement)} merged after dedup", file=sys.stderr)
 
     last_path = None
     for layer_name, feats in buckets.items():
