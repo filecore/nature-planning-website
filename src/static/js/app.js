@@ -845,6 +845,7 @@
     title.textContent = src.title;
     frame.src = src.embedUrl || src.url;
     panel.classList.remove('hidden');
+    document.getElementById('app').classList.add('inline-open');
     setTimeout(() => map.invalidateSize(), 200);
   }
 
@@ -853,6 +854,7 @@
       const panel = document.getElementById('inline-panel');
       panel.classList.add('hidden');
       document.getElementById('inline-panel-frame').src = 'about:blank';
+      document.getElementById('app').classList.remove('inline-open');
       setTimeout(() => map.invalidateSize(), 200);
     });
   }

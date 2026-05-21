@@ -443,21 +443,52 @@ button.ghost:hover { background: #1f7a3a; color: #fff; }
   padding: 10px 14px;
   border-bottom: 1px solid #ececec;
   font-weight: 600;
+  background: #fafaf6;
 }
 
 #inline-panel-close {
-  background: transparent;
-  color: #555;
-  border: none;
-  font-size: 22px;
+  background: #fff;
+  color: #1a2533;
+  border: 1px solid #d0d0d0;
+  border-radius: 18px;
+  padding: 4px 12px 4px 10px;
   cursor: pointer;
-  padding: 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+#inline-panel-close::before {
+  content: "×";
+  font-size: 18px;
+  line-height: 1;
+}
+#inline-panel-close:hover {
+  background: #1a2533;
+  color: #fff;
+  border-color: #1a2533;
 }
 
 #inline-panel-frame {
   flex: 1;
   border: none;
   width: 100%;
+}
+
+/* When the inline panel is open, shift Leaflet's top-right + / − zoom
+   chip so it stays visible to the left of the panel. The panel is
+   width: 45% with min-width: 360px, so match those. */
+#app.inline-open .leaflet-top.leaflet-right {
+  right: calc(45% + 10px);
+}
+@media (min-width: 100px) {
+  /* Anchor at min-width when the viewport gets small enough that 45%
+     would be narrower than the panel's actual min-width. */
+  #app.inline-open .leaflet-top.leaflet-right {
+    right: max(calc(45% + 10px), 370px);
+  }
 }
 
 /* Popups - jaaskel.com-inspired visual hierarchy */
