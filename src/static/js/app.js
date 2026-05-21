@@ -23,6 +23,7 @@
     { id: 'local-beaches',    file: 'local-beaches.geojson',    label: 'Local beaches (personal)',         color: '#06b6d4', icon: '\u{1F3CA}', group: 'swimming-water', pane: 'uusimaaPane' },
     { id: 'water-sensors',    file: 'water-sensors.geojson',    label: 'Live water temperature (Helsinki)',color: '#14b8a6', icon: '\u{1F321}', group: 'quality' },
     { id: 'algae',            file: 'algae.geojson',            label: 'Recent algae observations',        color: '#84cc16', icon: '\u{1F33F}', group: 'quality' },
+    { id: 'air-quality',      file: 'air-quality.geojson',      label: 'Air quality stations',             color: '#3b82f6', icon: '\u{1F32B}', group: 'quality' },
     { id: 'lakes',            file: 'lakes.geojson',            label: 'Lakes (≥ 0.5 km²)',            color: '#0b6fb2', icon: '\u{1F3DE}', group: 'swimming-water' },
     { id: 'waterfalls',       file: 'waterfalls.geojson',       label: 'Waterfalls',                       color: '#2e7bd6', icon: '\u{1F30A}', group: 'swimming-water' },
     { id: 'breweries',        file: 'breweries.geojson',        label: 'Breweries',                        color: '#d4a017', icon: '\u{1F37A}', group: 'alcohol' },

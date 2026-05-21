@@ -33,6 +33,7 @@ ADAPTERS=(
   beaches
   water_sensors
   algae
+  air_quality
   breweries
   archaeology
   heritage
