@@ -37,6 +37,7 @@ ADAPTERS=(
   archaeology
   sacred_sites
   uusimaa_classics
+  caves
 )
 
 failed=()

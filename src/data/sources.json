@@ -61,8 +61,12 @@
       "label": "Apps - Geocaching"
     },
     {
-      "id": "apps-photography",
-      "label": "Apps - Photography"
+      "id": "apps-camera",
+      "label": "Apps - Camera"
+    },
+    {
+      "id": "apps-drones",
+      "label": "Apps - Drones"
     }
   ],
   "sources": [
@@ -347,7 +351,7 @@
       "title": "Camera FV-5",
       "url": "https://play.google.com/store/apps/details?id=com.flavionet.android.camera.lite",
       "blurb": "Manual-control camera app with many photographic options.",
-      "category": "apps-photography",
+      "category": "apps-camera",
       "inline": false,
       "language": "en",
       "android_url": "https://play.google.com/store/apps/details?id=com.flavionet.android.camera.lite",
@@ -358,7 +362,7 @@
       "title": "Airdata UAV",
       "url": "https://play.google.com/store/apps/details?id=com.airdata.uav.app",
       "blurb": "Drone flight log + weather prediction.",
-      "category": "apps-photography",
+      "category": "apps-drones",
       "inline": false,
       "language": "en",
       "android_url": "https://play.google.com/store/apps/details?id=com.airdata.uav.app",
@@ -369,7 +373,7 @@
       "title": "UAV Forecast",
       "url": "https://play.google.com/store/apps/details?id=com.uavforecast",
       "blurb": "Drone-specific weather and flight-suitability forecast.",
-      "category": "apps-photography",
+      "category": "apps-drones",
       "inline": false,
       "language": "en",
       "android_url": "https://play.google.com/store/apps/details?id=com.uavforecast",
@@ -380,7 +384,7 @@
       "title": "AirMap",
       "url": "https://play.google.com/store/apps/details?id=com.airmap.airmap",
       "blurb": "Airspace regulation data for drone pilots.",
-      "category": "apps-photography",
+      "category": "apps-drones",
       "inline": false,
       "language": "en",
       "android_url": "https://play.google.com/store/apps/details?id=com.airmap.airmap",
@@ -391,7 +395,7 @@
       "title": "AviaMaps",
       "url": "https://aviamaps.com/map?drone#p=5.11/65.35/26.1",
       "blurb": "Airspace regulation map with a drone filter.",
-      "category": "apps-photography",
+      "category": "apps-drones",
       "inline": false,
       "language": "en"
     },

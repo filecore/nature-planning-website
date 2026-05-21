@@ -11,6 +11,7 @@
     { id: 'uusimaa-classics', file: 'uusimaa-classics.geojson', label: 'Uusimaa classics',                 color: '#facc15', icon: '⭐',    group: 'hiking' },
     { id: 'archaeology',      file: 'archaeology.geojson',      label: 'Archaeological sites (VARK)',      color: '#a0292e', icon: '\u{1F3DB}', group: 'natural-sites' },
     { id: 'sacred-sites',     file: 'sacred-sites.geojson',     label: 'Sacred natural sites',             color: '#5b3a8a', icon: '✨',    group: 'natural-sites' },
+    { id: 'caves',            file: 'caves.geojson',            label: 'Caves',                            color: '#5a4a36', icon: '\u{1F573}️', group: 'natural-sites' },
     { id: 'beaches',          file: 'beaches.geojson',          label: 'Public swimming beaches',          color: '#4ec3e0', icon: '\u{1F3D6}', group: 'swimming-water' },
     { id: 'water-sensors',    file: 'water-sensors.geojson',    label: 'Live water temperature (Helsinki)',color: '#14b8a6', icon: '\u{1F321}', group: 'swimming-water' },
     { id: 'algae',            file: 'algae.geojson',            label: 'Recent algae observations',        color: '#84cc16', icon: '\u{1F33F}', group: 'swimming-water' },
