@@ -39,6 +39,7 @@ ADAPTERS=(
   sacred_sites
   uusimaa_classics
   caves
+  crags
   local_beaches
   bucket_list
 )
