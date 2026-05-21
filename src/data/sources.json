@@ -181,6 +181,15 @@
       "language": "fi"
     },
     {
+      "id": "luolaseura",
+      "title": "Suomen luolat (Luolaseura)",
+      "url": "https://luolaseura.fi/luolaretkelle/suomen-luolat/",
+      "blurb": "Finnish Caving Society's master list of Finnish caves with descriptions, photos, and published WGS84 + ETRS-TM35FIN coordinates per cave. Source of the Caves layer.",
+      "category": "places-of-interest",
+      "inline": false,
+      "language": "fi"
+    },
+    {
       "id": "hylly-kartat",
       "title": "Offline maps for Garmin / Android / iOS",
       "url": "https://kartat.hylly.org/#lataukset",
