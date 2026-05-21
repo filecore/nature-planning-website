@@ -170,12 +170,17 @@ def _ingest(geo: dict, *, simplify: tuple[int, float] = (4, 0.001), min_area_km2
         cat = _category_for(props.get("tyyppilyhenne"), props.get("tyyppinimi"))
         feature_id = "mh-" + str(props.get("kohdeid") or props.get("lsaluetunnus") or re.sub(r"[^a-z0-9]+", "-", name.lower())[:60])
 
-        # Best-effort source URL: prefer the law-reference link, fall back to the
-        # outdoors.fi search page so users still get somewhere useful.
+        # Source URL preference:
+        # 1. The WFS-supplied paaturl if present (rarely is, and when it is
+        #    it tends to point at a law text PDF, not a tourist page).
+        # 2. A Google search scoped to the canonical Metsähallitus portals
+        #    (luontoon.fi / nationalparks.fi) so the result is a real
+        #    landing page for the park rather than the dead outdoors.fi
+        #    homepage that the previous /?q= fallback resolved to.
         link = props.get("paaturl")
         if not link:
-            slug = re.sub(r"[^a-z0-9]+", "", name.lower())
-            link = f"https://www.outdoors.fi/?q={urllib.parse.quote(name)}"
+            q = urllib.parse.quote(f"{name} site:luontoon.fi OR site:nationalparks.fi")
+            link = f"https://www.google.com/search?q={q}"
 
         f = make_polygon_feature(
             feature_id=feature_id,

@@ -258,6 +258,24 @@ button.ghost:hover { background: #1f7a3a; color: #fff; }
 .muted { color: #888; }
 .small { font-size: 12px; }
 
+/* Data sources tab: a tight per-layer list with inline links. */
+.ds-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0;
+}
+.ds-list li {
+  font-size: 12px;
+  line-height: 1.45;
+  padding: 6px 0;
+  border-bottom: 1px dotted #ececec;
+  color: #2a3540;
+}
+.ds-list li:last-child { border-bottom: none; }
+.ds-list li strong { color: #1f7a3a; }
+.ds-list li code { font-size: 11px; background: #f5f5f0; padding: 0 4px; border-radius: 3px; color: #555; }
+.ds-list a { color: #1a6b9a; }
+
 /* Resources tab: two-level accordions.
    Top level: Web resources / Mobile apps (exclusive open via JS).
    Sub level: one details per category (independent toggles). */
