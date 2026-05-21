@@ -35,6 +35,7 @@ ADAPTERS=(
   algae
   breweries
   archaeology
+  heritage
   sacred_sites
   uusimaa_classics
   caves

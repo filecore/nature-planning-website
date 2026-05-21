@@ -14,6 +14,7 @@
     { id: 'uusimaa-classics', file: 'uusimaa-classics.geojson', label: 'Uusimaa classics',                 color: '#facc15', icon: '⭐',    group: 'hiking', pane: 'uusimaaPane' },
     { id: 'bucket-list',      file: 'bucket-list.geojson',      label: 'Bucket list',                      color: '#ec4899', icon: '\u{1F3AF}', group: 'hiking', pane: 'uusimaaPane' },
     { id: 'archaeology',      file: 'archaeology.geojson',      label: 'Archaeological sites',             color: '#a0292e', icon: '\u{1F3DB}', group: 'natural-sites' },
+    { id: 'open-air-heritage',file: 'open-air-heritage.geojson',label: 'Open-air museums and ruins',       color: '#6b4226', icon: '\u{1F3DB}', group: 'natural-sites' },
     { id: 'sacred-sites',     file: 'sacred-sites.geojson',     label: 'Sacred natural sites',             color: '#5b3a8a', icon: '✨',    group: 'natural-sites' },
     { id: 'caves',            file: 'caves.geojson',            label: 'Caves',                            color: '#5a4a36', icon: '\u{1F573}️', group: 'natural-sites' },
     { id: 'beaches',          file: 'beaches.geojson',          label: 'Public swimming beaches',          color: '#4ec3e0', icon: '\u{1F3D6}', group: 'swimming-water' },
