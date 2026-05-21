@@ -520,8 +520,9 @@ button.ghost:hover { background: #1f7a3a; color: #fff; }
   font-size: 13px;
   line-height: 1.4;
   max-width: 280px;
-  /* Right margin keeps clear space for the close-button hit area. */
-  margin: 14px 16px 12px 16px;
+  /* Top margin clears the floating close button; right margin keeps clear
+     space for its hit area. */
+  margin: 24px 16px 12px 16px;
   padding-right: 18px;
 }
 
