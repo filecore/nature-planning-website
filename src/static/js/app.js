@@ -92,6 +92,34 @@
       groupOpen: { ...userGroupOverrides },
     };
     try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) {}
+    syncUrl();
+  }
+
+  // Reflect current filter state in the URL bar so users can copy a
+  // deep-link straight from the address bar. Omits params that match
+  // the site's default state to keep the URL clean.
+  function syncUrl() {
+    if (typeof window === 'undefined' || !window.history || !window.history.replaceState) return;
+    const params = new URLSearchParams();
+
+    // layers: include only when the active set differs from the default.
+    const active = Array.from(Filters.state.layers).sort();
+    const defaultActive = Array.from(DEFAULT_ON_LAYERS).sort();
+    if (active.join(',') !== defaultActive.join(',')) {
+      params.set('layers', active.join(','));
+    }
+    if (Filters.state.region) params.set('region', Filters.state.region);
+    if (Filters.state.search) params.set('q', Filters.state.search);
+
+    const geo = Array.from(Filters.state.geoClasses).sort((a,b) => a - b);
+    // Default is [1].
+    if (geo.length !== 1 || geo[0] !== 1) {
+      params.set('geo', geo.join(','));
+    }
+
+    const qs = params.toString();
+    const url = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
+    try { window.history.replaceState(null, '', url); } catch (e) {}
   }
 
   // URL-param overrides applied at boot. Cached once so every consumer
