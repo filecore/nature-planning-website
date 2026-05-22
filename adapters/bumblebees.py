@@ -75,6 +75,9 @@ def fetch_features() -> list[dict]:
         if feature:
             feature["properties"]["species_count"] = n_species
             feature["properties"]["individual_count"] = total
+            feature["properties"]["render_as"] = "cell"
+            feature["properties"]["bin_lat_deg"] = BIN_LAT
+            feature["properties"]["bin_lon_deg"] = BIN_LON
             out.append(feature)
     return out
 

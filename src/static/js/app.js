@@ -284,12 +284,54 @@
     return        { radius: 6, fillOpacity: 0.2,  tier: 'long' };
   }
 
+  // Pick a fill opacity for a grid-cell layer (bird-atlas, butterflies,
+  // bumblebees) from the adapter-emitted "richness-{low|mid|high}" tag.
+  // The per-layer threshold lives in the adapter so each taxon's idea
+  // of "rich" is honoured (8 species for bumblebees ~ 60 for birds).
+  // Adjacent cells overlap visually into a contiguous choropleth at
+  // these opacities, which is the whole point of the rectangle render.
+  function richnessOpacity(featureTags) {
+    if (Array.isArray(featureTags)) {
+      if (featureTags.includes('richness-high')) return 0.55;
+      if (featureTags.includes('richness-mid'))  return 0.32;
+      if (featureTags.includes('richness-low'))  return 0.16;
+    }
+    return 0.32;
+  }
+
   function buildLeafletLayer(feature, layer) {
     const props = feature.properties || {};
     const name = props.name || '(unnamed)';
     let lyr;
 
-    if (feature.geometry && feature.geometry.type === 'Point') {
+    const isCell = (
+      feature.geometry
+      && feature.geometry.type === 'Point'
+      && props.render_as === 'cell'
+      && props.bin_lat_deg != null
+      && props.bin_lon_deg != null
+    );
+
+    if (isCell) {
+      const [lat, lon] = featureCentroid(feature);
+      const dLat = Number(props.bin_lat_deg) / 2;
+      const dLon = Number(props.bin_lon_deg) / 2;
+      const bounds = [[lat - dLat, lon - dLon], [lat + dLat, lon + dLon]];
+      const fillOpacity = richnessOpacity(props.features);
+      const opts = {
+        color: layer.color,
+        weight: 0,
+        fillColor: layer.color,
+        fillOpacity,
+      };
+      if (layer.pane) opts.pane = layer.pane;
+      lyr = L.rectangle(bounds, opts);
+      lyr._kind = 'cell';
+      // Cache the richness-based fill opacity so applyFilters can
+      // restore it on filter re-show without clobbering it with the
+      // generic polygon default (0.18).
+      lyr._origFillOpacity = fillOpacity;
+    } else if (feature.geometry && feature.geometry.type === 'Point') {
       const [lat, lon] = featureCentroid(feature);
       const uncStyle = styleForUncertainty(props.coordinate_uncertainty_m);
       const opts = {
@@ -1026,11 +1068,17 @@
       }
 
       // Polygons: opacity-toggle as before (they don't cluster).
+      // Grid-cell rectangles share this branch but restore their
+      // richness-derived fill opacity instead of the polygon default,
+      // and use weight 0 so the cell edges don't reappear on re-show.
       if (entry.polygons) {
         for (const lyr of entry.polygonLayers) {
           const match = layerOn && Filters.matches(lyr._feature);
           if (match) visible++;
-          const styleOn  = { opacity: 1, fillOpacity: 0.18 };
+          const isCell = lyr._kind === 'cell';
+          const styleOn  = isCell
+            ? { opacity: 0, weight: 0, fillOpacity: lyr._origFillOpacity != null ? lyr._origFillOpacity : 0.32 }
+            : { opacity: 1, fillOpacity: 0.18 };
           const styleOff = { opacity: 0, fillOpacity: 0 };
           const apply = (sub) => {
             if (typeof sub.setStyle === 'function') sub.setStyle(match ? styleOn : styleOff);
