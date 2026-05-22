@@ -39,7 +39,7 @@ def fetch_features() -> list[dict]:
         "country": "FI",
         "taxonKey": str(TAXON_KEY),
         "hasCoordinate": "true",
-    }, year_range=(MIN_YEAR, 2025))
+    }, year_range=(MIN_YEAR, 2026))
 
     cells: dict[tuple[float, float], Counter[str]] = defaultdict(Counter)
     for r in records:

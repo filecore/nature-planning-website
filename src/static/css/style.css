@@ -104,7 +104,7 @@ html, body {
   letter-spacing: 0.5px;
 }
 
-.tab-button:hover { color: #1f7a3a; }
+.tab-button:hover { color: #fff; }
 
 .tab-button.active {
   color: #1f7a3a;
@@ -325,7 +325,7 @@ button.ghost:hover { background: #1f7a3a; color: #fff; }
   cursor: pointer;
   text-decoration: underline;
 }
-.ghost-link:hover { color: #11506f; }
+.ghost-link:hover { color: #fff; }
 
 /* Resources tab: two-level accordions.
    Top level: Web resources / Mobile apps (exclusive open via JS).

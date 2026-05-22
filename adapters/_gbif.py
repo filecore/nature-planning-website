@@ -37,6 +37,10 @@ def _cache_path(cache_name: str) -> pathlib.Path:
     return CACHE_DIR / f"gbif_{cache_name}.json"
 
 
+def _checkpoint_path(cache_name: str) -> pathlib.Path:
+    return CACHE_DIR / f"gbif_{cache_name}.partial.json"
+
+
 def _cache_is_fresh(path: pathlib.Path) -> bool:
     if not path.exists():
         return False
@@ -44,6 +48,8 @@ def _cache_is_fresh(path: pathlib.Path) -> bool:
         return False
     try:
         payload = json.loads(path.read_text())
+        if not payload.get("complete"):
+            return False
         fetched_at = _dt.datetime.fromisoformat(payload["fetched_at"].replace("Z", "+00:00"))
     except Exception:
         return False
@@ -60,9 +66,52 @@ def _save_cache(path: pathlib.Path, records: list[dict]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "fetched_at": _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "complete": True,
         "records": records,
     }
-    path.write_text(json.dumps(payload, ensure_ascii=False))
+    # Atomic-ish write: stage to a sibling tmp then rename, so a crash
+    # mid-write does not leave a half-truncated cache file.
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(payload, ensure_ascii=False))
+    tmp.replace(path)
+
+
+def _load_checkpoint(cache_name: str) -> tuple[set[tuple], list[dict]]:
+    """Resume in-progress fetches across crashes.
+
+    Returns (set of completed chunk keys, accumulated records). Each
+    chunk key is a tuple like (year,) for a single-year fetch or
+    (year, month) for a month-chunked one.
+    """
+    path = _checkpoint_path(cache_name)
+    if not path.exists():
+        return set(), []
+    try:
+        payload = json.loads(path.read_text())
+        done = {tuple(k) for k in payload.get("completed") or []}
+        return done, payload.get("records") or []
+    except Exception:
+        return set(), []
+
+
+def _save_checkpoint(cache_name: str, completed: set[tuple], records: list[dict]) -> None:
+    path = _checkpoint_path(cache_name)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "fetched_at": _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "complete": False,
+        "completed": [list(k) for k in completed],
+        "records": records,
+    }
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(payload, ensure_ascii=False))
+    tmp.replace(path)
+
+
+def _drop_checkpoint(cache_name: str) -> None:
+    path = _checkpoint_path(cache_name)
+    if path.exists():
+        path.unlink()
 
 
 def _http_get(url: str) -> dict:
@@ -134,19 +183,27 @@ def occurrence_search(
         print(f"  using cached {cache_name} ({len(records)} records, ttl {CACHE_TTL_DAYS}d)")
         return records
 
-    out: list[dict] = []
+    # Resume from checkpoint if a previous run crashed mid-fetch.
+    done, out = _load_checkpoint(cache_name)
+    if done:
+        print(f"  resuming {cache_name} from checkpoint ({len(done)} chunks, {len(out)} records)")
     start = time.monotonic()
 
     if year_range is None:
-        print(f"  fetching {cache_name} from GBIF (single query)")
-        records, hit_cliff = _paginate(params)
-        out.extend(records)
-        if hit_cliff:
-            print(
-                f"    WARN: hit GBIF deep-pagination cliff at offset {DEEP_PAGE_THRESHOLD}; "
-                "truncated. Pass year_range=... to chunk.",
-                file=sys.stderr,
-            )
+        if ("single",) in done:
+            print(f"  checkpoint already complete for {cache_name}; finalising")
+        else:
+            print(f"  fetching {cache_name} from GBIF (single query)")
+            records, hit_cliff = _paginate(params)
+            out.extend(records)
+            if hit_cliff:
+                print(
+                    f"    WARN: hit GBIF deep-pagination cliff at offset {DEEP_PAGE_THRESHOLD}; "
+                    "truncated. Pass year_range=... to chunk.",
+                    file=sys.stderr,
+                )
+            done.add(("single",))
+            _save_checkpoint(cache_name, done, out)
     else:
         year_start, year_end = year_range
         years = list(range(year_start, year_end + 1))
@@ -156,14 +213,21 @@ def occurrence_search(
         )
         last_log = start
         for year in years:
+            if (year,) in done:
+                print(f"    {year}: skip (checkpoint)")
+                continue
             count = _count(params, year=str(year))
             if count == 0:
+                done.add((year,))
+                _save_checkpoint(cache_name, done, out)
                 continue
             if count < DEEP_PAGE_THRESHOLD - PAGE:
                 records, hit_cliff = _paginate({**params, "year": str(year)})
                 out.extend(records)
                 if hit_cliff:
                     print(f"    WARN: unexpected cliff on year {year}", file=sys.stderr)
+                done.add((year,))
+                _save_checkpoint(cache_name, done, out)
             else:
                 # Year is too big for single pagination; chunk by month.
                 # This loses records that are missing the month field
@@ -171,6 +235,8 @@ def occurrence_search(
                 # GBIF's deep-pagination cliff.
                 print(f"    {year}: {count} records, chunking by month")
                 for month in range(1, 13):
+                    if (year, month) in done:
+                        continue
                     records, hit_cliff = _paginate({**params, "year": str(year), "month": str(month)})
                     out.extend(records)
                     if hit_cliff:
@@ -179,6 +245,10 @@ def occurrence_search(
                             f"({len(records)} truncated)",
                             file=sys.stderr,
                         )
+                    done.add((year, month))
+                    _save_checkpoint(cache_name, done, out)
+                done.add((year,))
+                _save_checkpoint(cache_name, done, out)
             now = time.monotonic()
             if now - last_log > 10 or year == years[-1]:
                 elapsed = int(now - start)
@@ -186,6 +256,7 @@ def occurrence_search(
                 last_log = now
 
     _save_cache(cache, out)
+    _drop_checkpoint(cache_name)
     elapsed = int(time.monotonic() - start)
     print(f"  cached {cache_name}: {len(out)} records in {elapsed}s")
     return out
