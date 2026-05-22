@@ -553,7 +553,7 @@
     };
   }
 
-  function makeClusterGroup(layer, onChunkDone) {
+  function makeClusterGroup(layer) {
     return L.markerClusterGroup({
       chunkedLoading: true,
       maxClusterRadius: 50,
@@ -568,21 +568,11 @@
       showCoverageOnHover: false,
       iconCreateFunction: makeClusterIconFactory(layer.color),
       ...(layer.pane ? { clusterPane: layer.pane } : {}),
-      // chunkProgress fires after each addLayers batch; when processed
-      // equals total, the group is fully populated and ready to reveal.
-      chunkProgress: (processed, total /*, elapsed*/) => {
-        if (onChunkDone && processed >= total) onChunkDone();
-      },
     });
   }
 
   async function loadAllLayers() {
     const allRegions = new Set();
-    // Per-layer Promises that resolve once each cluster group has
-    // finished its chunked addLayers run. We addTo(map) only after
-    // every Promise has resolved so the user never sees the staggered
-    // build-up.
-    const clusterReady = [];
     for (const layer of LAYERS) {
       const geo = await loadLayer(layer);
       if (!geo || !Array.isArray(geo.features)) continue;
@@ -608,14 +598,12 @@
         if (feature.properties.region) allRegions.add(feature.properties.region);
       }
 
-      let cluster = null;
-      if (pointMarkers.length) {
-        const ready = new Promise(resolve => {
-          cluster = makeClusterGroup(layer, resolve);
-        });
-        cluster.addLayers(pointMarkers);
-        clusterReady.push(ready);
-      }
+      // Build groups in memory; do NOT addTo(map) yet. addLayers on a
+      // detached cluster group is synchronous (chunkedLoading is only
+      // honoured once the group is on the map), so the internal cluster
+      // tree finishes before we move on to the next layer.
+      const cluster = pointMarkers.length ? makeClusterGroup(layer) : null;
+      if (cluster) cluster.addLayers(pointMarkers);
       const polygons = polygonLayers.length ? L.layerGroup() : null;
       if (polygons) {
         for (const p of polygonLayers) p.addTo(polygons);
@@ -631,13 +619,16 @@
       if (geo.generated_at && (!lastFreshness || geo.generated_at > lastFreshness)) {
         lastFreshness = geo.generated_at;
       }
+
+      // Yield to the event loop so the spinner keeps animating between
+      // layers (each layer's addLayers run can be tens of ms of work).
+      await new Promise(resolve => setTimeout(resolve, 0));
     }
     populateRegionSelect(Array.from(allRegions).sort());
     updateFreshness();
 
-    // Wait for every cluster group to finish chunked-loading, then
-    // attach all groups to the map in one go and reveal the layout.
-    await Promise.all(clusterReady);
+    // Attach every group to the map in a single batch. This is the only
+    // moment any markers / polygons become visible.
     for (const entry of leafletLayers.values()) {
       if (entry.cluster) entry.cluster.addTo(map);
       if (entry.polygons) entry.polygons.addTo(map);
