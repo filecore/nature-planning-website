@@ -1133,7 +1133,7 @@
       actions.className = 'fav-actions';
 
       const fly = document.createElement('button');
-      fly.textContent = 'Fly to';
+      fly.textContent = 'Center on map';
       fly.className = 'ghost';
       fly.addEventListener('click', () => {
         const lyr = featureLookup.get(f.id);
