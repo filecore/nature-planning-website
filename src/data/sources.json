@@ -1,32 +1,12 @@
 {
   "categories": [
     {
-      "id": "hiking-map",
-      "label": "Hiking maps"
-    },
-    {
-      "id": "destination-list",
-      "label": "Destination lists"
-    },
-    {
-      "id": "tips",
-      "label": "Tips and stories"
-    },
-    {
-      "id": "winter",
-      "label": "Winter routes"
-    },
-    {
-      "id": "places-of-interest",
-      "label": "Places of interest"
+      "id": "destinations",
+      "label": "Destinations"
     },
     {
       "id": "lakes",
       "label": "Lakes and waterways"
-    },
-    {
-      "id": "waterfalls",
-      "label": "Waterfalls"
     },
     {
       "id": "food-drink",
@@ -35,10 +15,6 @@
     {
       "id": "heritage",
       "label": "Cultural heritage"
-    },
-    {
-      "id": "tools",
-      "label": "Tools"
     },
     {
       "id": "weather",
@@ -83,7 +59,7 @@
       "title": "Retkikartta",
       "url": "https://retkikartta.fi/",
       "blurb": "Metsahallitus hiking maps with filterable overlays. The gold standard for trail-level detail in national parks and state hiking areas.",
-      "category": "hiking-map",
+      "category": "destinations",
       "inline": true,
       "language": "fi"
     },
@@ -92,7 +68,7 @@
       "title": "outdoors.fi",
       "url": "https://www.outdoors.fi/",
       "blurb": "Metsahallitus's English-language portal for national parks and hiking areas. Backs the national-parks layer on the map.",
-      "category": "hiking-map",
+      "category": "destinations",
       "inline": false,
       "language": "en"
     },
@@ -101,7 +77,7 @@
       "title": "Uuvi (Uusimaa)",
       "url": "https://uuvi.fi/fi/lista-kaikista-virkistys-ulkoilu-ja-luontokohteet-uudellamaalla/",
       "blurb": "Full list of recreation, outdoor, and nature destinations in Uusimaa. Useful when planning short trips around Helsinki.",
-      "category": "destination-list",
+      "category": "destinations",
       "inline": true,
       "language": "fi"
     },
@@ -110,7 +86,7 @@
       "title": "Retkipaikka",
       "url": "https://retkipaikka.fi/",
       "blurb": "User-written hiking destination tips and trip reports. Good for trail-condition narratives and lesser-known spots.",
-      "category": "tips",
+      "category": "destinations",
       "inline": false,
       "language": "fi"
     },
@@ -119,7 +95,7 @@
       "title": "Ulkoliikunta winter map",
       "url": "https://ulkoliikunta.fi/",
       "blurb": "Map of winter routes for cross-country skiing, skating, and ice swimming across Finland.",
-      "category": "winter",
+      "category": "destinations",
       "inline": true,
       "language": "fi"
     },
@@ -129,7 +105,7 @@
       "url": "https://www.google.com/maps/d/u/0/viewer?mid=1JFlmZvP7e_RrejFW-3FOl9KMnjg",
       "embedUrl": "https://www.google.com/maps/d/embed?mid=1JFlmZvP7e_RrejFW-3FOl9KMnjg",
       "blurb": "Curated Google My Maps list of Finnish natural sacred sites.",
-      "category": "places-of-interest",
+      "category": "destinations",
       "inline": true,
       "language": "fi"
     },
@@ -147,7 +123,7 @@
       "title": "Suomen vesiputoukset",
       "url": "https://www.suomenvesiputoukset.fi/",
       "blurb": "Catalogue of Finnish waterfalls with photos and access notes.",
-      "category": "waterfalls",
+      "category": "lakes",
       "inline": false,
       "language": "fi"
     },
@@ -184,7 +160,7 @@
       "title": "Pikakartta",
       "url": "https://pikakartta.fi/",
       "blurb": "Generate a printable A4 trail map of any area in seconds. Useful as a paper backup.",
-      "category": "tools",
+      "category": "destinations",
       "inline": true,
       "language": "fi"
     },
@@ -193,7 +169,7 @@
       "title": "Suomen luolat (Luolaseura)",
       "url": "https://luolaseura.fi/luolaretkelle/suomen-luolat/",
       "blurb": "Finnish Caving Society's master list of Finnish caves with descriptions, photos, and published WGS84 + ETRS-TM35FIN coordinates per cave. Source of the Caves layer.",
-      "category": "places-of-interest",
+      "category": "destinations",
       "inline": false,
       "language": "fi"
     },
@@ -202,7 +178,7 @@
       "title": "Offline maps for Garmin / Android / iOS",
       "url": "https://kartat.hylly.org/#lataukset",
       "blurb": "Whole-Finland topographic map files for Garmin (IMG / MapSource), Android (Mapsforge: Oruxmaps, Locus), and iOS (Cartograph). Includes OSM-sourced marked hiking routes, laavus, and wilderness huts. Refreshed regularly. Use these for offline navigation when the phone is out of range.",
-      "category": "tools",
+      "category": "destinations",
       "inline": false,
       "language": "fi"
     },
@@ -439,7 +415,7 @@
       "title": "Luontoon.fi (Metsähallitus)",
       "url": "https://www.luontoon.fi/",
       "blurb": "Metsähallitus's national-parks portal: official descriptions, services, photo galleries, and the per-park exceptional-situations alert pages. User-facing source for the National parks, Wilderness areas and Nature reserves layers.",
-      "category": "destination-list",
+      "category": "destinations",
       "inline": true,
       "language": "fi"
     },
@@ -448,7 +424,7 @@
       "title": "laavu.org",
       "url": "http://laavu.org/",
       "blurb": "Community-maintained directory of laavus, kotas, lean-to shelters and wilderness huts across Finland. Backs the Laavus, kotas, Lean-tos and Wilderness huts layers.",
-      "category": "destination-list",
+      "category": "destinations",
       "inline": true,
       "language": "fi"
     },
@@ -457,7 +433,7 @@
       "title": "Saunas in nature (Google Sheet)",
       "url": "https://docs.google.com/spreadsheets/d/1zQvYnqq35oMKoJ7HbqNE8P-4EmIQdPj3npZNUjRqfJ4/",
       "blurb": "Hand-curated spreadsheet of public saunas reachable on foot. Source for the Saunas in nature layer.",
-      "category": "places-of-interest",
+      "category": "destinations",
       "inline": true,
       "language": "fi"
     },
@@ -466,7 +442,7 @@
       "title": "Uimaan.fi (swimming spots)",
       "url": "https://uimaan.fi/",
       "blurb": "Crowdsourced directory of Finnish swimming spots (LIPAS-backed). Source for the Local beaches layer.",
-      "category": "places-of-interest",
+      "category": "destinations",
       "inline": true,
       "language": "fi"
     },
