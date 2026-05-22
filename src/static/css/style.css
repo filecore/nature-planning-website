@@ -161,67 +161,86 @@ html, body {
 .checkbox-group label {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 1px 0;
+  gap: 9px;
+  padding: 5px 4px;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 12.5px;
-  line-height: 1.3;
+  font-size: 13.5px;
+  line-height: 1.35;
 }
+.checkbox-group label:hover { background: #f3f5f4; }
 
 .checkbox-group input[type="checkbox"] {
   margin: 0;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
 .layer-swatch {
   display: inline-block;
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  margin-right: 4px;
+  margin-right: 2px;
+  flex-shrink: 0;
 }
 
 .layer-group { margin-top: 2px; }
 .layer-group > summary {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 9px;
   cursor: pointer;
   list-style: none;
-  font-size: 12.5px;
+  font-size: 13.5px;
   font-weight: 600;
-  padding: 3px 0;
+  padding: 7px 4px;
+  border-radius: 4px;
   user-select: none;
   color: #1f7a3a;
 }
+.layer-group > summary:hover { background: #eef3ec; }
 .layer-group > summary::-webkit-details-marker { display: none; }
 .layer-group > summary::before {
   content: "+";
-  width: 14px;
-  height: 14px;
-  line-height: 12px;
+  width: 18px;
+  height: 18px;
+  line-height: 16px;
   text-align: center;
   border: 1px solid #1f7a3a;
   border-radius: 3px;
   color: #1f7a3a;
   font-weight: 700;
-  font-size: 12px;
+  font-size: 14px;
   display: inline-block;
   flex-shrink: 0;
 }
 .layer-group[open] > summary::before { content: "−"; }
 .layer-group .group-label { flex: 1; }
 .layer-group .group-children {
-  padding-left: 18px;
+  padding-left: 22px;
   border-left: 1px dotted #d0d0d0;
-  margin-left: 6px;
+  margin-left: 8px;
   display: flex;
   flex-direction: column;
   gap: 0;
-  padding-top: 2px;
-  padding-bottom: 3px;
+  padding-top: 4px;
+  padding-bottom: 5px;
 }
-/* Make the parent-toggle checkbox a touch smaller and snug to the label. */
-.layer-group .group-parent { margin: 0; }
+/* Group-parent checkbox: same size as the leaf rows, with an enlarged
+   hit area courtesy of a 4px outer padding box. stopPropagation is set
+   in JS so clicking the box doesn't toggle the summary. */
+.layer-group .group-parent {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  padding: 4px;
+  box-sizing: content-box;
+  cursor: pointer;
+  flex-shrink: 0;
+}
 
 input[type="search"], select {
   width: 100%;
