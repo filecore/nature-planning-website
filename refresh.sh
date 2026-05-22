@@ -30,6 +30,7 @@ ADAPTERS=(
   laavu_org
   saunas_sheet
   waterfalls
+  rapids
   beaches
   water_sensors
   algae
