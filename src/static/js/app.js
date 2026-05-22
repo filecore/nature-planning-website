@@ -94,7 +94,36 @@
     try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) {}
   }
 
+  // URL-param overrides applied at boot. Cached once so every consumer
+  // sees the same parse. Supported keys:
+  //   ?layers=a,b,c   -> exactly these layer ids on (everything else off)
+  //   ?region=Lappi   -> region filter preset
+  //   ?q=koski        -> name-search preset
+  //   ?geo=1,2        -> SYKE value-class chip preset
+  let _urlOverridesCache = undefined;
+  function urlOverrides() {
+    if (_urlOverridesCache !== undefined) return _urlOverridesCache;
+    let params;
+    try { params = new URLSearchParams(window.location.search); }
+    catch (e) { params = new URLSearchParams(); }
+    const raw = (k) => {
+      const v = params.get(k);
+      return v === null ? null : v;
+    };
+    const layersStr = raw('layers');
+    const geoStr = raw('geo');
+    _urlOverridesCache = {
+      layers: layersStr === null ? null : new Set(layersStr.split(',').map(s => s.trim()).filter(Boolean)),
+      region: raw('region'),
+      search: raw('q'),
+      geoClasses: geoStr === null ? null : new Set(geoStr.split(',').map(s => parseInt(s, 10)).filter(n => n >= 1 && n <= 4)),
+    };
+    return _urlOverridesCache;
+  }
+
   function initialLayerChecked(layerId) {
+    const ov = urlOverrides();
+    if (ov.layers) return ov.layers.has(layerId);
     const prefs = loadPrefs();
     if (prefs && prefs.layers && Object.prototype.hasOwnProperty.call(prefs.layers, layerId)) {
       return Boolean(prefs.layers[layerId]);
@@ -803,19 +832,22 @@
 
   function wireFilters() {
     const prefs = loadPrefs() || {};
+    const ov = urlOverrides();
     const searchBox = document.getElementById('search-box');
     const regionSel = document.getElementById('region-select');
 
-    // Restore non-layer prefs.
-    if (typeof prefs.search === 'string') {
-      searchBox.value = prefs.search;
-      Filters.set({ search: prefs.search });
+    // Restore non-layer prefs (URL params win over saved prefs).
+    const initialSearch = ov.search !== null ? ov.search : (typeof prefs.search === 'string' ? prefs.search : '');
+    if (initialSearch) {
+      searchBox.value = initialSearch;
+      Filters.set({ search: initialSearch });
     }
-    if (typeof prefs.region === 'string' && prefs.region) {
+    const initialRegion = ov.region !== null ? ov.region : (typeof prefs.region === 'string' ? prefs.region : '');
+    if (initialRegion) {
       // Region values are populated later from layer data, but the saved
       // string can be set immediately; the select shows it once populateRegionSelect runs.
-      regionSel.dataset.pending = prefs.region;
-      Filters.set({ region: prefs.region });
+      regionSel.dataset.pending = initialRegion;
+      Filters.set({ region: initialRegion });
     }
 
     searchBox.addEventListener('input', (e) => {
@@ -840,14 +872,17 @@
 
     const chipEls = Array.from(document.querySelectorAll('#geo-class-chips .chip'));
     let restored = null;
-    if (Array.isArray(prefs.geoClasses)) {
+    if (ov.geoClasses && ov.geoClasses.size) {
+      restored = ov.geoClasses;
+      Filters.set({ geoClasses: restored });
+    } else if (Array.isArray(prefs.geoClasses)) {
       restored = new Set(prefs.geoClasses.map(Number).filter(n => n >= 1 && n <= 4));
       if (restored.size) Filters.set({ geoClasses: restored });
     }
     for (const chip of chipEls) {
       const cls = parseInt(chip.dataset.class, 10);
-      // No prefs -> mirror Filters.state default (Level 1 only). With
-      // prefs -> trust the restored Set.
+      // No restore source -> mirror Filters.state default (Level 1 only).
+      // URL or prefs -> trust the restored Set.
       const on = restored ? restored.has(cls) : (cls === 1);
       chip.classList.toggle('chip-on', on);
       chip.setAttribute('aria-pressed', on ? 'true' : 'false');
