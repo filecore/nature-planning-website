@@ -42,6 +42,17 @@
           </select>
         </div>
 
+        <div class="panel-block" id="geo-class-block">
+          <span class="block-label">Geological value class</span>
+          <div id="geo-class-chips" class="chip-row" role="group" aria-label="Filter geological POIs by SYKE value class">
+            <button type="button" class="chip" data-class="1" aria-pressed="true">1 - Unique</button>
+            <button type="button" class="chip" data-class="2" aria-pressed="true">2 - Extremely</button>
+            <button type="button" class="chip" data-class="3" aria-pressed="true">3 - Very</button>
+            <button type="button" class="chip" data-class="4" aria-pressed="true">4 - Valuable</button>
+          </div>
+          <p class="muted small">Affects bedrock, boulder, moraine, and wind / shore layers only.</p>
+        </div>
+
         <div class="panel-block actions">
           <button id="clear-filters" type="button">Clear filters</button>
           <span id="result-count" class="muted"></span>
@@ -67,9 +78,9 @@
           <li><strong>Archaeological sites (VARK)</strong>: <a href="https://www.kyppi.fi/" target="_blank" rel="noopener">Museovirasto</a> via <code>geoserver.museovirasto.fi/geoserver/rajapinta_suojellut/wfs</code>.</li>
           <li><strong>Open-air museums and ruins</strong>: <a href="http://www.rky.fi/" target="_blank" rel="noopener">Museovirasto</a> built-heritage (RKY) + UNESCO World Heritage points via the same <code>rajapinta_suojellut</code> WFS.</li>
           <li><strong>Sacred natural sites</strong>: exported from <a href="https://www.facebook.com/pyhatpaikat/" target="_blank" rel="noopener">Suomen luonnon pyhäpaikat</a> Google Maps list.</li>
-          <li><strong>Caves</strong>: <a href="https://luolaseura.fi/luolaretkelle/suomen-luolat/" target="_blank" rel="noopener">Luolaseura ry</a> published WGS84 coordinates; <em>data/manual/caves.csv</em> for additions.</li>
+          <li><strong>Caves</strong>: <a href="https://luolaseura.fi/luolaretkelle/suomen-luolat/" target="_blank" rel="noopener">Luolaseura ry</a> published WGS84 coordinates.</li>
           <li><strong>Climbing crags</strong>: <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap</a> outdoor crags via the Overpass API (filters out indoor climbing gyms).</li>
-          <li><strong>Geological POIs</strong>: <a href="https://www.syke.fi/avointieto" target="_blank" rel="noopener">SYKE</a> nationally valuable geological formations (bedrock areas, boulder fields, moraines, wind / shore deposits) via <code>paikkatiedot.ymparisto.fi/geoserver/syke_geologisetmuodostumat/wfs</code>.</li>
+          <li><strong>Bedrock and cliffs / Boulder fields / Moraine formations / Wind and shore deposits</strong>: <a href="https://www.syke.fi/avointieto" target="_blank" rel="noopener">SYKE</a> nationally valuable geological formations (four layers from the same source) via <code>paikkatiedot.ymparisto.fi/geoserver/syke_geologisetmuodostumat/wfs</code>. Filter by SYKE value class (1 unique, 2 extremely valuable, 3 very valuable, 4 valuable) in the Filter tab.</li>
           <li><strong>Public swimming beaches</strong>: SYKE EU Bathing Water Directive register via <code>paikkatiedot.ymparisto.fi/geoserver/inspire_am2/wfs</code>.</li>
           <li><strong>Local beaches</strong>: <a href="https://uimaan.fi/" target="_blank" rel="noopener">uimaan.fi</a> place listings (LIPAS-backed).</li>
           <li><strong>Live water temperature</strong>: <a href="https://iot.fvh.fi/opendata/uiras/" target="_blank" rel="noopener">Forum Virium Uiras</a> IoT sensors (Helsinki region).</li>

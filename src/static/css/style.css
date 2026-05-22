@@ -259,6 +259,30 @@ button.ghost:hover { background: #1f7a3a; color: #fff; }
 .muted { color: #888; }
 .small { font-size: 12px; }
 
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.chip-row + .muted { margin-top: 6px; }
+.chip {
+  font: 500 12px/1 inherit;
+  padding: 5px 9px;
+  border-radius: 999px;
+  border: 1px solid #d0d4d9;
+  background: #f6f7f9;
+  color: #5a6470;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.chip:hover { border-color: #b3bac1; }
+.chip.chip-on {
+  background: #1f7a3a;
+  border-color: #1f7a3a;
+  color: #fff;
+}
+
 /* Data sources tab: a tight per-layer list with inline links. */
 .ds-list {
   list-style: none;

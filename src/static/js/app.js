@@ -18,7 +18,10 @@
     { id: 'sacred-sites',     file: 'sacred-sites.geojson',     label: 'Sacred natural sites',             color: '#5b3a8a', icon: '✨',    group: 'natural-sites' },
     { id: 'caves',            file: 'caves.geojson',            label: 'Caves',                            color: '#5a4a36', icon: '\u{1F573}️', group: 'natural-sites' },
     { id: 'crags',            file: 'crags.geojson',            label: 'Climbing crags',                   color: '#737373', icon: '\u{1F9D7}', group: 'natural-sites' },
-    { id: 'geo-sites',        file: 'geo-sites.geojson',        label: 'Geological POIs',                  color: '#8b6f47', icon: '\u{26F0}', group: 'natural-sites' },
+    { id: 'geo-bedrock',      file: 'geo-bedrock.geojson',      label: 'Bedrock and cliffs',               color: '#8b6f47', icon: '\u{26F0}', group: 'natural-sites' },
+    { id: 'geo-boulders',     file: 'geo-boulders.geojson',     label: 'Boulder fields',                   color: '#6b6b6b', icon: '\u{1FAA8}', group: 'natural-sites' },
+    { id: 'geo-moraines',     file: 'geo-moraines.geojson',     label: 'Moraine formations',               color: '#b78a4a', icon: '\u{1F30D}', group: 'natural-sites' },
+    { id: 'geo-eolian',       file: 'geo-eolian.geojson',       label: 'Wind and shore deposits',          color: '#d4a574', icon: '\u{1F3D6}', group: 'natural-sites' },
     { id: 'beaches',          file: 'beaches.geojson',          label: 'Public swimming beaches',          color: '#4ec3e0', icon: '\u{1F3D6}', group: 'swimming-water' },
     { id: 'local-beaches',    file: 'local-beaches.geojson',    label: 'Local beaches (personal)',         color: '#06b6d4', icon: '\u{1F3CA}', group: 'swimming-water', pane: 'uusimaaPane' },
     { id: 'water-sensors',    file: 'water-sensors.geojson',    label: 'Live water temperature (Helsinki)',color: '#14b8a6', icon: '\u{1F321}', group: 'quality' },
@@ -67,6 +70,7 @@
       layers,
       region: Filters.state.region,
       search: Filters.state.search,
+      geoClasses: Array.from(Filters.state.geoClasses).sort(),
     };
     try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) {}
   }
@@ -658,10 +662,36 @@
       savePrefs();
     });
 
+    // Geological value-class chips: restore from prefs, then wire toggles.
+    const chipEls = Array.from(document.querySelectorAll('#geo-class-chips .chip'));
+    let restored = null;
+    if (Array.isArray(prefs.geoClasses)) {
+      restored = new Set(prefs.geoClasses.map(Number).filter(n => n >= 1 && n <= 4));
+      if (restored.size) Filters.set({ geoClasses: restored });
+    }
+    for (const chip of chipEls) {
+      const cls = parseInt(chip.dataset.class, 10);
+      const on = restored ? restored.has(cls) : true;
+      chip.classList.toggle('chip-on', on);
+      chip.setAttribute('aria-pressed', on ? 'true' : 'false');
+      chip.addEventListener('click', () => {
+        const enabled = !chip.classList.contains('chip-on');
+        chip.classList.toggle('chip-on', enabled);
+        chip.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+        Filters.setGeoClass(cls, enabled);
+        savePrefs();
+      });
+    }
+
     document.getElementById('clear-filters').addEventListener('click', () => {
       searchBox.value = '';
       regionSel.value = '';
       Filters.clear();
+      // Reflect cleared geo-class state in the chip UI.
+      for (const chip of document.querySelectorAll('#geo-class-chips .chip')) {
+        chip.classList.add('chip-on');
+        chip.setAttribute('aria-pressed', 'true');
+      }
       savePrefs();
     });
 
