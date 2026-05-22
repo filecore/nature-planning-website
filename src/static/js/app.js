@@ -557,7 +557,13 @@
     return L.markerClusterGroup({
       chunkedLoading: true,
       maxClusterRadius: 50,
-      disableClusteringAtZoom: 12,
+      // Intentionally no `disableClusteringAtZoom`: markers at the same
+      // (or very close) coordinates would otherwise render on top of
+      // each other at high zoom and one would be unclickable. Keeping
+      // clustering enabled at all zoom levels lets `spiderfyOnMaxZoom`
+      // fan co-located markers out when the cluster is clicked at max
+      // zoom. Spread-out markers still break apart naturally via
+      // `maxClusterRadius` as the user zooms in.
       spiderfyOnMaxZoom: true,
       showCoverageOnHover: false,
       iconCreateFunction: makeClusterIconFactory(layer.color),
