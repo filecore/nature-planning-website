@@ -71,32 +71,58 @@
       </section>
 
       <section class="tab-panel" id="tab-data-sources" role="tabpanel">
+        <h4 class="ds-group-title">Hiking</h4>
         <ul class="ds-list">
-          <li><strong>National parks &amp; wilderness areas</strong>: <a href="https://avoindata.suomi.fi/data/en_GB/dataset/luonnonsuojelu-ja-eramaa-alueet" target="_blank" rel="noopener">SYKE open data</a> via <code>paikkatiedot.ymparisto.fi/geoserver/inspire_ps/wfs</code>.</li>
-          <li><strong>Laavus and kotas</strong>: <a href="http://laavu.org/lataa.php?paikkakunta=kaikki" target="_blank" rel="noopener">laavu.org bulk GPX export</a> (~4 500 waypoints).</li>
+          <li><strong>National parks, wilderness areas and nature reserves</strong>: <a href="https://avoindata.suomi.fi/data/en_GB/dataset/luonnonsuojelu-ja-eramaa-alueet" target="_blank" rel="noopener">SYKE open data</a> via <code>paikkatiedot.ymparisto.fi/geoserver/inspire_ps/wfs</code>.</li>
+          <li><strong>Laavus, kotas, lean-to shelters and wilderness huts</strong>: <a href="http://laavu.org/lataa.php?paikkakunta=kaikki" target="_blank" rel="noopener">laavu.org bulk GPX export</a> (~4 500 waypoints).</li>
           <li><strong>Saunas in nature</strong>: <a href="https://docs.google.com/spreadsheets/d/1zQvYnqq35oMKoJ7HbqNE8P-4EmIQdPj3npZNUjRqfJ4" target="_blank" rel="noopener">Curated Google Sheet</a>, joined by area name to the national-parks layer.</li>
+        </ul>
+
+        <h4 class="ds-group-title">Natural sites</h4>
+        <ul class="ds-list">
           <li><strong>Archaeological sites (VARK)</strong>: <a href="https://www.kyppi.fi/" target="_blank" rel="noopener">Museovirasto</a> via <code>geoserver.museovirasto.fi/geoserver/rajapinta_suojellut/wfs</code>.</li>
           <li><strong>Open-air museums and ruins</strong>: <a href="http://www.rky.fi/" target="_blank" rel="noopener">Museovirasto</a> built-heritage (RKY) + UNESCO World Heritage points via the same <code>rajapinta_suojellut</code> WFS.</li>
           <li><strong>Sacred natural sites</strong>: exported from <a href="https://www.facebook.com/pyhatpaikat/" target="_blank" rel="noopener">Suomen luonnon pyhäpaikat</a> Google Maps list.</li>
+        </ul>
+
+        <h4 class="ds-group-title">Geological features</h4>
+        <ul class="ds-list">
           <li><strong>Caves</strong>: <a href="https://luolaseura.fi/luolaretkelle/suomen-luolat/" target="_blank" rel="noopener">Luolaseura ry</a> published WGS84 coordinates.</li>
           <li><strong>Climbing crags</strong>: <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap</a> outdoor crags via the Overpass API (filters out indoor climbing gyms).</li>
-          <li><strong>Bird-watching towers</strong>: <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap</a> bird hides (<code>leisure=bird_hide</code>) and observation towers via the Overpass API.</li>
           <li><strong>Bedrock and cliffs / Boulder fields / Moraine formations / Wind and shore deposits</strong>: <a href="https://www.syke.fi/avointieto" target="_blank" rel="noopener">SYKE</a> nationally valuable geological formations (four layers from the same source) via <code>paikkatiedot.ymparisto.fi/geoserver/syke_geologisetmuodostumat/wfs</code>. Filter by SYKE value class (1 unique, 2 extremely valuable, 3 very valuable, 4 valuable) in the Filter tab.</li>
+        </ul>
+
+        <h4 class="ds-group-title">Wildlife</h4>
+        <ul class="ds-list">
+          <li><strong>Bird-watching towers</strong>: <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap</a> bird hides (<code>leisure=bird_hide</code>) and observation towers via the Overpass API.</li>
+          <li><strong>Tick observation density</strong>: <a href="https://www.gbif.org/" target="_blank" rel="noopener">GBIF</a> Ixodes ricinus + Ixodes persulcatus records since 2014, aggregated by maakunta. Note: this reflects observation effort as much as actual tick density.</li>
+        </ul>
+
+        <h4 class="ds-group-title">Swimming and water</h4>
+        <ul class="ds-list">
           <li><strong>Public swimming beaches</strong>: SYKE EU Bathing Water Directive register via <code>paikkatiedot.ymparisto.fi/geoserver/inspire_am2/wfs</code>.</li>
           <li><strong>Local beaches</strong>: <a href="https://uimaan.fi/" target="_blank" rel="noopener">uimaan.fi</a> place listings (LIPAS-backed).</li>
+          <li><strong>Lakes</strong>: <a href="https://www.jarviwiki.fi/wiki/Etusivu" target="_blank" rel="noopener">Järvi-meriwiki</a> Semantic MediaWiki, lakes ≥ 0.5 km².</li>
+          <li><strong>Waterfalls</strong>: <a href="https://www.suomenvesiputoukset.fi/" target="_blank" rel="noopener">Suomen vesiputoukset</a>, scraped from per-fall detail pages.</li>
+        </ul>
+
+        <h4 class="ds-group-title">Quality</h4>
+        <ul class="ds-list">
           <li><strong>Live water temperature</strong>: <a href="https://iot.fvh.fi/opendata/uiras/" target="_blank" rel="noopener">Forum Virium Uiras</a> IoT sensors (Helsinki region).</li>
           <li><strong>Recent algae observations</strong>: <a href="https://www.jarviwiki.fi/wiki/Levavahti" target="_blank" rel="noopener">SYKE VESLA</a> citizen observation database (OData), last 60 days.</li>
           <li><strong>Air quality stations</strong>: <a href="https://en.ilmatieteenlaitos.fi/air-quality" target="_blank" rel="noopener">FMI</a> air quality monitoring network (148 stations), latest AQI via the FMI open-data WFS (<code>urban::observations::airquality::hourly::simple</code>).</li>
-          <li><strong>River and lake water levels</strong>: <a href="https://wwwi3.ymparisto.fi/i3/paivanarvot/ENG/Index.htm" target="_blank" rel="noopener">SYKE Hydrologiarajapinta</a> OData API; latest reading per station with data in the last 3 days.</li>
+          <li><strong>River and lake water levels</strong>: <a href="https://wwwi3.ymparisto.fi/i3/paivanarvot/ENG/Index.htm" target="_blank" rel="noopener">SYKE Hydrologiarajapinta</a> OData API; latest reading per station with 30-day median and range.</li>
           <li><strong>Weather warnings</strong>: <a href="https://en.ilmatieteenlaitos.fi/warnings" target="_blank" rel="noopener">FMI</a> Common Alerting Protocol (CAP) atom feed at <code>alerts.fmi.fi/cap/feed/atom_en-GB.xml</code> - one marker per affected area (centroid of CAP polygon). Covers wind, thunderstorm, forest-fire, ice and other warnings up to 5 days ahead.</li>
           <li><strong>Pollen forecast</strong>: <a href="https://open-meteo.com/en/docs/air-quality-api" target="_blank" rel="noopener">Open-Meteo Air Quality API</a> sampled at each maakunta centroid; one marker per region showing today's peak per species (alder, birch, grass, mugwort, olive, ragweed).</li>
-          <li><strong>Tick observation density</strong>: <a href="https://www.gbif.org/" target="_blank" rel="noopener">GBIF</a> Ixodes ricinus + Ixodes persulcatus records since 2014, aggregated by maakunta. Note: this reflects observation effort as much as actual tick density.</li>
-          <li><strong>Lakes</strong>: <a href="https://www.jarviwiki.fi/wiki/Etusivu" target="_blank" rel="noopener">Järvi-meriwiki</a> Semantic MediaWiki, lakes ≥ 0.5 km².</li>
-          <li><strong>Waterfalls</strong>: <a href="https://www.suomenvesiputoukset.fi/" target="_blank" rel="noopener">Suomen vesiputoukset</a>, scraped from per-fall detail pages.</li>
+        </ul>
+
+        <h4 class="ds-group-title">Alcohol</h4>
+        <ul class="ds-list">
           <li><strong>Breweries</strong>: <a href="https://www.google.com/maps/d/u/0/viewer?mid=1NtD_h1CjndFVmV77m1chR3Mjhko" target="_blank" rel="noopener">Suomen pienpanimot</a> Google My Maps (olutkellari.blogspot.fi).</li>
           <li><strong>Wineries</strong>: <a href="https://www.google.com/maps/d/u/0/viewer?mid=1NtD_h1CjndFVmV77m1chR3Mjhko" target="_blank" rel="noopener">Suomen pienpanimot</a> Google My Maps + <a href="https://www.viinitilat.net/" target="_blank" rel="noopener">Viinitilat</a> directory + personal Google Maps additions.</li>
           <li><strong>Distilleries</strong>: <a href="https://www.google.com/maps/d/u/0/viewer?mid=1NtD_h1CjndFVmV77m1chR3Mjhko" target="_blank" rel="noopener">Suomen pienpanimot</a> Google My Maps (same KML as breweries / wineries, separated by category).</li>
         </ul>
+
         <p class="small muted">Manually-derived and partially-derived layers are edited via the editor at <code>nature.nightjar.cc</code>.</p>
       </section>
 
