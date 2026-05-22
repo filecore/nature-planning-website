@@ -834,7 +834,9 @@
     }
     for (const chip of chipEls) {
       const cls = parseInt(chip.dataset.class, 10);
-      const on = restored ? restored.has(cls) : true;
+      // No prefs -> mirror Filters.state default (Level 1 only). With
+      // prefs -> trust the restored Set.
+      const on = restored ? restored.has(cls) : (cls === 1);
       chip.classList.toggle('chip-on', on);
       chip.setAttribute('aria-pressed', on ? 'true' : 'false');
       chip.addEventListener('click', () => {
