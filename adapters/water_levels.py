@@ -77,54 +77,90 @@ def _stations() -> list[dict]:
     return rows
 
 
-def _latest_readings(days: int = 3) -> dict[int, tuple[float, str]]:
-    """Return {Paikka_Id: (value_cm, iso_timestamp)} keeping only the
-    most recent reading per station."""
+def _readings_window(days: int) -> list[dict]:
     since = (_dt.datetime.now(_dt.timezone.utc) - _dt.timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%S")
     rows = _paged("Vedenkorkeus", {"$filter": f"Aika gt datetime'{since}'"})
-    print(f"  {len(rows)} readings in last {days} days")
+    print(f"  {len(rows)} Vedenkorkeus rows in last {days} days")
+    return rows
 
-    latest: dict[int, tuple[float, str]] = {}
+
+def _summarise(rows: list[dict]) -> dict[int, dict]:
+    """Group rows by Paikka_Id; return per-station latest value plus
+    min/median/max across the window."""
+    buckets: dict[int, list[tuple[str, float]]] = {}
     for r in rows:
         pid = r.get("Paikka_Id")
         ts = r.get("Aika")
         val = r.get("Arvo")
         if pid is None or ts is None or val is None:
             continue
-        prev = latest.get(pid)
-        if prev is None or ts > prev[1]:
-            latest[pid] = (float(val), ts)
-    print(f"  {len(latest)} stations with recent data")
-    return latest
+        buckets.setdefault(pid, []).append((ts, float(val)))
+
+    summary: dict[int, dict] = {}
+    for pid, items in buckets.items():
+        items.sort(key=lambda x: x[0])  # by Aika asc
+        values = [v for _, v in items]
+        latest_ts, latest_val = items[-1]
+        values_sorted = sorted(values)
+        median = values_sorted[len(values_sorted) // 2]
+        summary[pid] = {
+            "latest_cm": latest_val,
+            "latest_ts": latest_ts,
+            "min_cm": min(values),
+            "max_cm": max(values),
+            "median_cm": median,
+            "samples": len(values),
+        }
+    print(f"  {len(summary)} stations with data summarised")
+    return summary
 
 
 def fetch_features() -> list[dict]:
     stations = _stations()
-    readings = _latest_readings(days=3)
+    rows = _readings_window(days=30)
+    summary = _summarise(rows)
 
     out: list[dict] = []
     for s in stations:
         pid = s.get("Paikka_Id")
-        reading = readings.get(pid)
-        if not reading:
+        stats = summary.get(pid)
+        if not stats:
             continue
         lat = _dms_to_deg(s.get("KoordLat"))
         lon = _dms_to_deg(s.get("KoordLong"))
         if lat is None or lon is None:
             continue
 
-        value_cm, ts = reading
-        when = ts.replace("T", " ").split(".")[0]
+        latest_m = stats["latest_cm"] / 100.0
+        median_m = stats["median_cm"] / 100.0
+        min_m = stats["min_cm"] / 100.0
+        max_m = stats["max_cm"] / 100.0
+        diff_cm = stats["latest_cm"] - stats["median_cm"]
+        sign = "+" if diff_cm >= 0 else ""
+        when = stats["latest_ts"].replace("T", " ").split(".")[0]
         body_kind = "Lake" if s.get("JarviNimi") else "River"
+
         bits = [
-            f"Water level: {value_cm:.0f} cm",
+            f"Water level: {latest_m:.2f} m ({sign}{diff_cm:.0f} cm vs 30d median)",
+            f"30-day median: {median_m:.2f} m",
+            f"30-day range: {min_m:.2f} - {max_m:.2f} m ({stats['samples']} readings)",
             f"as of {when}",
             f"{body_kind}: {(s.get('JarviNimi') or s.get('PaaVesalNimi') or '').strip()}",
         ]
-        description = " . ".join(b for b in bits if b.strip())[:300]
+        description = " . ".join(b for b in bits if b.strip())[:400]
 
         nro = (s.get("Nro") or "").strip()
         name = (s.get("Nimi") or "").strip() or f"Station {nro}"
+
+        # Tag whether the current reading is above / below / near the
+        # 30-day median so the UI could colour-code later if wanted.
+        if abs(diff_cm) < 5:
+            level_tag = "level-normal"
+        elif diff_cm > 0:
+            level_tag = "level-above"
+        else:
+            level_tag = "level-below"
+
         feature = make_feature(
             feature_id=f"syke-w-{pid}",
             name=name,
@@ -133,7 +169,7 @@ def fetch_features() -> list[dict]:
             category="water-level",
             source=SOURCE,
             source_url=f"https://wwwi3.ymparisto.fi/i3/paivanarvot/FIN/Kunta/Paikka.aspx?Paikka_ID={pid}",
-            features=[body_kind.lower()],
+            features=[body_kind.lower(), level_tag],
             description=description,
         )
         if feature:
