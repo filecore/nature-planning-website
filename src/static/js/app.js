@@ -96,25 +96,25 @@
   }
 
   // Reflect current filter state in the URL bar so users can copy a
-  // deep-link straight from the address bar. Omits params that match
-  // the site's default state to keep the URL clean.
+  // deep-link straight from the address bar. Multi-value params (one
+  // ?key=value pair per layer / class) so the URL reads naturally
+  // without %2C-encoded commas. Omits params that match the site's
+  // default state to keep the URL clean.
   function syncUrl() {
     if (typeof window === 'undefined' || !window.history || !window.history.replaceState) return;
     const params = new URLSearchParams();
 
-    // layers: include only when the active set differs from the default.
     const active = Array.from(Filters.state.layers).sort();
     const defaultActive = Array.from(DEFAULT_ON_LAYERS).sort();
     if (active.join(',') !== defaultActive.join(',')) {
-      params.set('layers', active.join(','));
+      for (const id of active) params.append('layers', id);
     }
     if (Filters.state.region) params.set('region', Filters.state.region);
     if (Filters.state.search) params.set('q', Filters.state.search);
 
     const geo = Array.from(Filters.state.geoClasses).sort((a,b) => a - b);
-    // Default is [1].
     if (geo.length !== 1 || geo[0] !== 1) {
-      params.set('geo', geo.join(','));
+      for (const n of geo) params.append('geo', String(n));
     }
 
     const qs = params.toString();
@@ -123,28 +123,39 @@
   }
 
   // URL-param overrides applied at boot. Cached once so every consumer
-  // sees the same parse. Supported keys:
-  //   ?layers=a,b,c   -> exactly these layer ids on (everything else off)
-  //   ?region=Lappi   -> region filter preset
-  //   ?q=koski        -> name-search preset
-  //   ?geo=1,2        -> SYKE value-class chip preset
+  // sees the same parse. Supported keys (use multi-value form so the
+  // URL bar reads ?layers=a&layers=b not ?layers=a%2Cb):
+  //   ?layers=a&layers=b   -> exactly these layer ids on (everything else off)
+  //   ?region=Lappi        -> region filter preset
+  //   ?q=koski             -> name-search preset
+  //   ?geo=1&geo=2         -> SYKE value-class chip preset
+  // Legacy comma-separated values are still parsed for backwards compat
+  // with already-shared links.
   let _urlOverridesCache = undefined;
   function urlOverrides() {
     if (_urlOverridesCache !== undefined) return _urlOverridesCache;
     let params;
     try { params = new URLSearchParams(window.location.search); }
     catch (e) { params = new URLSearchParams(); }
-    const raw = (k) => {
-      const v = params.get(k);
-      return v === null ? null : v;
+    const multi = (k) => {
+      const all = params.getAll(k);
+      if (!all.length) return null;
+      const items = [];
+      for (const v of all) {
+        for (const part of String(v).split(',')) {
+          const t = part.trim();
+          if (t) items.push(t);
+        }
+      }
+      return items;
     };
-    const layersStr = raw('layers');
-    const geoStr = raw('geo');
+    const layers = multi('layers');
+    const geo = multi('geo');
     _urlOverridesCache = {
-      layers: layersStr === null ? null : new Set(layersStr.split(',').map(s => s.trim()).filter(Boolean)),
-      region: raw('region'),
-      search: raw('q'),
-      geoClasses: geoStr === null ? null : new Set(geoStr.split(',').map(s => parseInt(s, 10)).filter(n => n >= 1 && n <= 4)),
+      layers: layers === null ? null : new Set(layers),
+      region: params.get('region'),
+      search: params.get('q'),
+      geoClasses: geo === null ? null : new Set(geo.map(s => parseInt(s, 10)).filter(n => n >= 1 && n <= 4)),
     };
     return _urlOverridesCache;
   }
