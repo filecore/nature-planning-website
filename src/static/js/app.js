@@ -22,7 +22,7 @@
     { id: 'geo-boulders',     file: 'geo-boulders.geojson',     label: 'Boulder fields',                   color: '#6b6b6b', icon: '\u{1FAA8}', group: 'geological' },
     { id: 'geo-moraines',     file: 'geo-moraines.geojson',     label: 'Moraine formations',               color: '#b78a4a', icon: '\u{1F30D}', group: 'geological' },
     { id: 'geo-eolian',       file: 'geo-eolian.geojson',       label: 'Wind and shore deposits',          color: '#d4a574', icon: '\u{1F3D6}', group: 'geological' },
-    { id: 'bird-hotspots',    file: 'bird-hotspots.geojson',    label: 'Bird hotspots',                    color: '#0891b2', icon: '\u{1F426}', group: 'wildlife' },
+    { id: 'bird-hotspots',    file: 'bird-hotspots.geojson',    label: 'Bird-watching towers',             color: '#0891b2', icon: '\u{1F426}', group: 'wildlife' },
     { id: 'beaches',          file: 'beaches.geojson',          label: 'Public swimming beaches',          color: '#4ec3e0', icon: '\u{1F3D6}', group: 'swimming-water' },
     { id: 'local-beaches',    file: 'local-beaches.geojson',    label: 'Local beaches (personal)',         color: '#06b6d4', icon: '\u{1F3CA}', group: 'swimming-water', pane: 'uusimaaPane' },
     { id: 'water-sensors',    file: 'water-sensors.geojson',    label: 'Live water temperature (Helsinki)',color: '#14b8a6', icon: '\u{1F321}', group: 'quality' },
