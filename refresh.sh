@@ -37,6 +37,7 @@ ADAPTERS=(
   water_levels
   weather_alerts
   pollen
+  bird_hotspots
   breweries
   archaeology
   heritage
