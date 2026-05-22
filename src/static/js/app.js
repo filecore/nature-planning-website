@@ -105,7 +105,13 @@
   const FINLAND_ZOOM = 6;
 
   let map;
-  let leafletLayers = new Map();  // layerId -> Leaflet LayerGroup
+  // layerId -> { cluster: L.MarkerClusterGroup | null,
+  //              polygons: L.LayerGroup | null,
+  //              pointMarkers: array of L.CircleMarker,
+  //              polygonLayers: array of L.geoJSON wrappers }
+  // Point markers go through the cluster group; polygons go through the
+  // separate plain layerGroup so they stay rendered as outlines.
+  let leafletLayers = new Map();
   let featureLookup = new Map();  // 'layerId:featureId' -> Leaflet marker
   let lastFreshness = null;
 
@@ -528,26 +534,82 @@
     return tag.replace(/^has-/, '').replace(/-/g, ' ');
   }
 
+  function makeClusterIconFactory(color) {
+    return function (cluster) {
+      const n = cluster.getChildCount();
+      // Three size tiers, mirroring marker-cluster's default but with
+      // per-layer colour and a single ring style.
+      const size = n < 10 ? 32 : n < 100 ? 38 : 46;
+      const html = (
+        '<div class="nature-cluster-inner" style="background:' + color + ';' +
+        'width:' + size + 'px;height:' + size + 'px;line-height:' + size + 'px;">' +
+        '<span>' + n + '</span></div>'
+      );
+      return L.divIcon({
+        html: html,
+        className: 'nature-cluster',
+        iconSize: L.point(size, size),
+      });
+    };
+  }
+
+  function makeClusterGroup(layer) {
+    return L.markerClusterGroup({
+      chunkedLoading: true,
+      maxClusterRadius: 50,
+      disableClusteringAtZoom: 12,
+      spiderfyOnMaxZoom: true,
+      showCoverageOnHover: false,
+      iconCreateFunction: makeClusterIconFactory(layer.color),
+      ...(layer.pane ? { clusterPane: layer.pane } : {}),
+    });
+  }
+
   async function loadAllLayers() {
     const allRegions = new Set();
     for (const layer of LAYERS) {
       const geo = await loadLayer(layer);
       if (!geo || !Array.isArray(geo.features)) continue;
 
-      const group = L.layerGroup().addTo(map);
-      leafletLayers.set(layer.id, group);
+      // Sort features by geometry kind. Points cluster; polygons render
+      // as outlines in a parallel plain layerGroup so they stay visible
+      // at all zooms.
+      const pointMarkers = [];
+      const polygonLayers = [];
 
       for (const feature of geo.features) {
-        // Tag every feature with its owning layer so filters can match.
         feature.properties = feature.properties || {};
         feature.properties.layer = layer.id;
         const featureId = feature.properties.id || (feature.properties.name + ':' + JSON.stringify(featureCentroid(feature)));
         const lyr = buildLeafletLayer(feature, layer);
         lyr._feature = feature;
-        lyr.addTo(group);
+        if (lyr._kind === 'point') {
+          pointMarkers.push(lyr);
+        } else {
+          polygonLayers.push(lyr);
+        }
         featureLookup.set(Favourites.makeId(layer.id, featureId), lyr);
         if (feature.properties.region) allRegions.add(feature.properties.region);
       }
+
+      const cluster = pointMarkers.length ? makeClusterGroup(layer) : null;
+      const polygons = polygonLayers.length ? L.layerGroup() : null;
+
+      if (cluster) {
+        cluster.addLayers(pointMarkers);
+        cluster.addTo(map);
+      }
+      if (polygons) {
+        for (const p of polygonLayers) p.addTo(polygons);
+        polygons.addTo(map);
+      }
+
+      leafletLayers.set(layer.id, {
+        cluster,
+        polygons,
+        pointMarkers,
+        polygonLayers,
+      });
 
       if (geo.generated_at && (!lastFreshness || geo.generated_at > lastFreshness)) {
         lastFreshness = geo.generated_at;
@@ -796,35 +858,46 @@
 
   function applyFilters() {
     let visible = 0;
-    for (const [layerId, group] of leafletLayers) {
-      group.eachLayer(lyr => {
-        const match = Filters.matches(lyr._feature);
-        if (match) visible++;
-        const isPolygon = lyr._kind === 'polygon';
-        const uncStyle = lyr._uncertaintyStyle;
-        const fillTarget = isPolygon
-          ? 0.18
-          : (uncStyle ? uncStyle.fillOpacity : 0.85);
-        const styleOn  = { opacity: 1, fillOpacity: fillTarget };
-        const styleOff = { opacity: 0, fillOpacity: 0 };
-        const apply = (sub) => {
-          if (typeof sub.setStyle === 'function') sub.setStyle(match ? styleOn : styleOff);
-          // setStyle only changes paint; the SVG path still receives
-          // pointer events at opacity 0, which leaves stale tooltips on
-          // screen. Block pointer events on hidden markers and force any
-          // currently-open tooltip / popup to dismiss.
-          if (sub._path) sub._path.style.pointerEvents = match ? '' : 'none';
-          if (!match) {
-            if (typeof sub.closeTooltip === 'function') sub.closeTooltip();
-            if (typeof sub.closePopup === 'function') sub.closePopup();
+    for (const [layerId, entry] of leafletLayers) {
+      const layerOn = Filters.state.layers.has(layerId);
+
+      // Point markers: add/remove from the cluster group so cluster
+      // counts reflect filters. Batch via addLayers / removeLayers.
+      if (entry.cluster) {
+        const toAdd = [];
+        const toRemove = [];
+        for (const m of entry.pointMarkers) {
+          const match = layerOn && Filters.matches(m._feature);
+          if (match) {
+            toAdd.push(m);
+            visible++;
+          } else {
+            toRemove.push(m);
           }
-        };
-        if (typeof lyr.eachLayer === 'function') {
-          lyr.eachLayer(apply);
-        } else {
-          apply(lyr);
         }
-      });
+        if (toRemove.length) entry.cluster.removeLayers(toRemove);
+        if (toAdd.length) entry.cluster.addLayers(toAdd);
+      }
+
+      // Polygons: opacity-toggle as before (they don't cluster).
+      if (entry.polygons) {
+        for (const lyr of entry.polygonLayers) {
+          const match = layerOn && Filters.matches(lyr._feature);
+          if (match) visible++;
+          const styleOn  = { opacity: 1, fillOpacity: 0.18 };
+          const styleOff = { opacity: 0, fillOpacity: 0 };
+          const apply = (sub) => {
+            if (typeof sub.setStyle === 'function') sub.setStyle(match ? styleOn : styleOff);
+            if (sub._path) sub._path.style.pointerEvents = match ? '' : 'none';
+            if (!match) {
+              if (typeof sub.closeTooltip === 'function') sub.closeTooltip();
+              if (typeof sub.closePopup === 'function') sub.closePopup();
+            }
+          };
+          if (typeof lyr.eachLayer === 'function') lyr.eachLayer(apply);
+          else apply(lyr);
+        }
+      }
     }
     document.getElementById('result-count').textContent = visible + ' shown';
   }
