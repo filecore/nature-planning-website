@@ -110,6 +110,7 @@ html, body {
   color: #1f7a3a;
   border-bottom-color: #1f7a3a;
 }
+.tab-button.active:hover { color: #fff; }
 
 /* Single scroll wrapper holds the active tab panel and the footer,
    so the footer flows after the content instead of stealing a fixed
