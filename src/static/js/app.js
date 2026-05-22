@@ -397,12 +397,13 @@
     row.appendChild(txt);
   }
 
-  function mapsLink(lat, lon, name) {
-    // Universal Google Maps deeplink with a label. Works on desktop and
-    // hands off cleanly to the native maps app on iOS / Android.
+  function mapsLink(lat, lon /*, name */) {
+    // Universal Google Maps deeplink. Coordinates-only - appending a
+    // `(name)` label makes Google Maps run a *named-place* search at the
+    // coordinates, which often returns "no results" for natural / unnamed
+    // sites. Plain coords just drop a pin where we want it.
     const q = encodeURIComponent(`${lat},${lon}`);
-    const label = name ? '+' + encodeURIComponent(`(${name})`) : '';
-    return `https://www.google.com/maps/search/?api=1&query=${q}${label}`;
+    return `https://www.google.com/maps/search/?api=1&query=${q}`;
   }
 
   function buildPopup(feature, layer) {
