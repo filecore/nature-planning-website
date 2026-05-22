@@ -1303,6 +1303,9 @@
     wireDivider();
     wireInlinePanel();
     wireFavourites();
+    if (window.socialShare && typeof window.socialShare.render === 'function') {
+      window.socialShare.render(document.getElementById('footer-share'));
+    }
     await wireResources();
     try {
       await loadAllLayers();

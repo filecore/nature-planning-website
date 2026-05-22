@@ -611,6 +611,70 @@ button.ghost:hover { background: #1f7a3a; color: #fff; }
 
 .favourite-entry .fav-actions { display: flex; gap: 4px; }
 
+/* Footer share row - ported from togneri.net/layoff-guide, themed to
+   nature's green palette. */
+.footer-share {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.footer-share-label {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #7a8a83;
+}
+.share-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid #d0d4d9;
+  background: #fff;
+  color: #5a6470;
+  border-radius: 50%;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+.share-btn:hover,
+.share-btn:focus-visible {
+  color: #1f7a3a;
+  border-color: #1f7a3a;
+  transform: translateY(-1px);
+  outline: none;
+}
+.share-btn svg { width: 13px; height: 13px; display: block; }
+
+.share-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%) translateY(8px);
+  background: #1a2533;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 2000;
+}
+.share-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 .fav-export-actions {
   display: flex;
   flex-wrap: wrap;
