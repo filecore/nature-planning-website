@@ -44,7 +44,7 @@
   ];
 
   const GROUPS = {
-    'hiking':          { label: 'Hiking' },
+    'hiking':          { label: 'Outdoors recreation' },
     'natural-sites':   { label: 'Natural sites' },
     'geological':      { label: 'Geological features' },
     'wildlife':        { label: 'Wildlife' },
