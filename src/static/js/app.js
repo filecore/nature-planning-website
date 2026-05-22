@@ -897,6 +897,7 @@
     regionSel.addEventListener('change', (e) => {
       Filters.set({ region: e.target.value });
       savePrefs();
+      fitToRegion(e.target.value);
     });
 
     // Geological value-class chips: restore from prefs, then wire toggles.
@@ -948,6 +949,36 @@
     });
 
     Filters.onChange(applyFilters);
+  }
+
+  // Zoom the map to the bounding box of every feature in ``region``.
+  // Used on initial load (URL / prefs preset) and on region-select
+  // change. Skips polygons-without-bounds and never operates without
+  // a valid bounds object.
+  function fitToRegion(region) {
+    if (!region || !map) return;
+    const bounds = L.latLngBounds([]);
+    for (const entry of leafletLayers.values()) {
+      if (entry.pointMarkers) {
+        for (const m of entry.pointMarkers) {
+          const f = m._feature;
+          if (f && f.properties && f.properties.region === region) {
+            try { bounds.extend(m.getLatLng()); } catch (e) {}
+          }
+        }
+      }
+      if (entry.polygonLayers) {
+        for (const lyr of entry.polygonLayers) {
+          const f = lyr._feature;
+          if (f && f.properties && f.properties.region === region && typeof lyr.getBounds === 'function') {
+            try { bounds.extend(lyr.getBounds()); } catch (e) {}
+          }
+        }
+      }
+    }
+    if (bounds.isValid()) {
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 10 });
+    }
   }
 
   function applyFilters() {
@@ -1349,6 +1380,10 @@
     try {
       await loadAllLayers();
       applyFilters();
+      // If a region was set via URL / prefs at boot, zoom there
+      // automatically so users landing on a deep-link see the area
+      // they asked for rather than the whole-country default view.
+      if (Filters.state.region) fitToRegion(Filters.state.region);
     } finally {
       const overlay = document.getElementById('map-loading');
       if (overlay) {
