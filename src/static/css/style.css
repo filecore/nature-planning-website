@@ -310,6 +310,23 @@ button.ghost:hover { background: #1f7a3a; color: #fff; }
 }
 .ds-group-title:first-child { margin-top: 0; }
 
+.layers-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ghost-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: 500 11px/1 inherit;
+  color: #1a6b9a;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.ghost-link:hover { color: #11506f; }
+
 /* Resources tab: two-level accordions.
    Top level: Web resources / Mobile apps (exclusive open via JS).
    Sub level: one details per category (independent toggles). */

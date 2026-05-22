@@ -623,6 +623,32 @@
       // Initial sync so the parent reflects the restored child states.
       syncParent();
     }
+
+    wireLayersCollapseToggle();
+  }
+
+  function wireLayersCollapseToggle() {
+    const btn = document.getElementById('layers-collapse-toggle');
+    if (!btn) return;
+    const groups = () => document.querySelectorAll('#layer-toggles details.layer-group');
+    const sync = () => {
+      const list = groups();
+      if (!list.length) return;
+      const anyOpen = Array.from(list).some(d => d.open);
+      btn.textContent = anyOpen ? 'Collapse all' : 'Expand all';
+    };
+    btn.addEventListener('click', () => {
+      const list = groups();
+      const anyOpen = Array.from(list).some(d => d.open);
+      const target = !anyOpen;  // if all closed, expand; otherwise collapse
+      for (const d of list) d.open = target;
+      sync();
+    });
+    // Keep button label in sync if user toggles individual groups manually.
+    for (const d of groups()) {
+      d.addEventListener('toggle', sync);
+    }
+    sync();
   }
 
   function makeLayerLabel(layer) {

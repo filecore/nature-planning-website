@@ -34,7 +34,7 @@ NAME = "algae"
 SOURCE = "SYKE VESLA citizen algae observations"
 SITE_URL = "https://www.jarviwiki.fi/wiki/Levavahti"
 ODATA_BASE = "https://rajapinnat.ymparisto.fi/api/vesla/2.0/odata"
-LOOKBACK_DAYS = 60
+LOOKBACK_DAYS = 180
 PAIKKA_BATCH = 30  # how many Paikka_Ids per Paikka lookup request
 USER_AGENT = "nature-aggregator/0.1 (+https://nature.togneri.net)"
 
