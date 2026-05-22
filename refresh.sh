@@ -36,6 +36,7 @@ ADAPTERS=(
   air_quality
   water_levels
   weather_alerts
+  pollen
   breweries
   archaeology
   heritage

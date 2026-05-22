@@ -29,6 +29,7 @@
     { id: 'air-quality',      file: 'air-quality.geojson',      label: 'Air quality stations',             color: '#3b82f6', icon: '\u{1F32B}', group: 'quality' },
     { id: 'water-levels',     file: 'water-levels.geojson',     label: 'River and lake water levels',      color: '#0ea5e9', icon: '\u{1F30A}', group: 'quality' },
     { id: 'weather-alerts',   file: 'weather-alerts.geojson',   label: 'Weather warnings',                 color: '#dc2626', icon: '\u{26A0}', group: 'quality' },
+    { id: 'pollen',           file: 'pollen.geojson',           label: 'Pollen forecast (today)',          color: '#f59e0b', icon: '\u{1F33C}', group: 'quality' },
     { id: 'lakes',            file: 'lakes.geojson',            label: 'Lakes (≥ 0.5 km²)',            color: '#0b6fb2', icon: '\u{1F3DE}', group: 'swimming-water' },
     { id: 'waterfalls',       file: 'waterfalls.geojson',       label: 'Waterfalls',                       color: '#2e7bd6', icon: '\u{1F30A}', group: 'swimming-water' },
     { id: 'breweries',        file: 'breweries.geojson',        label: 'Breweries',                        color: '#d4a017', icon: '\u{1F37A}', group: 'alcohol' },
