@@ -72,6 +72,10 @@
     }
   }
 
+  // Per-group accordion open/closed overrides set by the user.
+  // Missing key = "auto" (open if any child is checked).
+  const userGroupOverrides = {};
+
   function savePrefs() {
     const layers = {};
     for (const layer of LAYERS) {
@@ -82,6 +86,7 @@
       region: Filters.state.region,
       search: Filters.state.search,
       geoClasses: Array.from(Filters.state.geoClasses).sort(),
+      groupOpen: { ...userGroupOverrides },
     };
     try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) {}
   }
@@ -572,12 +577,27 @@
       if (!orderedGroups.includes(k)) orderedGroups.push(k);
     }
 
+    // Hydrate per-group open overrides from prefs before the first render
+    // so accordion states match what the user last left them in.
+    const bootPrefs = loadPrefs();
+    if (bootPrefs && bootPrefs.groupOpen && typeof bootPrefs.groupOpen === 'object') {
+      for (const k of Object.keys(bootPrefs.groupOpen)) {
+        userGroupOverrides[k] = Boolean(bootPrefs.groupOpen[k]);
+      }
+    }
+
     for (const groupId of orderedGroups) {
       const layers = groupedByKey.get(groupId);
       const meta = GROUPS[groupId] || { label: groupId };
       const wrap = document.createElement('details');
       wrap.className = 'layer-group';
-      wrap.open = false;
+      // Initial open state: explicit user override wins; otherwise expand
+      // when at least one layer in the group is checked (so a partial 1-of-N
+      // selection is visible after page refresh).
+      const anyChecked = layers.some(l => initialLayerChecked(l.id));
+      wrap.open = Object.prototype.hasOwnProperty.call(userGroupOverrides, groupId)
+        ? userGroupOverrides[groupId]
+        : anyChecked;
 
       const summary = document.createElement('summary');
       const parentCb = document.createElement('input');
@@ -622,6 +642,15 @@
       childWrap.addEventListener('change', syncParent);
       // Initial sync so the parent reflects the restored child states.
       syncParent();
+
+      // Record user-driven open/close so collapse persists across reloads
+      // even when items inside the group are still checked. The collapse-all
+      // button mutates ``wrap.open`` programmatically; that fires toggle too,
+      // which is correct - it's a user action.
+      wrap.addEventListener('toggle', () => {
+        userGroupOverrides[groupId] = wrap.open;
+        savePrefs();
+      });
     }
 
     wireLayersCollapseToggle();
