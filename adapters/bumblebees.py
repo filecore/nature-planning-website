@@ -5,32 +5,27 @@ and from there to GBIF: the SYKE / Luomus pollinator-monitoring scheme,
 opportunistic FinBIF observations, and academic studies. We pull the
 genus *Bombus* across all of them, restricted to Finland and the last
 five years, and aggregate to ~10x10 km grid cells the same way the
-butterflies adapter does. The popup shows species richness, total
-individuals, and the three most-seen species.
+butterflies adapter does.
 
 Coordinate uncertainty in GBIF Bombus records is typically already 10
-km (cell-coarsened by FinBIF), which matches our bin resolution.
+km (cell-coarsened by FinBIF), which matches our bin resolution. Raw
+records are cached on disk for 30 days via ``_gbif.py``.
 """
 
 from __future__ import annotations
 
-import json
 import sys
-import urllib.parse
-import urllib.request
 from collections import Counter, defaultdict
 
+from _gbif import occurrence_search
 from common import make_feature, run, write_layer
 
 NAME = "bumblebees"
 SOURCE = "GBIF: Bombus observations in Finland (FinBIF aggregate)"
 SITE_URL = "https://www.gbif.org/occurrence/search?country=FI&taxon_key=1340278"
-API = "https://api.gbif.org/v1/occurrence/search"
 TAXON_KEY = 1340278  # genus Bombus
 
-PAGE = 300
 MIN_YEAR = 2020
-
 BIN_LAT = 0.1
 BIN_LON = 0.2
 
@@ -39,32 +34,12 @@ def _bin(lat: float, lon: float) -> tuple[float, float]:
     return (round(lat / BIN_LAT) * BIN_LAT, round(lon / BIN_LON) * BIN_LON)
 
 
-def _fetch_all() -> list[dict]:
-    out: list[dict] = []
-    offset = 0
-    while True:
-        qs = urllib.parse.urlencode({
-            "country": "FI",
-            "taxonKey": TAXON_KEY,
-            "hasCoordinate": "true",
-            "year": f"{MIN_YEAR},2030",
-            "limit": PAGE,
-            "offset": offset,
-        })
-        req = urllib.request.Request(f"{API}?{qs}", headers={"User-Agent": "nature-aggregator/0.1"})
-        with urllib.request.urlopen(req, timeout=60) as resp:
-            body = json.loads(resp.read())
-        results = body.get("results") or []
-        out.extend(results)
-        if body.get("endOfRecords") or len(results) < PAGE:
-            return out
-        offset += PAGE
-
-
 def fetch_features() -> list[dict]:
-    print(f"  fetching Bombus from GBIF since {MIN_YEAR}")
-    records = _fetch_all()
-    print(f"    {len(records)} records")
+    records = occurrence_search("bumblebees", {
+        "country": "FI",
+        "taxonKey": str(TAXON_KEY),
+        "hasCoordinate": "true",
+    }, year_range=(MIN_YEAR, 2025))
 
     cells: dict[tuple[float, float], Counter[str]] = defaultdict(Counter)
     for r in records:
@@ -74,7 +49,6 @@ def fetch_features() -> list[dict]:
             continue
         species = r.get("species") or r.get("acceptedScientificName") or r.get("scientificName")
         if not species or species.lower().startswith("bombus latr"):
-            # Genus-only records add no species information.
             continue
         cells[_bin(float(lat), float(lon))][species] += int(r.get("individualCount") or 1)
 

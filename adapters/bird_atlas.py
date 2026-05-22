@@ -1,8 +1,8 @@
 """Adapter for the 4th Finnish Bird Atlas (2022-2025).
 
 The Bird Atlas is a country-wide breeding-bird census run by Luomus
-and BirdLife Finland on the standard 10x10 km ETRS-TM35FIN grid.
-The fieldwork dataset is published openly on GBIF as
+and BirdLife Finland on the standard 10x10 km ETRS-TM35FIN grid. The
+fieldwork dataset is published openly on GBIF as
 ``74b866a0-6bed-41f0-83be-f52bf16ad77a``.
 
 The atlas grid has roughly 3800 cells covering Finland. We bin the
@@ -11,27 +11,23 @@ and emit one feature per cell with the species count (richness) and
 the three most-frequently-recorded species.
 
 We do not attempt to reconstruct the breeding-confirmation index
-(Possible / Probable / Confirmed) from the raw GBIF dump - those
-codes live in the FinBIF Notebook export, not the GBIF projection.
+(Possible / Probable / Confirmed) from the raw GBIF dump - those codes
+live in the FinBIF Notebook export, not the GBIF projection. Raw
+records are cached on disk for 30 days via ``_gbif.py``.
 """
 
 from __future__ import annotations
 
-import json
 import sys
-import urllib.parse
-import urllib.request
 from collections import Counter, defaultdict
 
+from _gbif import occurrence_search
 from common import make_feature, run, write_layer
 
 NAME = "bird-atlas"
 SOURCE = "GBIF: 4th Finnish Bird Atlas (2022-2025)"
 SITE_URL = "https://lintuatlas.fi/"
-API = "https://api.gbif.org/v1/occurrence/search"
 DATASET_KEY = "74b866a0-6bed-41f0-83be-f52bf16ad77a"
-
-PAGE = 300
 
 BIN_LAT = 0.1
 BIN_LON = 0.2
@@ -41,31 +37,12 @@ def _bin(lat: float, lon: float) -> tuple[float, float]:
     return (round(lat / BIN_LAT) * BIN_LAT, round(lon / BIN_LON) * BIN_LON)
 
 
-def _fetch_all() -> list[dict]:
-    out: list[dict] = []
-    offset = 0
-    while True:
-        qs = urllib.parse.urlencode({
-            "country": "FI",
-            "datasetKey": DATASET_KEY,
-            "hasCoordinate": "true",
-            "limit": PAGE,
-            "offset": offset,
-        })
-        req = urllib.request.Request(f"{API}?{qs}", headers={"User-Agent": "nature-aggregator/0.1"})
-        with urllib.request.urlopen(req, timeout=60) as resp:
-            body = json.loads(resp.read())
-        results = body.get("results") or []
-        out.extend(results)
-        if body.get("endOfRecords") or len(results) < PAGE:
-            return out
-        offset += PAGE
-
-
 def fetch_features() -> list[dict]:
-    print("  fetching 4th Bird Atlas observations from GBIF")
-    records = _fetch_all()
-    print(f"    {len(records)} records")
+    records = occurrence_search("bird_atlas_4", {
+        "country": "FI",
+        "datasetKey": DATASET_KEY,
+        "hasCoordinate": "true",
+    }, year_range=(2022, 2025))
 
     cells: dict[tuple[float, float], Counter[str]] = defaultdict(Counter)
     for r in records:

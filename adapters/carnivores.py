@@ -9,25 +9,21 @@ species - it both protects animals from disturbance and reflects how
 far large carnivores actually roam.
 
 We ship one feature per record (a few hundred per year), labelled
-with species, year, and coordinate-precision. The map marker stays
-honest about precision by being deliberately large.
+with species, year, and coordinate-precision. Raw records are cached
+on disk for 30 days via ``_gbif.py``.
 """
 
 from __future__ import annotations
 
-import json
 import sys
-import urllib.parse
-import urllib.request
 
+from _gbif import occurrence_search
 from common import make_feature, run, write_layer
 
 NAME = "carnivores"
 SOURCE = "GBIF: large-carnivore observations in Finland"
 SITE_URL = "https://www.gbif.org/"
-API = "https://api.gbif.org/v1/occurrence/search"
 
-PAGE = 300
 MIN_YEAR = 2020
 
 SPECIES = [
@@ -37,34 +33,15 @@ SPECIES = [
 ]
 
 
-def _fetch_species(scientific_name: str) -> list[dict]:
-    out: list[dict] = []
-    offset = 0
-    while True:
-        qs = urllib.parse.urlencode({
-            "country": "FI",
-            "scientificName": scientific_name,
-            "hasCoordinate": "true",
-            "year": f"{MIN_YEAR},2030",
-            "limit": PAGE,
-            "offset": offset,
-        })
-        req = urllib.request.Request(f"{API}?{qs}", headers={"User-Agent": "nature-aggregator/0.1"})
-        with urllib.request.urlopen(req, timeout=60) as resp:
-            body = json.loads(resp.read())
-        results = body.get("results") or []
-        out.extend(results)
-        if body.get("endOfRecords") or len(results) < PAGE:
-            return out
-        offset += PAGE
-
-
 def fetch_features() -> list[dict]:
     out: list[dict] = []
     for scientific, vernacular in SPECIES:
-        print(f"  fetching {vernacular} ({scientific}) from GBIF since {MIN_YEAR}")
-        records = _fetch_species(scientific)
-        print(f"    {len(records)} records")
+        cache_name = "carnivore_" + scientific.lower().replace(" ", "_")
+        records = occurrence_search(cache_name, {
+            "country": "FI",
+            "scientificName": scientific,
+            "hasCoordinate": "true",
+        }, year_range=(MIN_YEAR, 2025))
         for r in records:
             lat = r.get("decimalLatitude")
             lon = r.get("decimalLongitude")

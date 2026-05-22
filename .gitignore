@@ -6,3 +6,4 @@ venv/
 *.swp
 .DS_Store
 src/data/layers/*.geojson
+data/cache/
