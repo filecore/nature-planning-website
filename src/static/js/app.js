@@ -201,8 +201,8 @@
     const km = Number(uncertaintyM) / 1000;
     if (km < 10)  return { radius: 9, fillOpacity: 0.9,  tier: 'short' };
     if (km < 30)  return { radius: 8, fillOpacity: 0.7,  tier: 'mid' };
-    if (km < 50)  return { radius: 7, fillOpacity: 0.5,  tier: 'long-mid' };
-    return        { radius: 6, fillOpacity: 0.3,  tier: 'long' };
+    if (km < 50)  return { radius: 7, fillOpacity: 0.4,  tier: 'long-mid' };
+    return        { radius: 6, fillOpacity: 0.2,  tier: 'long' };
   }
 
   function buildLeafletLayer(feature, layer) {
