@@ -67,6 +67,14 @@
     {
       "id": "apps-drones",
       "label": "Apps - Drones"
+    },
+    {
+      "id": "wildlife",
+      "label": "Wildlife and biodiversity"
+    },
+    {
+      "id": "monitoring",
+      "label": "Environmental monitoring"
     }
   ],
   "sources": [
@@ -425,6 +433,159 @@
       "category": "weather",
       "inline": true,
       "language": "en"
+    },
+    {
+      "id": "luontoon",
+      "title": "Luontoon.fi (Metsähallitus)",
+      "url": "https://www.luontoon.fi/",
+      "blurb": "Metsähallitus's national-parks portal: official descriptions, services, photo galleries, and the per-park exceptional-situations alert pages. User-facing source for the National parks, Wilderness areas and Nature reserves layers.",
+      "category": "destination-list",
+      "inline": true,
+      "language": "fi"
+    },
+    {
+      "id": "laavu-org",
+      "title": "laavu.org",
+      "url": "http://laavu.org/",
+      "blurb": "Community-maintained directory of laavus, kotas, lean-to shelters and wilderness huts across Finland. Backs the Laavus, kotas, Lean-tos and Wilderness huts layers.",
+      "category": "destination-list",
+      "inline": true,
+      "language": "fi"
+    },
+    {
+      "id": "saunas-sheet",
+      "title": "Saunas in nature (Google Sheet)",
+      "url": "https://docs.google.com/spreadsheets/d/1zQvYnqq35oMKoJ7HbqNE8P-4EmIQdPj3npZNUjRqfJ4/",
+      "blurb": "Hand-curated spreadsheet of public saunas reachable on foot. Source for the Saunas in nature layer.",
+      "category": "places-of-interest",
+      "inline": true,
+      "language": "fi"
+    },
+    {
+      "id": "uimaan",
+      "title": "Uimaan.fi (swimming spots)",
+      "url": "https://uimaan.fi/",
+      "blurb": "Crowdsourced directory of Finnish swimming spots (LIPAS-backed). Source for the Local beaches layer.",
+      "category": "places-of-interest",
+      "inline": true,
+      "language": "fi"
+    },
+    {
+      "id": "syke-bathing-waters",
+      "title": "SYKE Uimarannat (bathing waters)",
+      "url": "https://www.ymparisto.fi/fi/luonto-vesistot-ja-meri/vedet/uimavedet",
+      "blurb": "EU Bathing Water Directive register: official Finnish public swimming beaches with water-quality classifications. Source for the Public swimming beaches layer.",
+      "category": "monitoring",
+      "inline": true,
+      "language": "fi"
+    },
+    {
+      "id": "rky",
+      "title": "RKY (built heritage)",
+      "url": "http://www.rky.fi/",
+      "blurb": "Museovirasto's register of nationally significant built-heritage environments. Source for the Open-air museums and ruins layer.",
+      "category": "heritage",
+      "inline": true,
+      "language": "fi"
+    },
+    {
+      "id": "lintuatlas",
+      "title": "Suomen Lintuatlas (4th, 2022-2025)",
+      "url": "https://lintuatlas.fi/",
+      "blurb": "Fourth Finnish breeding-bird atlas. Maps recorded species in every 10x10 km grid square. Source for the Bird Atlas layer.",
+      "category": "wildlife",
+      "inline": true,
+      "language": "fi"
+    },
+    {
+      "id": "lepiseura",
+      "title": "Suomen Perhostutkijain Seura (NAFI)",
+      "url": "https://www.perhostutkijainseura.fi/",
+      "blurb": "Finnish Lepidopterological Society. Runs the NAFI butterfly-transect monitoring scheme that feeds the Butterflies layer.",
+      "category": "wildlife",
+      "inline": true,
+      "language": "fi"
+    },
+    {
+      "id": "laji-fi",
+      "title": "Laji.fi (FinBIF portal)",
+      "url": "https://laji.fi/en",
+      "blurb": "Finnish Biodiversity Information Facility portal. Browse all species observations and atlas data; download the underlying Bombus, butterfly, and bird-atlas datasets.",
+      "category": "wildlife",
+      "inline": true,
+      "language": "en"
+    },
+    {
+      "id": "luke-carnivores",
+      "title": "Luke - Large carnivore monitoring",
+      "url": "https://www.luke.fi/en/our-tasks/wildlife-monitoring/large-carnivores",
+      "blurb": "Natural Resources Institute Finland tracks wolf, bear, lynx and wolverine populations. Background for the Wolves, bears, lynx layer.",
+      "category": "wildlife",
+      "inline": true,
+      "language": "en"
+    },
+    {
+      "id": "norkko",
+      "title": "Norkko (pollen forecast)",
+      "url": "https://norkko.fi/",
+      "blurb": "University of Turku Aerobiology Unit. Daily Finnish pollen forecast and observation map. Companion source to the Pollen forecast layer (which uses Open-Meteo's gridded version).",
+      "category": "wildlife",
+      "inline": true,
+      "language": "fi"
+    },
+    {
+      "id": "punkkilive",
+      "title": "Punkkilive (tick observations)",
+      "url": "https://www.punkkilive.fi/",
+      "blurb": "Citizen-science tick observation map (Pfizer / UTU). Complements the Tick observation density layer.",
+      "category": "wildlife",
+      "inline": true,
+      "language": "fi"
+    },
+    {
+      "id": "ilmatieteenlaitos-warnings",
+      "title": "FMI safety warnings",
+      "url": "https://en.ilmatieteenlaitos.fi/warnings",
+      "blurb": "Finnish Meteorological Institute current weather warnings: wind, thunderstorm, forest fire, ice. User-facing version of the CAP feed in the Weather warnings layer.",
+      "category": "monitoring",
+      "inline": true,
+      "language": "en"
+    },
+    {
+      "id": "ilmatieteenlaitos-airquality",
+      "title": "FMI air quality",
+      "url": "https://en.ilmatieteenlaitos.fi/air-quality",
+      "blurb": "Live air-quality index map for Finnish monitoring stations. User-facing source for the Air quality stations layer.",
+      "category": "monitoring",
+      "inline": true,
+      "language": "en"
+    },
+    {
+      "id": "uiras",
+      "title": "Forum Virium Uiras",
+      "url": "https://iot.fvh.fi/opendata/uiras/",
+      "blurb": "Live Helsinki swimming-water temperature sensor network. Source for the Live water temperature layer.",
+      "category": "monitoring",
+      "inline": false,
+      "language": "en"
+    },
+    {
+      "id": "syke-paivanarvot",
+      "title": "SYKE Hydrologinen tilanne",
+      "url": "https://wwwi3.ymparisto.fi/i3/paivanarvot/ENG/Index.htm",
+      "blurb": "SYKE hydrology portal: water level, discharge, ice thickness and snow for ~1750 monitoring stations. Source for the River and lake water levels layer.",
+      "category": "monitoring",
+      "inline": true,
+      "language": "en"
+    },
+    {
+      "id": "syke-avointieto",
+      "title": "SYKE Avoin tieto",
+      "url": "https://www.syke.fi/avointieto",
+      "blurb": "SYKE open data catalogue. Hosts the four nationally-valuable geological-formation inventories (bedrock, boulder, moraine, eolian + shore) plus the algae citizen-observation database.",
+      "category": "monitoring",
+      "inline": false,
+      "language": "fi"
     }
   ]
 }

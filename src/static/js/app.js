@@ -724,10 +724,11 @@
       searchBox.value = '';
       regionSel.value = '';
       Filters.clear();
-      // Reflect cleared geo-class state in the chip UI.
+      // Reflect cleared geo-class state in the chip UI (class 1 only).
       for (const chip of document.querySelectorAll('#geo-class-chips .chip')) {
-        chip.classList.add('chip-on');
-        chip.setAttribute('aria-pressed', 'true');
+        const isOne = chip.dataset.class === '1';
+        chip.classList.toggle('chip-on', isOne);
+        chip.setAttribute('aria-pressed', isOne ? 'true' : 'false');
       }
       savePrefs();
     });

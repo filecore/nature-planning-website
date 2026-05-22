@@ -27,11 +27,13 @@ rsync -a \
   --exclude='.venv/' \
   --exclude='__pycache__/' \
   --exclude='*.pyc' \
+  --exclude='data/cache/' \
   ./ "${STAGE_DIR}/"
 BUILD_ID="$(date +%s)"
 sed -i "s/__BUILD__/${BUILD_ID}/g" "${STAGE_DIR}/src/index.html"
 
 rsync -av --delete \
+  --exclude='data/cache/' \
   "${STAGE_DIR}/" "$REMOTE_HOST:$REMOTE_DIR/"
 
 echo "Build id: ${BUILD_ID}"

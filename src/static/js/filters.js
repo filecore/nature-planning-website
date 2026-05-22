@@ -5,7 +5,7 @@
     search: '',
     layers: new Set(),        // enabled layer ids
     region: '',               // selected region (empty = all)
-    geoClasses: new Set([1, 2, 3, 4]),  // SYKE arvoluokka 1-4, all on by default
+    geoClasses: new Set([1]),  // SYKE arvoluokka, default to Unique only (class 1)
   };
 
   const listeners = [];
@@ -67,7 +67,7 @@
   function clear() {
     state.search = '';
     state.region = '';
-    state.geoClasses = new Set([1, 2, 3, 4]);
+    state.geoClasses = new Set([1]);
     // layers intentionally kept (toggling all off would hide everything)
     notify();
   }
