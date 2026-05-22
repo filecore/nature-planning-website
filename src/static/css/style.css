@@ -17,11 +17,11 @@ html, body {
 }
 
 /* Sidebar - width set inline by JS so the desktop divider can resize it.
-   Default is 35% of viewport on first visit; localStorage
+   Default is 25% of viewport on first visit; localStorage
    'nature.sidebar_width_px' takes over on subsequent loads. */
 .sidebar {
-  width: 35%;
-  flex: 0 0 35%;
+  width: 25%;
+  flex: 0 0 25%;
   background: #fff;
   border-right: 1px solid #d8d8d2;
   display: flex;

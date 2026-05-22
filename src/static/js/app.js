@@ -962,11 +962,11 @@
       sidebar.style.flexBasis = '';
     } else {
       sidebar.style.height = '';
-      // Default sidebar takes 35% of the viewport on first visit so the
-      // data-source / resources panes have room to breathe; user-resized
-      // values persist in localStorage and override the default.
+      // Default sidebar takes 25% of the viewport on first visit so the
+      // map has more room; user-resized values persist in localStorage
+      // and override the default.
       const stored = localStorage.getItem(STORAGE_KEY_PX);
-      const px = stored !== null ? parseFloat(stored) : Math.round(window.innerWidth * 0.35);
+      const px = stored !== null ? parseFloat(stored) : Math.round(window.innerWidth * 0.25);
       const w = clampPx(px) + 'px';
       sidebar.style.width = w;
       sidebar.style.flexBasis = w;
