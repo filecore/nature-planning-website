@@ -16,12 +16,12 @@
     { id: 'archaeology',      file: 'archaeology.geojson',      label: 'Archaeological sites',             color: '#a0292e', icon: '\u{1F3DB}', group: 'natural-sites' },
     { id: 'open-air-heritage',file: 'open-air-heritage.geojson',label: 'Open-air museums and ruins',       color: '#6b4226', icon: '\u{1F3DB}', group: 'natural-sites' },
     { id: 'sacred-sites',     file: 'sacred-sites.geojson',     label: 'Sacred natural sites',             color: '#5b3a8a', icon: '✨',    group: 'natural-sites' },
-    { id: 'caves',            file: 'caves.geojson',            label: 'Caves',                            color: '#5a4a36', icon: '\u{1F573}️', group: 'natural-sites' },
-    { id: 'crags',            file: 'crags.geojson',            label: 'Climbing crags',                   color: '#737373', icon: '\u{1F9D7}', group: 'natural-sites' },
-    { id: 'geo-bedrock',      file: 'geo-bedrock.geojson',      label: 'Bedrock and cliffs',               color: '#8b6f47', icon: '\u{26F0}', group: 'natural-sites' },
-    { id: 'geo-boulders',     file: 'geo-boulders.geojson',     label: 'Boulder fields',                   color: '#6b6b6b', icon: '\u{1FAA8}', group: 'natural-sites' },
-    { id: 'geo-moraines',     file: 'geo-moraines.geojson',     label: 'Moraine formations',               color: '#b78a4a', icon: '\u{1F30D}', group: 'natural-sites' },
-    { id: 'geo-eolian',       file: 'geo-eolian.geojson',       label: 'Wind and shore deposits',          color: '#d4a574', icon: '\u{1F3D6}', group: 'natural-sites' },
+    { id: 'caves',            file: 'caves.geojson',            label: 'Caves',                            color: '#5a4a36', icon: '\u{1F573}️', group: 'geological' },
+    { id: 'crags',            file: 'crags.geojson',            label: 'Climbing crags',                   color: '#737373', icon: '\u{1F9D7}', group: 'geological' },
+    { id: 'geo-bedrock',      file: 'geo-bedrock.geojson',      label: 'Bedrock and cliffs',               color: '#8b6f47', icon: '\u{26F0}', group: 'geological' },
+    { id: 'geo-boulders',     file: 'geo-boulders.geojson',     label: 'Boulder fields',                   color: '#6b6b6b', icon: '\u{1FAA8}', group: 'geological' },
+    { id: 'geo-moraines',     file: 'geo-moraines.geojson',     label: 'Moraine formations',               color: '#b78a4a', icon: '\u{1F30D}', group: 'geological' },
+    { id: 'geo-eolian',       file: 'geo-eolian.geojson',       label: 'Wind and shore deposits',          color: '#d4a574', icon: '\u{1F3D6}', group: 'geological' },
     { id: 'bird-hotspots',    file: 'bird-hotspots.geojson',    label: 'Bird hotspots',                    color: '#0891b2', icon: '\u{1F426}', group: 'natural-sites' },
     { id: 'beaches',          file: 'beaches.geojson',          label: 'Public swimming beaches',          color: '#4ec3e0', icon: '\u{1F3D6}', group: 'swimming-water' },
     { id: 'local-beaches',    file: 'local-beaches.geojson',    label: 'Local beaches (personal)',         color: '#06b6d4', icon: '\u{1F3CA}', group: 'swimming-water', pane: 'uusimaaPane' },
@@ -31,6 +31,7 @@
     { id: 'water-levels',     file: 'water-levels.geojson',     label: 'River and lake water levels',      color: '#0ea5e9', icon: '\u{1F30A}', group: 'quality' },
     { id: 'weather-alerts',   file: 'weather-alerts.geojson',   label: 'Weather warnings',                 color: '#dc2626', icon: '\u{26A0}', group: 'quality' },
     { id: 'pollen',           file: 'pollen.geojson',           label: 'Pollen forecast (today)',          color: '#f59e0b', icon: '\u{1F33C}', group: 'quality' },
+    { id: 'tick-density',     file: 'tick-density.geojson',     label: 'Tick observation density',         color: '#92400e', icon: '\u{1FAB2}', group: 'quality' },
     { id: 'lakes',            file: 'lakes.geojson',            label: 'Lakes (≥ 0.5 km²)',            color: '#0b6fb2', icon: '\u{1F3DE}', group: 'swimming-water' },
     { id: 'waterfalls',       file: 'waterfalls.geojson',       label: 'Waterfalls',                       color: '#2e7bd6', icon: '\u{1F30A}', group: 'swimming-water' },
     { id: 'breweries',        file: 'breweries.geojson',        label: 'Breweries',                        color: '#d4a017', icon: '\u{1F37A}', group: 'alcohol' },
@@ -41,11 +42,12 @@
   const GROUPS = {
     'hiking':          { label: 'Hiking' },
     'natural-sites':   { label: 'Natural sites' },
+    'geological':      { label: 'Geological features' },
     'swimming-water':  { label: 'Swimming and water' },
     'quality':         { label: 'Quality' },
     'alcohol':         { label: 'Alcohol' },
   };
-  const GROUP_ORDER = ['hiking', 'natural-sites', 'swimming-water', 'quality', 'alcohol'];
+  const GROUP_ORDER = ['hiking', 'natural-sites', 'geological', 'swimming-water', 'quality', 'alcohol'];
 
   // Default ON layers on first visit so the user is not greeted by a
   // blank map. Anything not listed here starts unchecked.

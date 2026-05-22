@@ -38,6 +38,7 @@ ADAPTERS=(
   weather_alerts
   pollen
   bird_hotspots
+  ticks
   breweries
   archaeology
   heritage
