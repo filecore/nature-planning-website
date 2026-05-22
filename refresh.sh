@@ -38,6 +38,10 @@ ADAPTERS=(
   weather_alerts
   pollen
   bird_hotspots
+  bird_atlas
+  butterflies
+  bumblebees
+  carnivores
   ticks
   breweries
   archaeology

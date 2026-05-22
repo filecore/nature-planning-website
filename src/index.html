@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nature - Finnish outdoor planner</title>
+  <title>Natural data (Finland)</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231f7a3a'/%3E%3Ctext x='16' y='22' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold' font-size='20'%3EN%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <link rel="stylesheet" href="static/css/style.css?v=__BUILD__">
@@ -12,7 +12,7 @@
   <div id="app">
     <aside id="sidebar" class="sidebar open" aria-label="Controls">
       <header class="sidebar-header">
-        <h1>Nature</h1>
+        <h1>Natural data (Finland)</h1>
         <button id="sidebar-toggle" type="button" aria-label="Collapse sidebar">&#x2039;</button>
       </header>
 
@@ -95,6 +95,10 @@
         <h4 class="ds-group-title">Wildlife</h4>
         <ul class="ds-list">
           <li><strong>Bird-watching towers</strong>: <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap</a> bird hides (<code>leisure=bird_hide</code>) and observation towers via the Overpass API.</li>
+          <li><strong>Bird Atlas</strong>: <a href="https://lintuatlas.fi/" target="_blank" rel="noopener">4th Finnish Bird Atlas 2022-2025</a> via <a href="https://www.gbif.org/dataset/74b866a0-6bed-41f0-83be-f52bf16ad77a" target="_blank" rel="noopener">GBIF</a>, aggregated to species richness per 10 km cell.</li>
+          <li><strong>Butterflies (NAFI)</strong>: <a href="https://www.gbif.org/dataset/181eab51-9399-4baa-a0df-8de01a3acf19" target="_blank" rel="noopener">NAFI Finnish butterfly monitoring scheme</a> via GBIF, last three years aggregated to 10 km cells.</li>
+          <li><strong>Bumblebees</strong>: <a href="https://www.gbif.org/occurrence/search?country=FI&amp;taxon_key=1340278" target="_blank" rel="noopener">GBIF</a> Bombus observations in Finland since 2020, aggregated to 10 km cells.</li>
+          <li><strong>Wolves, bears, lynx</strong>: <a href="https://www.gbif.org/" target="_blank" rel="noopener">GBIF</a> observations of <em>Canis lupus</em>, <em>Ursus arctos</em>, <em>Lynx lynx</em> in Finland since 2020. Coordinates are coarsened to roughly 25 km - this protects animals and reflects how far large carnivores roam.</li>
           <li><strong>Tick observation density</strong>: <a href="https://www.gbif.org/" target="_blank" rel="noopener">GBIF</a> Ixodes ricinus + Ixodes persulcatus records since 2014, aggregated by maakunta. Note: this reflects observation effort as much as actual tick density.</li>
         </ul>
 
@@ -108,8 +112,8 @@
 
         <h4 class="ds-group-title">Quality</h4>
         <ul class="ds-list">
-          <li><strong>Live water temperature</strong>: <a href="https://iot.fvh.fi/opendata/uiras/" target="_blank" rel="noopener">Forum Virium Uiras</a> IoT sensors (Helsinki region).</li>
-          <li><strong>Recent algae observations</strong>: <a href="https://www.jarviwiki.fi/wiki/Levavahti" target="_blank" rel="noopener">SYKE VESLA</a> citizen observation database (OData), last 60 days.</li>
+          <li><strong>Live water temperature (Helsinki only)</strong>: <a href="https://iot.fvh.fi/opendata/uiras/" target="_blank" rel="noopener">Forum Virium Uiras</a> IoT sensors.</li>
+          <li><strong>Recent algae observations</strong>: <a href="https://www.jarviwiki.fi/wiki/Levavahti" target="_blank" rel="noopener">SYKE VESLA</a> citizen observation database (OData), rolling 6 months.</li>
           <li><strong>Air quality stations</strong>: <a href="https://en.ilmatieteenlaitos.fi/air-quality" target="_blank" rel="noopener">FMI</a> air quality monitoring network (148 stations), latest AQI via the FMI open-data WFS (<code>urban::observations::airquality::hourly::simple</code>).</li>
           <li><strong>River and lake water levels</strong>: <a href="https://wwwi3.ymparisto.fi/i3/paivanarvot/ENG/Index.htm" target="_blank" rel="noopener">SYKE Hydrologiarajapinta</a> OData API; latest reading per station with 30-day median and range.</li>
           <li><strong>Weather warnings</strong>: <a href="https://en.ilmatieteenlaitos.fi/warnings" target="_blank" rel="noopener">FMI</a> Common Alerting Protocol (CAP) atom feed at <code>alerts.fmi.fi/cap/feed/atom_en-GB.xml</code> - one marker per affected area (centroid of CAP polygon). Covers wind, thunderstorm, forest-fire, ice and other warnings up to 5 days ahead.</li>
@@ -127,7 +131,7 @@
       </section>
 
       <footer class="sidebar-footer">
-        <p>A one-stop planner for hiking trips and outdoors excursions around Finland. Combines hand-curated data with outbound links to other resources.</p>
+        <p>A one-stop resource for aggregated natural data in Finland.</p>
         <p class="small muted">Data layers refreshed: <span id="data-freshness">unknown</span>.</p>
       </footer>
       </div>
