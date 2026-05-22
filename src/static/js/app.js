@@ -189,6 +189,21 @@
     return [(minLat + maxLat) / 2, (minLon + maxLon) / 2];
   }
 
+  // Map a coordinate-uncertainty value (metres) to a marker style.
+  // Used to communicate "how confident is this dot" without filtering
+  // long-range records out entirely.
+  function styleForUncertainty(uncertaintyM) {
+    // No data, or undefined: assume precise.
+    if (uncertaintyM == null) {
+      return { fillOpacity: 0.85, weight: 1.5, dashArray: null, tier: 'unknown' };
+    }
+    const km = Number(uncertaintyM) / 1000;
+    if (km < 10)  return { fillOpacity: 0.85, weight: 1.5, dashArray: null, tier: 'short' };
+    if (km < 30)  return { fillOpacity: 0.65, weight: 1.5, dashArray: null, tier: 'mid' };
+    if (km < 50)  return { fillOpacity: 0.45, weight: 1.5, dashArray: '3,3', tier: 'long-mid' };
+    return        { fillOpacity: 0.25, weight: 1,   dashArray: '2,3', tier: 'long' };
+  }
+
   function buildLeafletLayer(feature, layer) {
     const props = feature.properties || {};
     const name = props.name || '(unnamed)';
@@ -196,16 +211,19 @@
 
     if (feature.geometry && feature.geometry.type === 'Point') {
       const [lat, lon] = featureCentroid(feature);
+      const uncStyle = styleForUncertainty(props.coordinate_uncertainty_m);
       const opts = {
         radius: 7,
         color: '#fff',
-        weight: 1.5,
+        weight: uncStyle.weight,
         fillColor: layer.color,
-        fillOpacity: 0.85,
+        fillOpacity: uncStyle.fillOpacity,
       };
+      if (uncStyle.dashArray) opts.dashArray = uncStyle.dashArray;
       if (layer.pane) opts.pane = layer.pane;
       lyr = L.circleMarker([lat, lon], opts);
       lyr._kind = 'point';
+      lyr._uncertaintyStyle = uncStyle;
     } else {
       const geoJSONOpts = {
         style: {
@@ -782,8 +800,19 @@
       group.eachLayer(lyr => {
         const match = Filters.matches(lyr._feature);
         if (match) visible++;
-        const fillTarget = lyr._kind === 'polygon' ? 0.18 : 0.85;
+        const isPolygon = lyr._kind === 'polygon';
+        const uncStyle = lyr._uncertaintyStyle;
+        const fillTarget = isPolygon
+          ? 0.18
+          : (uncStyle ? uncStyle.fillOpacity : 0.85);
         const styleOn  = { opacity: 1, fillOpacity: fillTarget };
+        if (!isPolygon && uncStyle) {
+          styleOn.weight = uncStyle.weight;
+          // setStyle does not "unset" properties, so when uncertainty
+          // is precise we explicitly clear any dashArray that a prior
+          // visibility pass may have left in place.
+          styleOn.dashArray = uncStyle.dashArray || '';
+        }
         const styleOff = { opacity: 0, fillOpacity: 0 };
         const apply = (sub) => {
           if (typeof sub.setStyle === 'function') sub.setStyle(match ? styleOn : styleOff);
