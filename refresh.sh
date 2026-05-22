@@ -35,6 +35,7 @@ ADAPTERS=(
   algae
   air_quality
   water_levels
+  weather_alerts
   breweries
   archaeology
   heritage
