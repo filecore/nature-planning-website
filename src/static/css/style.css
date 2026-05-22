@@ -162,7 +162,7 @@ html, body {
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 5px 4px;
+  padding: 3px 4px;
   border-radius: 4px;
   cursor: pointer;
   font-size: 13.5px;
@@ -196,7 +196,7 @@ html, body {
   list-style: none;
   font-size: 13.5px;
   font-weight: 600;
-  padding: 7px 4px;
+  padding: 5px 4px;
   border-radius: 4px;
   user-select: none;
   color: #1f7a3a;
@@ -226,8 +226,8 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 0;
-  padding-top: 4px;
-  padding-bottom: 5px;
+  padding-top: 2px;
+  padding-bottom: 3px;
 }
 /* Group-parent checkbox: same size as the leaf rows, with an enlarged
    hit area courtesy of a 4px outer padding box. stopPropagation is set
