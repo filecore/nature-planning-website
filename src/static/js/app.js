@@ -577,7 +577,7 @@
       const meta = GROUPS[groupId] || { label: groupId };
       const wrap = document.createElement('details');
       wrap.className = 'layer-group';
-      wrap.open = true;
+      wrap.open = false;
 
       const summary = document.createElement('summary');
       const parentCb = document.createElement('input');
