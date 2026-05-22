@@ -86,7 +86,7 @@
     }
     const prefs = {
       layers,
-      region: Filters.state.region,
+      regions: Array.from(Filters.state.regions).sort(),
       search: Filters.state.search,
       geoClasses: Array.from(Filters.state.geoClasses).sort(),
       groupOpen: { ...userGroupOverrides },
@@ -109,7 +109,9 @@
     if (active.join(',') !== defaultActive.join(',')) {
       for (const id of active) params.append('layers', id);
     }
-    if (Filters.state.region) params.set('region', Filters.state.region);
+    for (const r of Array.from(Filters.state.regions).sort()) {
+      params.append('region', r);
+    }
     if (Filters.state.search) params.set('q', Filters.state.search);
 
     const geo = Array.from(Filters.state.geoClasses).sort((a,b) => a - b);
@@ -126,7 +128,8 @@
   // sees the same parse. Supported keys (use multi-value form so the
   // URL bar reads ?layers=a&layers=b not ?layers=a%2Cb):
   //   ?layers=a&layers=b   -> exactly these layer ids on (everything else off)
-  //   ?region=Lappi        -> region filter preset
+  //   ?region=Lappi                       -> single region filter preset
+  //   ?region=Uusimaa&region=Kanta-Häme   -> multi-region (stack for border targeting)
   //   ?q=koski             -> name-search preset
   //   ?geo=1&geo=2         -> SYKE value-class chip preset
   // Legacy comma-separated values are still parsed for backwards compat
@@ -151,9 +154,10 @@
     };
     const layers = multi('layers');
     const geo = multi('geo');
+    const regions = multi('region');
     _urlOverridesCache = {
       layers: layers === null ? null : new Set(layers),
-      region: params.get('region'),
+      regions: regions === null ? null : new Set(regions),
       search: params.get('q'),
       geoClasses: geo === null ? null : new Set(geo.map(s => parseInt(s, 10)).filter(n => n >= 1 && n <= 4)),
     };
@@ -713,10 +717,54 @@
       opt.textContent = r;
       sel.appendChild(opt);
     }
-    // Re-apply the saved region now that the option exists.
-    if (sel.dataset.pending) {
-      sel.value = sel.dataset.pending;
-      delete sel.dataset.pending;
+    // Re-apply the saved region(s) now that the options exist.
+    // Multi-region state is URL-authored only; reflect it via the chip.
+    syncRegionUI();
+  }
+
+  // Reflect Filters.state.regions in the dropdown + multi-region chip.
+  // Single region -> dropdown selects it, chip hidden.
+  // Multiple regions -> dropdown shows synthetic "Multiple regions" option,
+  // chip lists the names with an x to clear.
+  // No regions -> dropdown blank, chip hidden.
+  function syncRegionUI() {
+    const sel = document.getElementById('region-select');
+    if (!sel) return;
+    const chip = document.getElementById('region-multi-chip');
+    const selected = Array.from(Filters.state.regions).sort();
+    let multiOpt = sel.querySelector('option[value="__multi__"]');
+
+    if (selected.length > 1) {
+      if (!multiOpt) {
+        multiOpt = document.createElement('option');
+        multiOpt.value = '__multi__';
+        multiOpt.textContent = 'Multiple regions';
+        multiOpt.disabled = true;
+        sel.insertBefore(multiOpt, sel.firstChild);
+      }
+      sel.value = '__multi__';
+      if (chip) {
+        chip.hidden = false;
+        chip.textContent = '';
+        chip.appendChild(document.createTextNode(selected.join(', ') + ' '));
+        const close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'chip-close';
+        close.setAttribute('aria-label', 'Clear region filter');
+        close.textContent = '×';
+        close.addEventListener('click', () => {
+          Filters.setRegions([]);
+          savePrefs();
+        });
+        chip.appendChild(close);
+      }
+    } else {
+      if (multiOpt) multiOpt.remove();
+      sel.value = selected[0] || '';
+      if (chip) {
+        chip.hidden = true;
+        chip.textContent = '';
+      }
     }
   }
 
@@ -881,12 +929,19 @@
       searchBox.value = initialSearch;
       Filters.set({ search: initialSearch });
     }
-    const initialRegion = ov.region !== null ? ov.region : (typeof prefs.region === 'string' ? prefs.region : '');
-    if (initialRegion) {
-      // Region values are populated later from layer data, but the saved
-      // string can be set immediately; the select shows it once populateRegionSelect runs.
-      regionSel.dataset.pending = initialRegion;
-      Filters.set({ region: initialRegion });
+    // Restore region(s) from URL (Set) -> prefs (array, new format) -> prefs (string, legacy)
+    let initialRegions = null;
+    if (ov.regions !== null) {
+      initialRegions = ov.regions;
+    } else if (Array.isArray(prefs.regions)) {
+      initialRegions = new Set(prefs.regions.filter(s => typeof s === 'string' && s));
+    } else if (typeof prefs.region === 'string' && prefs.region) {
+      initialRegions = new Set([prefs.region]);
+    }
+    if (initialRegions && initialRegions.size) {
+      // Options are populated later from layer data; the UI sync runs at
+      // the end of populateRegionSelect, so just set state here.
+      Filters.setRegions(initialRegions);
     }
 
     searchBox.addEventListener('input', (e) => {
@@ -895,9 +950,14 @@
     });
 
     regionSel.addEventListener('change', (e) => {
-      Filters.set({ region: e.target.value });
+      // Dropdown is single-select; any change collapses multi-region state
+      // back to one region (or none for the empty value).
+      const val = e.target.value;
+      if (val === '__multi__') return;  // synthetic option, no-op
+      Filters.setRegions(val ? [val] : []);
       savePrefs();
-      fitToRegion(e.target.value);
+      syncRegionUI();
+      fitToRegions(Filters.state.regions);
     });
 
     // Geological value-class chips: restore from prefs, then wire toggles.
@@ -937,8 +997,8 @@
 
     document.getElementById('clear-filters').addEventListener('click', () => {
       searchBox.value = '';
-      regionSel.value = '';
       Filters.clear();
+      syncRegionUI();
       // Reflect cleared geo-class state in the chip UI (class 1 only).
       for (const chip of document.querySelectorAll('#geo-class-chips .chip')) {
         const isOne = chip.dataset.class === '1';
@@ -951,18 +1011,18 @@
     Filters.onChange(applyFilters);
   }
 
-  // Zoom the map to the bounding box of every feature in ``region``.
-  // Used on initial load (URL / prefs preset) and on region-select
-  // change. Skips polygons-without-bounds and never operates without
-  // a valid bounds object.
-  function fitToRegion(region) {
-    if (!region || !map) return;
+  // Zoom the map to the union bounding box of every feature whose region
+  // is in ``regions`` (a Set). Used on initial load (URL / prefs preset)
+  // and on region-select change. Skips polygons-without-bounds and never
+  // operates without a valid bounds object.
+  function fitToRegions(regions) {
+    if (!regions || !regions.size || !map) return;
     const bounds = L.latLngBounds([]);
     for (const entry of leafletLayers.values()) {
       if (entry.pointMarkers) {
         for (const m of entry.pointMarkers) {
           const f = m._feature;
-          if (f && f.properties && f.properties.region === region) {
+          if (f && f.properties && regions.has(f.properties.region)) {
             try { bounds.extend(m.getLatLng()); } catch (e) {}
           }
         }
@@ -970,7 +1030,7 @@
       if (entry.polygonLayers) {
         for (const lyr of entry.polygonLayers) {
           const f = lyr._feature;
-          if (f && f.properties && f.properties.region === region && typeof lyr.getBounds === 'function') {
+          if (f && f.properties && regions.has(f.properties.region) && typeof lyr.getBounds === 'function') {
             try { bounds.extend(lyr.getBounds()); } catch (e) {}
           }
         }
@@ -1383,7 +1443,7 @@
       // If a region was set via URL / prefs at boot, zoom there
       // automatically so users landing on a deep-link see the area
       // they asked for rather than the whole-country default view.
-      if (Filters.state.region) fitToRegion(Filters.state.region);
+      if (Filters.state.regions.size) fitToRegions(Filters.state.regions);
     } finally {
       const overlay = document.getElementById('map-loading');
       if (overlay) {

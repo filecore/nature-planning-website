@@ -317,6 +317,29 @@ button.ghost:hover { background: #1f7a3a; color: #fff; }
   color: #fff;
 }
 
+/* Multi-region URL-only chip shown next to the region dropdown when
+   two or more regions are stacked via ?region=A&region=B. */
+.region-multi-chip {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 6px;
+  padding: 4px 8px;
+  font: 500 12px/1 inherit;
+  background: #1f7a3a;
+  color: #fff;
+  border-radius: 999px;
+}
+.region-multi-chip .chip-close {
+  margin-left: 6px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font: 700 14px/1 inherit;
+  cursor: pointer;
+  padding: 0 2px;
+}
+.region-multi-chip .chip-close:hover { opacity: 0.8; }
+
 /* Per-layer cluster markers - colour comes inline from layer.color so the
    pin matches the underlying marker hue. Default marker-cluster CSS is
    overridden via the .nature-cluster class. */

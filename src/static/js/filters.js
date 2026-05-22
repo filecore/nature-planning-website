@@ -4,7 +4,7 @@
   const state = {
     search: '',
     layers: new Set(),        // enabled layer ids
-    region: '',               // selected region (empty = all)
+    regions: new Set(),       // selected regions (empty set = all)
     geoClasses: new Set([1]),  // SYKE arvoluokka, default to Unique only (class 1)
   };
 
@@ -22,6 +22,17 @@
 
   function setGeoClass(cls, enabled) {
     if (enabled) state.geoClasses.add(cls); else state.geoClasses.delete(cls);
+    notify();
+  }
+
+  function setRegion(region, enabled) {
+    if (!region) return;
+    if (enabled) state.regions.add(region); else state.regions.delete(region);
+    notify();
+  }
+
+  function setRegions(iterable) {
+    state.regions = new Set(iterable || []);
     notify();
   }
 
@@ -43,8 +54,8 @@
       if (!name.includes(state.search.toLowerCase())) return false;
     }
 
-    // Region
-    if (state.region && props.region !== state.region) return false;
+    // Region (multi-select: feature must be in one of the selected regions)
+    if (state.regions.size && !state.regions.has(props.region)) return false;
 
     // SYKE value-class filter applies only to the four geo-* layers.
     // Features carry a tag like "class-3" in their features list.
@@ -66,11 +77,11 @@
 
   function clear() {
     state.search = '';
-    state.region = '';
+    state.regions = new Set();
     state.geoClasses = new Set([1]);
     // layers intentionally kept (toggling all off would hide everything)
     notify();
   }
 
-  window.Filters = { state, set, setLayer, setGeoClass, onChange, matches, clear };
+  window.Filters = { state, set, setLayer, setGeoClass, setRegion, setRegions, onChange, matches, clear };
 })();
