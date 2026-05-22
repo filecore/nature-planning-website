@@ -47,20 +47,23 @@ FIN_MIN_LON, FIN_MAX_LON = 19.0, 31.7
 
 # Rough centroids of the 19 Finnish maakuntas. Used to assign a region to a
 # point by nearest-neighbour. Coarse but enough for filter purposes.
+# Names are the canonical Finnish forms with diacritics — all adapters MUST
+# produce these strings (route any upstream value through canonical_region())
+# so the frontend region filter does not see duplicates.
 REGIONS = [
     ("Uusimaa",                60.30, 24.90),
     ("Varsinais-Suomi",        60.45, 22.30),
     ("Satakunta",              61.55, 22.10),
-    ("Kanta-Hame",             60.85, 24.45),
+    ("Kanta-Häme",             60.85, 24.45),
     ("Pirkanmaa",              61.65, 23.85),
-    ("Paijat-Hame",            61.10, 25.65),
+    ("Päijät-Häme",            61.10, 25.65),
     ("Kymenlaakso",            60.70, 26.70),
-    ("Etela-Karjala",          61.05, 28.20),
-    ("Etela-Savo",             61.85, 27.35),
+    ("Etelä-Karjala",          61.05, 28.20),
+    ("Etelä-Savo",             61.85, 27.35),
     ("Pohjois-Savo",           63.10, 27.50),
     ("Pohjois-Karjala",        62.85, 30.00),
     ("Keski-Suomi",            62.50, 25.65),
-    ("Etela-Pohjanmaa",        62.85, 22.85),
+    ("Etelä-Pohjanmaa",        62.85, 22.85),
     ("Pohjanmaa",              63.20, 22.20),
     ("Keski-Pohjanmaa",        63.85, 23.55),
     ("Pohjois-Pohjanmaa",      65.00, 25.40),
@@ -68,6 +71,19 @@ REGIONS = [
     ("Lappi",                  67.50, 26.50),
     ("Ahvenanmaa",             60.20, 20.00),
 ]
+
+_CANON_NAMES = {name for name, _, _ in REGIONS}
+_REGION_ALIASES = {
+    # Diacritic-stripped variants written by older adapters before
+    # canonical_region() existed.
+    "Kanta-Hame": "Kanta-Häme",
+    "Paijat-Hame": "Päijät-Häme",
+    "Etela-Karjala": "Etelä-Karjala",
+    "Etela-Savo": "Etelä-Savo",
+    "Etela-Pohjanmaa": "Etelä-Pohjanmaa",
+    # Sub-region of Lappi, not a maakunta in its own right; collapse it.
+    "Saamelaisten kotiseutualue": "Lappi",
+}
 
 
 def in_finland(lat: float, lon: float) -> bool:
@@ -83,6 +99,24 @@ def region_for(lat: float, lon: float) -> str:
             best_d = d
             best_name = name
     return best_name
+
+
+def canonical_region(value: str | None) -> str | None:
+    """Normalise any region string to one of the 19 canonical maakuntas.
+
+    Handles diacritic-stripped variants, known aliases (Sami homeland),
+    and compound cross-border strings like "Kainuu, Pohjois-Karjala"
+    (returns the first canonical match). Returns None for empty input
+    or if no match can be found.
+    """
+    if not value:
+        return None
+    for part in (p.strip() for p in value.split(",") if p.strip()):
+        if part in _CANON_NAMES:
+            return part
+        if part in _REGION_ALIASES:
+            return _REGION_ALIASES[part]
+    return None
 
 
 def make_feature(
@@ -102,6 +136,8 @@ def make_feature(
         return None
     if region is None:
         region = region_for(lat, lon)
+    else:
+        region = canonical_region(region) or region_for(lat, lon)
     return {
         "type": "Feature",
         "geometry": {"type": "Point", "coordinates": [round(lon, 6), round(lat, 6)]},
