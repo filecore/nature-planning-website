@@ -1162,16 +1162,66 @@
     }
   }
 
+  function xmlEscape(s) {
+    return String(s || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function buildFavouritesKml(favs) {
+    const placemarks = favs.map(f => (
+      '  <Placemark>\n' +
+      '    <name>' + xmlEscape(f.name) + '</name>\n' +
+      (f.layer ? '    <description>' + xmlEscape(f.layer) + '</description>\n' : '') +
+      '    <Point><coordinates>' + Number(f.lon).toFixed(6) + ',' + Number(f.lat).toFixed(6) + ',0</coordinates></Point>\n' +
+      '  </Placemark>'
+    )).join('\n');
+    return (
+      '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<kml xmlns="http://www.opengis.net/kml/2.2">\n' +
+      '<Document>\n' +
+      '  <name>Nature favourites</name>\n' +
+      '  <description>Exported from nature.togneri.net</description>\n' +
+      placemarks + '\n' +
+      '</Document>\n' +
+      '</kml>\n'
+    );
+  }
+
+  function downloadBlob(content, mime, filename) {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   function wireFavourites() {
     document.getElementById('export-favourites').addEventListener('click', () => {
-      const blob = new Blob([JSON.stringify(Favourites.load(), null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'nature-favourites.json';
-      a.click();
-      URL.revokeObjectURL(url);
+      const favs = Favourites.load();
+      if (!favs.length) { alert('No favourites yet.'); return; }
+      downloadBlob(JSON.stringify(favs, null, 2), 'application/json', 'nature-favourites.json');
     });
+
+    document.getElementById('export-favourites-kml').addEventListener('click', () => {
+      const favs = Favourites.load();
+      if (!favs.length) { alert('No favourites yet.'); return; }
+      downloadBlob(buildFavouritesKml(favs), 'application/vnd.google-earth.kml+xml', 'nature-favourites.kml');
+    });
+
+    document.getElementById('open-favourites-gmaps').addEventListener('click', () => {
+      const favs = Favourites.load();
+      if (!favs.length) { alert('No favourites yet.'); return; }
+      // Google Maps web caps directions URLs at ~10 stops; take the first 10.
+      const slice = favs.slice(0, 10);
+      const path = slice.map(f => Number(f.lat).toFixed(6) + ',' + Number(f.lon).toFixed(6)).join('/');
+      window.open('https://www.google.com/maps/dir/' + path, '_blank', 'noopener');
+    });
+
     renderFavourites();
   }
 

@@ -611,6 +611,14 @@ button.ghost:hover { background: #1f7a3a; color: #fff; }
 
 .favourite-entry .fav-actions { display: flex; gap: 4px; }
 
+.fav-export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.fav-export-actions button { flex: 1 1 auto; min-width: 0; }
+
 .favourite-entry button {
   font-size: 11px;
   padding: 3px 8px;

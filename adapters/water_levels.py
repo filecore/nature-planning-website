@@ -28,7 +28,7 @@ from common import make_feature, run, write_layer
 
 NAME = "water-levels"
 SOURCE = "SYKE: hydrological monitoring stations (Vedenkorkeus)"
-SITE_URL = "https://wwwi3.ymparisto.fi/i3/paivanarvot/ENG/Index.htm"
+SITE_URL = "https://www.vesi.fi/en/water-situation/"
 API_ROOT = "https://rajapinnat.ymparisto.fi/api/Hydrologiarajapinta/1.1/odata"
 
 PAGE = 500  # SYKE server caps responses at 500 rows
@@ -168,7 +168,7 @@ def fetch_features() -> list[dict]:
             lon=lon,
             category="water-level",
             source=SOURCE,
-            source_url=f"https://wwwi3.ymparisto.fi/i3/paivanarvot/FIN/Kunta/Paikka.aspx?Paikka_ID={pid}",
+            source_url=SITE_URL,  # vesi.fi has no per-station deep link; landing page only.
             features=[body_kind.lower(), level_tag],
             description=description,
         )

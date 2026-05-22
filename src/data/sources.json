@@ -546,10 +546,10 @@
       "language": "en"
     },
     {
-      "id": "syke-paivanarvot",
-      "title": "SYKE Hydrologinen tilanne",
-      "url": "https://wwwi3.ymparisto.fi/i3/paivanarvot/ENG/Index.htm",
-      "blurb": "SYKE hydrology portal: water level, discharge, ice thickness and snow for ~1750 monitoring stations. Source for the River and lake water levels layer.",
+      "id": "vesi-fi-water-situation",
+      "title": "vesi.fi Water situation",
+      "url": "https://www.vesi.fi/en/water-situation/",
+      "blurb": "Live Finnish water-situation dashboard (vesi.fi): water level, discharge, ice thickness and snow for ~1750 monitoring stations. Source for the River and lake water levels layer. (Replaces the retired wwwi3.ymparisto.fi portal.)",
       "category": "monitoring",
       "inline": true,
       "language": "en"
