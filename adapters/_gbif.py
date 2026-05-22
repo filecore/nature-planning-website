@@ -87,6 +87,12 @@ def _http_get(url: str) -> dict:
 REQUEST_GAP_S = 0.25  # courtesy delay between requests to stay under GBIF's rate limit
 
 
+def _count(params: dict[str, str], **extra: str) -> int:
+    qs = urllib.parse.urlencode({**params, **extra, "limit": 0})
+    body = _http_get(f"{API}?{qs}")
+    return int(body.get("count") or 0)
+
+
 def _paginate(params: dict[str, str]) -> tuple[list[dict], bool]:
     """Paginate one GBIF query. Returns (records, hit_deep_cliff)."""
     out: list[dict] = []
@@ -143,29 +149,41 @@ def occurrence_search(
             )
     else:
         year_start, year_end = year_range
-        chunks = (year_end - year_start + 1) * 12
+        years = list(range(year_start, year_end + 1))
         print(
-            f"  fetching {cache_name} from GBIF in {chunks} (year, month) chunks "
+            f"  fetching {cache_name} from GBIF year-by-year "
             f"({year_start}-{year_end})"
         )
-        done = 0
         last_log = start
-        for year in range(year_start, year_end + 1):
-            for month in range(1, 13):
-                chunk_params = {**params, "year": str(year), "month": str(month)}
-                records, hit_cliff = _paginate(chunk_params)
+        for year in years:
+            count = _count(params, year=str(year))
+            if count == 0:
+                continue
+            if count < DEEP_PAGE_THRESHOLD - PAGE:
+                records, hit_cliff = _paginate({**params, "year": str(year)})
                 out.extend(records)
-                done += 1
-                now = time.monotonic()
                 if hit_cliff:
-                    print(
-                        f"    WARN: cliff hit on {year}-{month:02d} ({len(records)} truncated)",
-                        file=sys.stderr,
-                    )
-                if now - last_log > 15 or done == chunks:
-                    elapsed = int(now - start)
-                    print(f"    {done}/{chunks} chunks, {len(out)} records ({elapsed}s)")
-                    last_log = now
+                    print(f"    WARN: unexpected cliff on year {year}", file=sys.stderr)
+            else:
+                # Year is too big for single pagination; chunk by month.
+                # This loses records that are missing the month field
+                # (typically 10-20%), which is the price of avoiding
+                # GBIF's deep-pagination cliff.
+                print(f"    {year}: {count} records, chunking by month")
+                for month in range(1, 13):
+                    records, hit_cliff = _paginate({**params, "year": str(year), "month": str(month)})
+                    out.extend(records)
+                    if hit_cliff:
+                        print(
+                            f"    WARN: cliff hit on {year}-{month:02d} "
+                            f"({len(records)} truncated)",
+                            file=sys.stderr,
+                        )
+            now = time.monotonic()
+            if now - last_log > 10 or year == years[-1]:
+                elapsed = int(now - start)
+                print(f"    through {year}: {len(out)} records ({elapsed}s)")
+                last_log = now
 
     _save_cache(cache, out)
     elapsed = int(time.monotonic() - start)

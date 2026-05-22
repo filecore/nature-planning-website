@@ -899,6 +899,13 @@
     let floating = null;
     btn.addEventListener('click', () => {
       sidebar.classList.remove('open');
+      // applySidebarSize() sets inline width / flexBasis, which beats
+      // the .sidebar:not(.open) { width: 0 } rule on specificity. Clear
+      // them when collapsing so the class-based hide actually takes
+      // effect; applySidebarSize() will restore them on expand.
+      sidebar.style.width = '';
+      sidebar.style.flexBasis = '';
+      sidebar.style.height = '';
       floating = document.createElement('button');
       floating.className = 'sidebar-toggle-floating';
       floating.setAttribute('aria-label', 'Open sidebar');
@@ -906,6 +913,7 @@
       floating.innerHTML = '&#x203A; Menu';
       floating.addEventListener('click', () => {
         sidebar.classList.add('open');
+        applySidebarSize();
         floating.remove();
         setTimeout(() => map.invalidateSize(), 200);
       });
