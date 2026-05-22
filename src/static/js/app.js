@@ -553,7 +553,7 @@
     };
   }
 
-  function makeClusterGroup(layer) {
+  function makeClusterGroup(layer, onChunkDone) {
     return L.markerClusterGroup({
       chunkedLoading: true,
       maxClusterRadius: 50,
@@ -568,11 +568,21 @@
       showCoverageOnHover: false,
       iconCreateFunction: makeClusterIconFactory(layer.color),
       ...(layer.pane ? { clusterPane: layer.pane } : {}),
+      // chunkProgress fires after each addLayers batch; when processed
+      // equals total, the group is fully populated and ready to reveal.
+      chunkProgress: (processed, total /*, elapsed*/) => {
+        if (onChunkDone && processed >= total) onChunkDone();
+      },
     });
   }
 
   async function loadAllLayers() {
     const allRegions = new Set();
+    // Per-layer Promises that resolve once each cluster group has
+    // finished its chunked addLayers run. We addTo(map) only after
+    // every Promise has resolved so the user never sees the staggered
+    // build-up.
+    const clusterReady = [];
     for (const layer of LAYERS) {
       const geo = await loadLayer(layer);
       if (!geo || !Array.isArray(geo.features)) continue;
@@ -598,16 +608,17 @@
         if (feature.properties.region) allRegions.add(feature.properties.region);
       }
 
-      const cluster = pointMarkers.length ? makeClusterGroup(layer) : null;
-      const polygons = polygonLayers.length ? L.layerGroup() : null;
-
-      if (cluster) {
+      let cluster = null;
+      if (pointMarkers.length) {
+        const ready = new Promise(resolve => {
+          cluster = makeClusterGroup(layer, resolve);
+        });
         cluster.addLayers(pointMarkers);
-        cluster.addTo(map);
+        clusterReady.push(ready);
       }
+      const polygons = polygonLayers.length ? L.layerGroup() : null;
       if (polygons) {
         for (const p of polygonLayers) p.addTo(polygons);
-        polygons.addTo(map);
       }
 
       leafletLayers.set(layer.id, {
@@ -623,6 +634,14 @@
     }
     populateRegionSelect(Array.from(allRegions).sort());
     updateFreshness();
+
+    // Wait for every cluster group to finish chunked-loading, then
+    // attach all groups to the map in one go and reveal the layout.
+    await Promise.all(clusterReady);
+    for (const entry of leafletLayers.values()) {
+      if (entry.cluster) entry.cluster.addTo(map);
+      if (entry.polygons) entry.polygons.addTo(map);
+    }
   }
 
   function populateRegionSelect(regions) {
@@ -1207,7 +1226,17 @@
     wireInlinePanel();
     wireFavourites();
     await wireResources();
-    await loadAllLayers();
-    applyFilters();
+    try {
+      await loadAllLayers();
+      applyFilters();
+    } finally {
+      const overlay = document.getElementById('map-loading');
+      if (overlay) {
+        overlay.classList.add('is-hidden');
+        // Remove from layout after the fade transition so it doesn't
+        // sit invisibly on top of map controls.
+        setTimeout(() => { overlay.style.display = 'none'; }, 300);
+      }
+    }
   });
 })();
