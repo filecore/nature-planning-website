@@ -729,6 +729,15 @@
     });
 
     // Geological value-class chips: restore from prefs, then wire toggles.
+    // Help-panel toggle for SYKE value categories.
+    const helpBtn = document.getElementById('geo-class-help');
+    const helpPanel = document.getElementById('geo-class-help-panel');
+    if (helpBtn && helpPanel) {
+      helpBtn.addEventListener('click', () => {
+        helpPanel.hidden = !helpPanel.hidden;
+      });
+    }
+
     const chipEls = Array.from(document.querySelectorAll('#geo-class-chips .chip'));
     let restored = null;
     if (Array.isArray(prefs.geoClasses)) {

@@ -46,14 +46,27 @@
         </div>
 
         <div class="panel-block" id="geo-class-block">
-          <span class="block-label">Geological value class</span>
+          <span class="block-label">
+            Geological value
+            <button type="button" class="info-help" id="geo-class-help" aria-label="About SYKE value classes" title="About SYKE value classes">?</button>
+          </span>
           <div id="geo-class-chips" class="chip-row" role="group" aria-label="Filter geological POIs by SYKE value class">
-            <button type="button" class="chip" data-class="1" aria-pressed="true">1 - Unique</button>
-            <button type="button" class="chip" data-class="2" aria-pressed="false">2 - Extremely</button>
-            <button type="button" class="chip" data-class="3" aria-pressed="false">3 - Very</button>
-            <button type="button" class="chip" data-class="4" aria-pressed="false">4 - Valuable</button>
+            <button type="button" class="chip" data-class="1" aria-pressed="true">Cat. 1</button>
+            <button type="button" class="chip" data-class="2" aria-pressed="false">Cat. 2</button>
+            <button type="button" class="chip" data-class="3" aria-pressed="false">Cat. 3</button>
+            <button type="button" class="chip" data-class="4" aria-pressed="false">Cat. 4</button>
           </div>
           <p class="muted small">Affects bedrock, boulder, moraine, and wind / shore layers only.</p>
+          <div id="geo-class-help-panel" class="help-panel" hidden>
+            <p><strong>SYKE value categories</strong> rate each formation against geological, biological, landscape, scientific / educational, and pristine-condition criteria. The scoring is documented in SYKE's national inventories (Husa &amp; Teeriaho for bedrock, Mäkinen et al. for the others).</p>
+            <ul>
+              <li><strong>Cat. 1 - Ainutlaatuinen (Unique):</strong> the top tier, exceptional in a national context.</li>
+              <li><strong>Cat. 2 - Erittäin arvokas (Extremely valuable):</strong> outstanding examples worth a dedicated visit.</li>
+              <li><strong>Cat. 3 - Hyvin arvokas (Very valuable):</strong> regionally notable formations.</li>
+              <li><strong>Cat. 4 - Arvokas (Valuable):</strong> the broad baseline, ~60% of inventoried sites.</li>
+            </ul>
+            <p class="muted small">Lower categories are not "less interesting" - the rubric weights uniqueness heavily, so a stunning local site can still land in Cat. 4 if a more unique example exists elsewhere.</p>
+          </div>
         </div>
 
         <div class="panel-block actions">
