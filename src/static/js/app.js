@@ -698,7 +698,7 @@
       // layers (each layer's addLayers run can be tens of ms of work).
       await new Promise(resolve => setTimeout(resolve, 0));
     }
-    populateRegionSelect(Array.from(allRegions).sort());
+    populateRegionToggles(Array.from(allRegions).sort());
     updateFreshness();
 
     // Attach every group to the map in a single batch. This is the only
@@ -709,62 +709,35 @@
     }
   }
 
-  function populateRegionSelect(regions) {
-    const sel = document.getElementById('region-select');
+  // Build a checkbox per region in the side panel. Mirrors the layer
+  // toggles UI. Checking a box adds the region to Filters.state.regions;
+  // an empty set means "all regions" (no filter).
+  function populateRegionToggles(regions) {
+    const wrap = document.getElementById('region-toggles');
+    if (!wrap) return;
+    wrap.textContent = '';
     for (const r of regions) {
-      const opt = document.createElement('option');
-      opt.value = r;
-      opt.textContent = r;
-      sel.appendChild(opt);
+      const label = document.createElement('label');
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = r;
+      cb.checked = Filters.state.regions.has(r);
+      cb.addEventListener('change', () => {
+        Filters.setRegion(r, cb.checked);
+        savePrefs();
+        if (cb.checked) fitToRegions(Filters.state.regions);
+      });
+      label.appendChild(cb);
+      label.appendChild(document.createTextNode(r));
+      wrap.appendChild(label);
     }
-    // Re-apply the saved region(s) now that the options exist.
-    // Multi-region state is URL-authored only; reflect it via the chip.
-    syncRegionUI();
   }
 
-  // Reflect Filters.state.regions in the dropdown + multi-region chip.
-  // Single region -> dropdown selects it, chip hidden.
-  // Multiple regions -> dropdown shows synthetic "Multiple regions" option,
-  // chip lists the names with an x to clear.
-  // No regions -> dropdown blank, chip hidden.
-  function syncRegionUI() {
-    const sel = document.getElementById('region-select');
-    if (!sel) return;
-    const chip = document.getElementById('region-multi-chip');
-    const selected = Array.from(Filters.state.regions).sort();
-    let multiOpt = sel.querySelector('option[value="__multi__"]');
-
-    if (selected.length > 1) {
-      if (!multiOpt) {
-        multiOpt = document.createElement('option');
-        multiOpt.value = '__multi__';
-        multiOpt.textContent = 'Multiple regions';
-        multiOpt.disabled = true;
-        sel.insertBefore(multiOpt, sel.firstChild);
-      }
-      sel.value = '__multi__';
-      if (chip) {
-        chip.hidden = false;
-        chip.textContent = '';
-        chip.appendChild(document.createTextNode(selected.join(', ') + ' '));
-        const close = document.createElement('button');
-        close.type = 'button';
-        close.className = 'chip-close';
-        close.setAttribute('aria-label', 'Clear region filter');
-        close.textContent = '×';
-        close.addEventListener('click', () => {
-          Filters.setRegions([]);
-          savePrefs();
-        });
-        chip.appendChild(close);
-      }
-    } else {
-      if (multiOpt) multiOpt.remove();
-      sel.value = selected[0] || '';
-      if (chip) {
-        chip.hidden = true;
-        chip.textContent = '';
-      }
+  function syncRegionCheckboxes() {
+    const wrap = document.getElementById('region-toggles');
+    if (!wrap) return;
+    for (const cb of wrap.querySelectorAll('input[type="checkbox"]')) {
+      cb.checked = Filters.state.regions.has(cb.value);
     }
   }
 
@@ -921,7 +894,6 @@
     const prefs = loadPrefs() || {};
     const ov = urlOverrides();
     const searchBox = document.getElementById('search-box');
-    const regionSel = document.getElementById('region-select');
 
     // Restore non-layer prefs (URL params win over saved prefs).
     const initialSearch = ov.search !== null ? ov.search : (typeof prefs.search === 'string' ? prefs.search : '');
@@ -939,25 +911,14 @@
       initialRegions = new Set([prefs.region]);
     }
     if (initialRegions && initialRegions.size) {
-      // Options are populated later from layer data; the UI sync runs at
-      // the end of populateRegionSelect, so just set state here.
+      // Checkboxes are built later from layer data; populateRegionToggles
+      // reads Filters.state.regions to set initial checked state.
       Filters.setRegions(initialRegions);
     }
 
     searchBox.addEventListener('input', (e) => {
       Filters.set({ search: e.target.value });
       savePrefs();
-    });
-
-    regionSel.addEventListener('change', (e) => {
-      // Dropdown is single-select; any change collapses multi-region state
-      // back to one region (or none for the empty value).
-      const val = e.target.value;
-      if (val === '__multi__') return;  // synthetic option, no-op
-      Filters.setRegions(val ? [val] : []);
-      savePrefs();
-      syncRegionUI();
-      fitToRegions(Filters.state.regions);
     });
 
     // Geological value-class chips: restore from prefs, then wire toggles.
@@ -998,7 +959,7 @@
     document.getElementById('clear-filters').addEventListener('click', () => {
       searchBox.value = '';
       Filters.clear();
-      syncRegionUI();
+      syncRegionCheckboxes();
       // Reflect cleared geo-class state in the chip UI (class 1 only).
       for (const chip of document.querySelectorAll('#geo-class-chips .chip')) {
         const isOne = chip.dataset.class === '1';
@@ -1013,8 +974,8 @@
 
   // Zoom the map to the union bounding box of every feature whose region
   // is in ``regions`` (a Set). Used on initial load (URL / prefs preset)
-  // and on region-select change. Skips polygons-without-bounds and never
-  // operates without a valid bounds object.
+  // and when a region checkbox is ticked. Skips polygons-without-bounds
+  // and never operates without a valid bounds object.
   function fitToRegions(regions) {
     if (!regions || !regions.size || !map) return;
     const bounds = L.latLngBounds([]);
