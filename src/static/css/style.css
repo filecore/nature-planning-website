@@ -328,6 +328,20 @@ button.ghost:hover { background: #1f7a3a; color: #fff; }
   background: #fafbfc;
 }
 
+/* Subtle text-link button. Used for the per-block "Clear all" affordance
+   that hides itself when there is nothing to clear. */
+.link-button {
+  margin-top: 4px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: #1f7a3a;
+  font: 500 12px/1 inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.link-button:hover { color: #145e2a; }
+
 /* Per-layer cluster markers - colour comes inline from layer.color so the
    pin matches the underlying marker hue. Default marker-cluster CSS is
    overridden via the .nature-cluster class. */
