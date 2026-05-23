@@ -438,6 +438,24 @@
       "language": "fi"
     },
     {
+      "id": "saunalista",
+      "title": "Saunalista (public saunas in Finland)",
+      "url": "https://saunalista.fi/en",
+      "blurb": "Directory of ~240 paid public saunas across Finland, including wood-fired, smoke, lakeside and urban saunas with entry-fee details. Complements the Saunas in nature spreadsheet, which focuses on free saunas reachable on foot.",
+      "category": "destinations",
+      "inline": true,
+      "language": "en"
+    },
+    {
+      "id": "huts-fi",
+      "title": "huts.fi (Finland)",
+      "url": "https://www.huts.fi/finland",
+      "blurb": "Directory of huts and shelters in Finland.",
+      "category": "destinations",
+      "inline": true,
+      "language": "en"
+    },
+    {
       "id": "uimaan",
       "title": "Uimaan.fi (swimming spots)",
       "url": "https://uimaan.fi/",
