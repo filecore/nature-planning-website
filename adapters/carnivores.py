@@ -33,6 +33,47 @@ SPECIES = [
     ("Lynx lynx",    "Eurasian lynx", "lynx"),
 ]
 
+# FinBIF coarsens large-carnivore coordinates to roughly 25 km to
+# protect sensitive species; the result is that wolf / bear / lynx
+# records routinely land on the *same* grid point. Without any
+# nudging, the layer rendered later in the front-end's LAYERS array
+# fully occludes the layers below it - typically the bear hides the
+# wolf entirely. This kills the "show me all carnivores at once" use
+# case and there is no UI cue that something is hidden.
+#
+# Each species gets a fixed offset on an equilateral triangle ~1 km
+# on a side, well inside the existing coarsening uncertainty so this
+# does not misrepresent location. Wolf goes north, bear southeast,
+# lynx southwest, so overlapping records show as three touching
+# circles instead of one. At 60 deg N, 1 km ~ 0.009 deg lat and
+# ~ 0.018 deg lon. Deterministic per species, so the same record
+# always lands at the same coordinate across refreshes.
+JITTER_LAT_DEG = 0.005   # ~ 0.55 km
+JITTER_LON_DEG = 0.010   # ~ 0.55 km at 60 deg N
+SPECIES_OFFSET = {
+    "Canis lupus":  ( JITTER_LAT_DEG,         0.0),
+    "Ursus arctos": (-JITTER_LAT_DEG * 0.5,   JITTER_LON_DEG),
+    "Lynx lynx":    (-JITTER_LAT_DEG * 0.5,  -JITTER_LON_DEG),
+}
+
+# Only nudge records that are themselves already coarsened. Precise
+# records (uncertainty under 1 km, or genuinely fine-grained citizen
+# observations) keep their reported coordinate so we do not move a
+# true sighting away from where it was actually recorded.
+JITTER_MIN_UNCERTAINTY_M = 1000.0
+
+
+def _jittered(scientific: str, lat: float, lon: float, uncertainty_m) -> tuple[float, float]:
+    if uncertainty_m is None:
+        return lat, lon
+    try:
+        if float(uncertainty_m) < JITTER_MIN_UNCERTAINTY_M:
+            return lat, lon
+    except (TypeError, ValueError):
+        return lat, lon
+    dlat, dlon = SPECIES_OFFSET.get(scientific, (0.0, 0.0))
+    return lat + dlat, lon + dlon
+
 
 def _features_for(scientific: str, vernacular: str) -> list[dict]:
     cache_name = "carnivore_" + scientific.lower().replace(" ", "_")
@@ -63,11 +104,12 @@ def _features_for(scientific: str, vernacular: str) -> list[dict]:
             f"{unc_label}. Source: GBIF."
         )
         feature_id = f"carnivore-{scientific.lower().replace(' ', '-')}-{r.get('key') or r.get('gbifID')}"
+        plot_lat, plot_lon = _jittered(scientific, float(lat), float(lon), uncertainty_m)
         feature = make_feature(
             feature_id=feature_id,
             name=vernacular,
-            lat=float(lat),
-            lon=float(lon),
+            lat=plot_lat,
+            lon=plot_lon,
             category="carnivore",
             source=SOURCE,
             source_url=SITE_URL,
