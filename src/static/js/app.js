@@ -767,14 +767,12 @@
       cb.addEventListener('change', () => {
         Filters.setRegion(r, cb.checked);
         savePrefs();
-        syncRegionClearButton();
         if (cb.checked) fitToRegions(Filters.state.regions);
       });
       label.appendChild(cb);
       label.appendChild(document.createTextNode(r));
       wrap.appendChild(label);
     }
-    syncRegionClearButton();
   }
 
   function syncRegionCheckboxes() {
@@ -783,16 +781,6 @@
     for (const cb of wrap.querySelectorAll('input[type="checkbox"]')) {
       cb.checked = Filters.state.regions.has(cb.value);
     }
-    syncRegionClearButton();
-  }
-
-  // The "Clear all" link below the region toggles only earns its
-  // pixels when at least one region is ticked. Hide it otherwise so
-  // the sidebar stays uncluttered.
-  function syncRegionClearButton() {
-    const btn = document.getElementById('region-clear');
-    if (!btn) return;
-    btn.hidden = Filters.state.regions.size === 0;
   }
 
   function updateFreshness() {
