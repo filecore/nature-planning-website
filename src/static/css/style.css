@@ -143,6 +143,37 @@ html, body {
 /* Panel blocks - tightened density */
 .panel-block { margin-bottom: 10px; }
 
+.time-window-inputs {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+.time-window-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  font-size: 11px;
+  color: #888;
+}
+.time-window-field input[type="month"] {
+  font: inherit;
+  font-size: 13px;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  color: #222;
+  width: 100%;
+  box-sizing: border-box;
+}
+.time-window-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+}
+#time-window-summary { margin-top: 6px; }
+
 .block-label {
   display: block;
   font-size: 10.5px;

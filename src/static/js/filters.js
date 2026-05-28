@@ -6,6 +6,7 @@
     layers: new Set(),        // enabled layer ids
     regions: new Set(),       // selected regions (empty set = all)
     geoClasses: new Set([1]),  // SYKE arvoluokka, default to Unique only (class 1)
+    timeWindow: null,          // {start, end} as 'YYYY-MM' strings, or null for all-time
   };
 
   const listeners = [];
@@ -33,6 +34,17 @@
 
   function setRegions(iterable) {
     state.regions = new Set(iterable || []);
+    notify();
+  }
+
+  // Set the time-window filter. Pass null (or both args null/undefined) to
+  // clear it ("all time"). Otherwise pass two 'YYYY-MM' strings.
+  function setTimeWindow(start, end) {
+    if (!start || !end) {
+      state.timeWindow = null;
+    } else {
+      state.timeWindow = { start: String(start), end: String(end) };
+    }
     notify();
   }
 
@@ -83,5 +95,5 @@
     notify();
   }
 
-  window.Filters = { state, set, setLayer, setGeoClass, setRegion, setRegions, onChange, matches, clear };
+  window.Filters = { state, set, setLayer, setGeoClass, setRegion, setRegions, setTimeWindow, onChange, matches, clear };
 })();

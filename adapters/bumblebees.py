@@ -42,6 +42,9 @@ def fetch_features() -> list[dict]:
     }, year_range=(MIN_YEAR, 2026))
 
     cells: dict[tuple[float, float], Counter[str]] = defaultdict(Counter)
+    # Per-(cell, year) individual-count tally so the frontend time-window
+    # slider can re-derive a windowed total without re-binning records.
+    cells_by_year: dict[tuple[float, float], dict[int, int]] = defaultdict(lambda: defaultdict(int))
     for r in records:
         lat = r.get("decimalLatitude")
         lon = r.get("decimalLongitude")
@@ -50,7 +53,12 @@ def fetch_features() -> list[dict]:
         species = r.get("species") or r.get("acceptedScientificName") or r.get("scientificName")
         if not species or species.lower().startswith("bombus latr"):
             continue
-        cells[_bin(float(lat), float(lon))][species] += int(r.get("individualCount") or 1)
+        indiv = int(r.get("individualCount") or 1)
+        key = _bin(float(lat), float(lon))
+        cells[key][species] += indiv
+        year = r.get("year")
+        if isinstance(year, int) and MIN_YEAR <= year <= 2030:
+            cells_by_year[key][year] += indiv
 
     out: list[dict] = []
     for (lat, lon), counter in cells.items():
@@ -78,6 +86,7 @@ def fetch_features() -> list[dict]:
             feature["properties"]["render_as"] = "cell"
             feature["properties"]["bin_lat_deg"] = BIN_LAT
             feature["properties"]["bin_lon_deg"] = BIN_LON
+            feature["properties"]["by_year"] = {str(y): n for y, n in sorted(cells_by_year[(lat, lon)].items())}
             out.append(feature)
     return out
 

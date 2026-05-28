@@ -24,11 +24,11 @@
     { id: 'geo-eolian',       file: 'geo-eolian.geojson',       label: 'Wind and shore deposits',          color: '#d4a574', icon: '\u{1F3D6}', group: 'geological' },
     { id: 'bird-hotspots',    file: 'bird-hotspots.geojson',    label: 'Bird-watching towers',             color: '#0891b2', icon: '\u{1F426}', group: 'wildlife' },
     { id: 'bird-atlas',       file: 'bird-atlas.geojson',       label: 'Bird Atlas (species richness)',    color: '#1e40af', icon: '\u{1F985}', group: 'wildlife' },
-    { id: 'butterflies',      file: 'butterflies.geojson',      label: 'Butterflies (NAFI)',               color: '#f97316', icon: '\u{1F98B}', group: 'wildlife' },
-    { id: 'bumblebees',       file: 'bumblebees.geojson',       label: 'Bumblebees',                       color: '#facc15', icon: '\u{1F41D}', group: 'wildlife' },
-    { id: 'wolves',           file: 'wolves.geojson',           label: 'Wolf sightings',                   color: '#64748b', icon: '\u{1F43A}', group: 'wildlife' },
-    { id: 'bears',            file: 'bears.geojson',            label: 'Bear sightings',                   color: '#7c2d12', icon: '\u{1F43B}', group: 'wildlife' },
-    { id: 'lynx',             file: 'lynx.geojson',             label: 'Lynx sightings',                   color: '#16a34a', icon: '\u{1F408}', group: 'wildlife' },
+    { id: 'butterflies',      file: 'butterflies.geojson',      label: 'Butterflies (NAFI)',               color: '#f97316', icon: '\u{1F98B}', group: 'wildlife', timeAware: true, timeMode: 'aggregate' },
+    { id: 'bumblebees',       file: 'bumblebees.geojson',       label: 'Bumblebees',                       color: '#facc15', icon: '\u{1F41D}', group: 'wildlife', timeAware: true, timeMode: 'aggregate' },
+    { id: 'wolves',           file: 'wolves.geojson',           label: 'Wolf sightings',                   color: '#64748b', icon: '\u{1F43A}', group: 'wildlife', timeAware: true, timeMode: 'heat' },
+    { id: 'bears',            file: 'bears.geojson',            label: 'Bear sightings',                   color: '#7c2d12', icon: '\u{1F43B}', group: 'wildlife', timeAware: true, timeMode: 'heat' },
+    { id: 'lynx',             file: 'lynx.geojson',             label: 'Lynx sightings',                   color: '#16a34a', icon: '\u{1F408}', group: 'wildlife', timeAware: true, timeMode: 'heat' },
     { id: 'beaches',          file: 'beaches.geojson',          label: 'Public swimming beaches',          color: '#4ec3e0', icon: '\u{1F3D6}', group: 'swimming-water' },
     { id: 'local-beaches',    file: 'local-beaches.geojson',    label: 'Local beaches (personal)',         color: '#06b6d4', icon: '\u{1F3CA}', group: 'swimming-water', pane: 'uusimaaPane' },
     { id: 'water-sensors',    file: 'water-sensors.geojson',    label: 'Live water temperature (Helsinki only)',color: '#14b8a6', icon: '\u{1F321}', group: 'quality' },
@@ -37,7 +37,7 @@
     { id: 'water-levels',     file: 'water-levels.geojson',     label: 'River and lake water levels',      color: '#0ea5e9', icon: '\u{1F30A}', group: 'quality' },
     { id: 'weather-alerts',   file: 'weather-alerts.geojson',   label: 'Weather warnings',                 color: '#dc2626', icon: '\u{26A0}', group: 'quality' },
     { id: 'pollen',           file: 'pollen.geojson',           label: 'Pollen forecast (today)',          color: '#f59e0b', icon: '\u{1F33C}', group: 'quality' },
-    { id: 'tick-density',     file: 'tick-density.geojson',     label: 'Tick observation density',         color: '#be185d', icon: '\u{1FAB2}', group: 'wildlife' },
+    { id: 'tick-density',     file: 'tick-density.geojson',     label: 'Tick observation density',         color: '#be185d', icon: '\u{1FAB2}', group: 'wildlife', timeAware: true, timeMode: 'aggregate' },
     { id: 'lakes',            file: 'lakes.geojson',            label: 'Lakes (≥ 0.5 km²)',            color: '#0b6fb2', icon: '\u{1F3DE}', group: 'swimming-water' },
     { id: 'rapids',           file: 'rapids.geojson',           label: 'Rapids and fast water',            color: '#1e3a8a', icon: '\u{1F30A}', group: 'swimming-water' },
     { id: 'waterfalls',       file: 'waterfalls.geojson',       label: 'Waterfalls',                       color: '#2e7bd6', icon: '\u{1F30A}', group: 'swimming-water' },
@@ -90,6 +90,7 @@
       search: Filters.state.search,
       geoClasses: Array.from(Filters.state.geoClasses).sort(),
       groupOpen: { ...userGroupOverrides },
+      timeWindow: Filters.state.timeWindow,
     };
     try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) {}
     syncUrl();
@@ -117,6 +118,10 @@
     const geo = Array.from(Filters.state.geoClasses).sort((a,b) => a - b);
     if (geo.length !== 1 || geo[0] !== 1) {
       for (const n of geo) params.append('geo', String(n));
+    }
+
+    if (Filters.state.timeWindow) {
+      params.set('window', Filters.state.timeWindow.start + '_' + Filters.state.timeWindow.end);
     }
 
     const qs = params.toString();
@@ -155,11 +160,20 @@
     const layers = multi('layers');
     const geo = multi('geo');
     const regions = multi('region');
+    let timeWindow = null;
+    const win = params.get('window');
+    if (win) {
+      const parts = win.split('_');
+      if (parts.length === 2 && /^\d{4}-\d{2}$/.test(parts[0]) && /^\d{4}-\d{2}$/.test(parts[1])) {
+        timeWindow = { start: parts[0], end: parts[1] };
+      }
+    }
     _urlOverridesCache = {
       layers: layers === null ? null : new Set(layers),
       regions: regions === null ? null : new Set(regions),
       search: params.get('q'),
       geoClasses: geo === null ? null : new Set(geo.map(s => parseInt(s, 10)).filter(n => n >= 1 && n <= 4)),
+      timeWindow,
     };
     return _urlOverridesCache;
   }
@@ -693,6 +707,41 @@
       const geo = await loadLayer(layer);
       if (!geo || !Array.isArray(geo.features)) continue;
 
+      // Heat-mode time-aware layers (carnivores) render through a single
+      // L.heatLayer rebuilt per time-window change. We skip the per-feature
+      // marker / cluster pipeline entirely and just stash the raw features
+      // with their observed_on dates for the filter step.
+      if (layer.timeAware && layer.timeMode === 'heat') {
+        const heatFeatures = [];
+        for (const feature of geo.features) {
+          feature.properties = feature.properties || {};
+          feature.properties.layer = layer.id;
+          if (!feature.geometry || feature.geometry.type !== 'Point') continue;
+          const lat = feature.geometry.coordinates[1];
+          const lon = feature.geometry.coordinates[0];
+          if (lat == null || lon == null) continue;
+          heatFeatures.push({ feature, lat, lon, observed_on: feature.properties.observed_on || '' });
+          if (feature.properties.region) allRegions.add(feature.properties.region);
+        }
+        leafletLayers.set(layer.id, {
+          cluster: null,
+          polygons: null,
+          pointMarkers: [],
+          polygonLayers: [],
+          heatFeatures,
+          heatLayer: null,
+          // Carnivore data is coarsened to ~25 km grid then triangle-offset
+          // per species. radius 28 / blur 22 gives circles slightly larger
+          // than that grid so they read as zones rather than pinpoints.
+          heatOptions: { radius: 28, blur: 22, minOpacity: 0.35, maxZoom: 12 },
+        });
+        if (geo.generated_at && (!lastFreshness || geo.generated_at > lastFreshness)) {
+          lastFreshness = geo.generated_at;
+        }
+        await new Promise(resolve => setTimeout(resolve, 0));
+        continue;
+      }
+
       // Sort features by geometry kind. Points cluster; polygons render
       // as outlines in a parallel plain layerGroup so they stay visible
       // at all zooms.
@@ -705,6 +754,14 @@
         const featureId = feature.properties.id || (feature.properties.name + ':' + JSON.stringify(featureCentroid(feature)));
         const lyr = buildLeafletLayer(feature, layer);
         lyr._feature = feature;
+        // Time-aware aggregate layers (butterflies, bumblebees, ticks)
+        // carry a by_year breakdown. Cache the full-window richness tier
+        // as the baseline so applyTimeFilter can restore it when the
+        // slider is widened back to "all time".
+        if (layer.timeAware && layer.timeMode === 'aggregate') {
+          lyr._byYear = feature.properties.by_year || null;
+          lyr._baseFeatures = feature.properties.features || [];
+        }
         if (lyr._kind === 'point') {
           pointMarkers.push(lyr);
         } else {
@@ -1050,18 +1107,134 @@
     }
   }
 
+  /* ---------- Time-window helpers ---------- */
+
+  // 'YYYY-MM' -> [year, month] integers, or null if unparseable.
+  function parseYearMonth(s) {
+    if (!s) return null;
+    const m = String(s).match(/^(\d{4})-(\d{1,2})/);
+    if (!m) return null;
+    return [parseInt(m[1], 10), parseInt(m[2], 10)];
+  }
+
+  // True if the observed_on date string falls within the (inclusive) window.
+  // Missing/unparseable dates are kept visible - we'd rather show a record
+  // with no date than silently drop it.
+  function inTimeWindow(observedOn, tw) {
+    if (!tw) return true;
+    const ym = parseYearMonth(observedOn);
+    if (!ym) return true;
+    const start = parseYearMonth(tw.start);
+    const end = parseYearMonth(tw.end);
+    if (!start || !end) return true;
+    const k = ym[0] * 100 + ym[1];
+    return k >= start[0] * 100 + start[1] && k <= end[0] * 100 + end[1];
+  }
+
+  // Years the window touches (inclusive). null if the window itself is null
+  // (= "all time").
+  function yearsTouchedByWindow(tw) {
+    if (!tw) return null;
+    const start = parseYearMonth(tw.start);
+    const end = parseYearMonth(tw.end);
+    if (!start || !end) return null;
+    const out = [];
+    for (let y = start[0]; y <= end[0]; y++) out.push(y);
+    return out;
+  }
+
+  // Sum the per-year counts in `byYear` that fall inside the window. by_year
+  // values can be either integers (ticks) or objects with a `count` field
+  // (butterflies, bumblebees).
+  function windowedByYearSum(byYear, tw) {
+    if (!byYear || typeof byYear !== 'object') return 0;
+    const yearKey = (v) => (typeof v === 'number') ? v : (v && typeof v.count === 'number' ? v.count : 0);
+    const years = yearsTouchedByWindow(tw);
+    if (!years) {
+      let total = 0;
+      for (const k of Object.keys(byYear)) total += yearKey(byYear[k]);
+      return total;
+    }
+    let total = 0;
+    for (const y of years) {
+      const v = byYear[String(y)];
+      if (v != null) total += yearKey(v);
+    }
+    return total;
+  }
+
+  // Total counts (window-agnostic) so we can derive a max for per-layer
+  // opacity scaling. Memoised per (layerId).
+  const _layerMaxCache = new Map();
+  function layerMaxByYear(entry, layerId) {
+    if (_layerMaxCache.has(layerId)) return _layerMaxCache.get(layerId);
+    let max = 0;
+    const consider = (lyr) => {
+      if (!lyr._byYear) return;
+      const t = windowedByYearSum(lyr._byYear, null);
+      if (t > max) max = t;
+    };
+    if (entry.polygonLayers) for (const lyr of entry.polygonLayers) consider(lyr);
+    if (entry.pointMarkers) for (const lyr of entry.pointMarkers) consider(lyr);
+    _layerMaxCache.set(layerId, max);
+    return max;
+  }
+
+  function haversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2 +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(a));
+  }
+
   function applyFilters() {
+    const tw = Filters.state.timeWindow;
     let visible = 0;
     for (const [layerId, entry] of leafletLayers) {
+      const layerCfg = LAYERS.find(l => l.id === layerId);
       const layerOn = Filters.state.layers.has(layerId);
+
+      // Heat-mode time-aware layers: tear down any existing L.heatLayer
+      // and rebuild from filtered features. Cheap enough to do on every
+      // change at the data volumes we have (~ 1300 carnivore points
+      // total).
+      if (entry.heatFeatures) {
+        if (entry.heatLayer) { map.removeLayer(entry.heatLayer); entry.heatLayer = null; }
+        if (layerOn) {
+          const pts = [];
+          const search = (Filters.state.search || '').toLowerCase();
+          for (const h of entry.heatFeatures) {
+            const props = h.feature.properties || {};
+            if (Filters.state.regions.size && !Filters.state.regions.has(props.region)) continue;
+            if (search) {
+              const name = (props.name || '').toLowerCase();
+              if (!name.includes(search)) continue;
+            }
+            if (tw && !inTimeWindow(h.observed_on, tw)) continue;
+            pts.push([h.lat, h.lon, 1]);
+          }
+          if (pts.length) {
+            entry.heatLayer = L.heatLayer(pts, entry.heatOptions).addTo(map);
+            visible += pts.length;
+          }
+        }
+        continue;
+      }
 
       // Point markers: add/remove from the cluster group so cluster
       // counts reflect filters. Batch via addLayers / removeLayers.
       if (entry.cluster) {
+        const isTimeAggregate = layerCfg && layerCfg.timeAware && layerCfg.timeMode === 'aggregate';
         const toAdd = [];
         const toRemove = [];
         for (const m of entry.pointMarkers) {
-          const match = layerOn && Filters.matches(m._feature);
+          let match = layerOn && Filters.matches(m._feature);
+          if (match && isTimeAggregate && m._byYear) {
+            if (windowedByYearSum(m._byYear, tw) === 0) match = false;
+          }
           if (match) {
             toAdd.push(m);
             visible++;
@@ -1078,12 +1251,28 @@
       // richness-derived fill opacity instead of the polygon default,
       // and use weight 0 so the cell edges don't reappear on re-show.
       if (entry.polygons) {
+        const isTimeAggregate = layerCfg && layerCfg.timeAware && layerCfg.timeMode === 'aggregate';
+        const layerMax = isTimeAggregate ? layerMaxByYear(entry, layerId) : 0;
         for (const lyr of entry.polygonLayers) {
-          const match = layerOn && Filters.matches(lyr._feature);
-          if (match) visible++;
+          let match = layerOn && Filters.matches(lyr._feature);
           const isCell = lyr._kind === 'cell';
+          let cellFillOpacity = lyr._origFillOpacity != null ? lyr._origFillOpacity : 0.32;
+          if (match && isTimeAggregate && lyr._byYear) {
+            const wsum = windowedByYearSum(lyr._byYear, tw);
+            if (wsum === 0) {
+              match = false;
+            } else if (layerMax > 0) {
+              // Scale the cell's fillOpacity between 0.12 (rare) and 0.55
+              // (the densest cell in this layer at full window), using a
+              // square-root curve so a handful of very dense cells don't
+              // wash out the rest of the country.
+              const ratio = Math.min(1, Math.sqrt(wsum / layerMax));
+              cellFillOpacity = 0.12 + 0.43 * ratio;
+            }
+          }
+          if (match) visible++;
           const styleOn  = isCell
-            ? { opacity: 0, weight: 0, fillOpacity: lyr._origFillOpacity != null ? lyr._origFillOpacity : 0.32 }
+            ? { opacity: 0, weight: 0, fillOpacity: cellFillOpacity }
             : { opacity: 1, fillOpacity: 0.18 };
           const styleOff = { opacity: 0, fillOpacity: 0 };
           const apply = (sub) => {
@@ -1405,6 +1594,161 @@
     renderFavourites();
   }
 
+  /* ---------- Time-window UI ---------- */
+
+  function defaultLast12Months() {
+    const now = new Date();
+    const endY = now.getUTCFullYear();
+    const endM = now.getUTCMonth() + 1; // 1..12
+    const startDate = new Date(Date.UTC(endY, endM - 12, 1));
+    const pad = (n) => String(n).padStart(2, '0');
+    return {
+      start: startDate.getUTCFullYear() + '-' + pad(startDate.getUTCMonth() + 1),
+      end:   endY + '-' + pad(endM),
+    };
+  }
+
+  function wireTimeWindow() {
+    const block = document.getElementById('time-window-block');
+    const startInput = document.getElementById('time-window-start');
+    const endInput = document.getElementById('time-window-end');
+    const last12 = document.getElementById('time-window-12m');
+    const allTime = document.getElementById('time-window-all');
+    const summary = document.getElementById('time-window-summary');
+    if (!block || !startInput || !endInput) return;
+
+    const prefs = loadPrefs() || {};
+    const ov = urlOverrides();
+
+    let initWindow = null;
+    if (ov.timeWindow) initWindow = ov.timeWindow;
+    else if (prefs.timeWindow && prefs.timeWindow.start && prefs.timeWindow.end) initWindow = prefs.timeWindow;
+    else initWindow = defaultLast12Months();
+
+    startInput.value = initWindow.start;
+    endInput.value = initWindow.end;
+    Filters.setTimeWindow(initWindow.start, initWindow.end);
+
+    function updateSummary() {
+      if (!summary) return;
+      if (!Filters.state.timeWindow) {
+        summary.textContent = 'Showing all observations.';
+      } else {
+        summary.textContent = 'Showing ' + Filters.state.timeWindow.start + ' to ' + Filters.state.timeWindow.end + '.';
+      }
+    }
+    updateSummary();
+
+    function onInputChange() {
+      if (startInput.value && endInput.value) {
+        let s = startInput.value, e = endInput.value;
+        if (s > e) { [s, e] = [e, s]; startInput.value = s; endInput.value = e; }
+        Filters.setTimeWindow(s, e);
+      }
+      savePrefs();
+      updateSummary();
+    }
+    startInput.addEventListener('change', onInputChange);
+    endInput.addEventListener('change', onInputChange);
+
+    if (last12) last12.addEventListener('click', () => {
+      const w = defaultLast12Months();
+      startInput.value = w.start;
+      endInput.value = w.end;
+      Filters.setTimeWindow(w.start, w.end);
+      savePrefs();
+      updateSummary();
+    });
+    if (allTime) allTime.addEventListener('click', () => {
+      startInput.value = '2014-01';
+      endInput.value = '2030-12';
+      Filters.setTimeWindow(null, null);
+      savePrefs();
+      updateSummary();
+    });
+
+    // Show the panel block only when at least one time-aware layer is enabled.
+    function syncVisibility() {
+      let anyOn = false;
+      for (const l of LAYERS) {
+        if (l.timeAware && Filters.state.layers.has(l.id)) { anyOn = true; break; }
+      }
+      block.hidden = !anyOn;
+    }
+    syncVisibility();
+    Filters.onChange(syncVisibility);
+  }
+
+  /* ---------- Heat-layer click popup ---------- */
+  // L.heatLayer draws onto a canvas, so per-point click handlers aren't
+  // possible. Instead listen on the map: when the click is in or near a
+  // visible carnivore heat blob, summarise the nearby sightings.
+
+  function wireHeatPopups() {
+    map.on('click', (e) => {
+      const tw = Filters.state.timeWindow;
+      const radiusKm = 35;
+      const byLayerHits = new Map();
+      for (const layer of LAYERS) {
+        if (!(layer.timeAware && layer.timeMode === 'heat')) continue;
+        if (!Filters.state.layers.has(layer.id)) continue;
+        const entry = leafletLayers.get(layer.id);
+        if (!entry || !entry.heatFeatures) continue;
+        const hits = [];
+        for (const h of entry.heatFeatures) {
+          const props = h.feature.properties || {};
+          if (Filters.state.regions.size && !Filters.state.regions.has(props.region)) continue;
+          if (tw && !inTimeWindow(h.observed_on, tw)) continue;
+          const d = haversineKm(e.latlng.lat, e.latlng.lng, h.lat, h.lon);
+          if (d <= radiusKm) hits.push(h);
+        }
+        if (hits.length) byLayerHits.set(layer, hits);
+      }
+      if (!byLayerHits.size) return;
+
+      const div = document.createElement('div');
+      div.className = 'popup';
+      const title = document.createElement('h3');
+      title.textContent = 'Sightings near this area';
+      div.appendChild(title);
+      const meta = document.createElement('p');
+      meta.className = 'popup-meta';
+      meta.textContent = 'Within ~35 km of click';
+      div.appendChild(meta);
+
+      const rowsBox = document.createElement('div');
+      rowsBox.className = 'popup-rows';
+      for (const [layer, hits] of byLayerHits) {
+        const dates = hits.map(h => h.observed_on).filter(Boolean).sort();
+        const earliest = dates[0];
+        const latest = dates[dates.length - 1];
+        const row = document.createElement('div');
+        row.className = 'popup-row';
+        const ico = document.createElement('span');
+        ico.className = 'popup-icon';
+        ico.textContent = layer.icon;
+        const txt = document.createElement('span');
+        const labelShort = layer.label.replace(/ sightings$/, '');
+        const range = (earliest && latest && earliest !== latest)
+          ? earliest + ' to ' + latest
+          : (earliest || 'date unknown');
+        txt.innerHTML = '<strong>' + hits.length + ' ' + labelShort + '</strong> (' + range + ')';
+        row.appendChild(ico);
+        row.appendChild(txt);
+        rowsBox.appendChild(row);
+      }
+      div.appendChild(rowsBox);
+
+      const note = document.createElement('p');
+      note.className = 'muted small';
+      note.style.marginTop = '6px';
+      note.textContent = 'Coordinates are coarsened to ~25 km (FinBIF sensitive-species policy), so these mark roughly where sightings clustered, not exact locations.';
+      div.appendChild(note);
+
+      L.popup({ maxWidth: 320 }).setLatLng(e.latlng).setContent(div).openOn(map);
+    });
+  }
+
   /* ---------- Visibility filter (public vs personal map) ---------- */
 
   // Two faces of the site share the same static files:
@@ -1443,6 +1787,8 @@
     initMap();
     buildLayerToggles();
     wireFilters();
+    wireTimeWindow();
+    wireHeatPopups();
     wireTabs();
     wireSidebar();
     wireDivider();

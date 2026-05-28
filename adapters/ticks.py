@@ -77,6 +77,11 @@ def fetch_features() -> list[dict]:
 
     # Bin by maakunta.
     counts: dict[str, dict[str, int]] = {name: {"ricinus": 0, "persulcatus": 0} for name, _, _ in REGIONS}
+    # Per-(region, year) total tick records so the frontend time-window
+    # slider can derive a windowed total per maakunta. Species-split is
+    # intentionally not preserved here - the popup already shows the
+    # all-time species mix and that's the more useful number.
+    by_year: dict[str, dict[int, int]] = {name: {} for name, _, _ in REGIONS}
     for rec, species_key in ((ricinus, "ricinus"), (persulcatus, "persulcatus")):
         for r in rec:
             lat = r.get("decimalLatitude")
@@ -86,6 +91,9 @@ def fetch_features() -> list[dict]:
             region = region_for(lat, lon)
             if region in counts:
                 counts[region][species_key] += 1
+                year = r.get("year")
+                if isinstance(year, int) and MIN_YEAR <= year <= 2030:
+                    by_year[region][year] = by_year[region].get(year, 0) + 1
 
     # Calibrate thresholds against the actual distribution so the
     # labels mean something. Compare to the median + max of the
@@ -134,6 +142,7 @@ def fetch_features() -> list[dict]:
             region=region_name,
         )
         if feature:
+            feature["properties"]["by_year"] = {str(y): n for y, n in sorted(by_year[region_name].items())}
             out.append(feature)
     return out
 

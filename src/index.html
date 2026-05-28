@@ -41,6 +41,26 @@
           <div id="layer-toggles" class="checkbox-group"></div>
         </div>
 
+        <div class="panel-block" id="time-window-block" hidden>
+          <span class="block-label">Time window</span>
+          <p class="muted small">Filters observation-based wildlife layers (bears, lynx, wolves, butterflies, bumblebees, ticks) by date.</p>
+          <div class="time-window-inputs">
+            <label class="time-window-field">
+              <span>From</span>
+              <input type="month" id="time-window-start" min="2014-01" max="2030-12">
+            </label>
+            <label class="time-window-field">
+              <span>To</span>
+              <input type="month" id="time-window-end" min="2014-01" max="2030-12">
+            </label>
+          </div>
+          <div class="time-window-actions">
+            <button type="button" class="ghost-link" id="time-window-12m">Last 12 months</button>
+            <button type="button" class="ghost-link" id="time-window-all">All time</button>
+          </div>
+          <p class="muted small" id="time-window-summary"></p>
+        </div>
+
         <div class="panel-block" id="geo-class-block">
           <button type="button" class="info-help" id="geo-class-help" aria-label="About SYKE value categories" title="About SYKE value categories">?</button>
           <span class="block-label">Geological value</span>
@@ -179,6 +199,7 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
   <script src="static/js/favourites.js?v=__BUILD__"></script>
   <script src="static/js/social-share.js?v=__BUILD__"></script>
   <script src="static/js/sources.js?v=__BUILD__"></script>
