@@ -1594,18 +1594,41 @@
     renderFavourites();
   }
 
-  /* ---------- Time-window UI ---------- */
+  /* ---------- Time-window UI (two-thumb range slider) ---------- */
+
+  // The slider's integer position maps onto a month index. Position 0 is
+  // MIN_YEAR-January; max position is the current month. Recomputed on
+  // every page load, so the right handle's max really is "today".
+  const TIME_WINDOW_MIN_YEAR = 2014;
+
+  function currentYearMonth() {
+    const now = new Date();
+    return { y: now.getFullYear(), m: now.getMonth() + 1 };
+  }
+
+  function ymToIndex(ym) {
+    return (ym.y - TIME_WINDOW_MIN_YEAR) * 12 + (ym.m - 1);
+  }
+
+  function indexToYM(i) {
+    const total = TIME_WINDOW_MIN_YEAR * 12 + Math.max(0, Math.round(i));
+    return { y: Math.floor(total / 12), m: (total % 12) + 1 };
+  }
+
+  function ymToString(ym) {
+    return ym.y + '-' + String(ym.m).padStart(2, '0');
+  }
+
+  function parseYMString(s) {
+    const m = /^(\d{4})-(\d{1,2})/.exec(String(s || ''));
+    return m ? { y: parseInt(m[1], 10), m: parseInt(m[2], 10) } : null;
+  }
 
   function defaultLast12Months() {
-    const now = new Date();
-    const endY = now.getUTCFullYear();
-    const endM = now.getUTCMonth() + 1; // 1..12
-    const startDate = new Date(Date.UTC(endY, endM - 12, 1));
-    const pad = (n) => String(n).padStart(2, '0');
-    return {
-      start: startDate.getUTCFullYear() + '-' + pad(startDate.getUTCMonth() + 1),
-      end:   endY + '-' + pad(endM),
-    };
+    const today = currentYearMonth();
+    const startTotal = today.y * 12 + (today.m - 1) - 11; // 12 months inclusive of today
+    const start = { y: Math.floor(startTotal / 12), m: (startTotal % 12) + 1 };
+    return { start: ymToString(start), end: ymToString(today) };
   }
 
   function wireTimeWindow() {
@@ -1614,57 +1637,84 @@
     const endInput = document.getElementById('time-window-end');
     const last12 = document.getElementById('time-window-12m');
     const allTime = document.getElementById('time-window-all');
-    const summary = document.getElementById('time-window-summary');
+    const fromLabel = document.getElementById('time-window-from-label');
+    const toLabel = document.getElementById('time-window-to-label');
+    const fill = document.getElementById('time-window-fill');
     if (!block || !startInput || !endInput) return;
+
+    const today = currentYearMonth();
+    const minIndex = 0;
+    const maxIndex = ymToIndex(today);
+    startInput.min = String(minIndex);
+    startInput.max = String(maxIndex);
+    endInput.min = String(minIndex);
+    endInput.max = String(maxIndex);
 
     const prefs = loadPrefs() || {};
     const ov = urlOverrides();
-
     let initWindow = null;
     if (ov.timeWindow) initWindow = ov.timeWindow;
     else if (prefs.timeWindow && prefs.timeWindow.start && prefs.timeWindow.end) initWindow = prefs.timeWindow;
     else initWindow = defaultLast12Months();
 
-    startInput.value = initWindow.start;
-    endInput.value = initWindow.end;
-    Filters.setTimeWindow(initWindow.start, initWindow.end);
+    function clampIndex(i) { return Math.min(maxIndex, Math.max(minIndex, i | 0)); }
 
-    function updateSummary() {
-      if (!summary) return;
-      if (!Filters.state.timeWindow) {
-        summary.textContent = 'Showing all observations.';
-      } else {
-        summary.textContent = 'Showing ' + Filters.state.timeWindow.start + ' to ' + Filters.state.timeWindow.end + '.';
-      }
+    function setHandles(startYM, endYM) {
+      // Clamp to slider range; if start > end after clamping, swap them.
+      let si = clampIndex(ymToIndex(startYM));
+      let ei = clampIndex(ymToIndex(endYM));
+      if (si > ei) [si, ei] = [ei, si];
+      startInput.value = String(si);
+      endInput.value = String(ei);
+      renderTrack();
     }
-    updateSummary();
 
-    function onInputChange() {
-      if (startInput.value && endInput.value) {
-        let s = startInput.value, e = endInput.value;
-        if (s > e) { [s, e] = [e, s]; startInput.value = s; endInput.value = e; }
-        Filters.setTimeWindow(s, e);
+    function renderTrack() {
+      const si = parseInt(startInput.value, 10);
+      const ei = parseInt(endInput.value, 10);
+      const range = Math.max(1, maxIndex - minIndex);
+      const leftPct = ((si - minIndex) / range) * 100;
+      const rightPct = ((ei - minIndex) / range) * 100;
+      if (fill) {
+        fill.style.left = leftPct + '%';
+        fill.style.width = Math.max(0, rightPct - leftPct) + '%';
       }
+      if (fromLabel) fromLabel.textContent = ymToString(indexToYM(si));
+      if (toLabel) toLabel.textContent = ymToString(indexToYM(ei));
+    }
+
+    function commitFromInputs() {
+      let si = clampIndex(parseInt(startInput.value, 10));
+      let ei = clampIndex(parseInt(endInput.value, 10));
+      // Don't let the thumbs cross: nudge whichever just moved.
+      if (si > ei) {
+        if (document.activeElement === startInput) ei = si;
+        else si = ei;
+        startInput.value = String(si);
+        endInput.value = String(ei);
+      }
+      renderTrack();
+      Filters.setTimeWindow(ymToString(indexToYM(si)), ymToString(indexToYM(ei)));
       savePrefs();
-      updateSummary();
     }
-    startInput.addEventListener('change', onInputChange);
-    endInput.addEventListener('change', onInputChange);
+
+    const startYM = parseYMString(initWindow.start) || { y: TIME_WINDOW_MIN_YEAR, m: 1 };
+    const endYM = parseYMString(initWindow.end) || today;
+    setHandles(startYM, endYM);
+    Filters.setTimeWindow(ymToString(indexToYM(parseInt(startInput.value, 10))),
+                         ymToString(indexToYM(parseInt(endInput.value, 10))));
+
+    startInput.addEventListener('input', commitFromInputs);
+    endInput.addEventListener('input', commitFromInputs);
 
     if (last12) last12.addEventListener('click', () => {
       const w = defaultLast12Months();
-      startInput.value = w.start;
-      endInput.value = w.end;
-      Filters.setTimeWindow(w.start, w.end);
-      savePrefs();
-      updateSummary();
+      setHandles(parseYMString(w.start), parseYMString(w.end));
+      commitFromInputs();
     });
     if (allTime) allTime.addEventListener('click', () => {
-      startInput.value = '2014-01';
-      endInput.value = '2030-12';
-      Filters.setTimeWindow(null, null);
-      savePrefs();
-      updateSummary();
+      setHandles({ y: TIME_WINDOW_MIN_YEAR, m: 1 }, today);
+      commitFromInputs();
     });
 
     // Show the panel block only when at least one time-aware layer is enabled.

@@ -143,36 +143,101 @@ html, body {
 /* Panel blocks - tightened density */
 .panel-block { margin-bottom: 10px; }
 
-.time-window-inputs {
-  display: flex;
-  gap: 8px;
+/* Two-thumb range slider used for the wildlife time window.
+   Two overlapping <input type="range"> elements share a custom track:
+   their native tracks are made transparent and the visible track plus
+   the filled segment between thumbs are drawn underneath. JS keeps the
+   thumbs from crossing. */
+.range-slider {
+  position: relative;
+  height: 44px;
   margin-top: 6px;
+  user-select: none;
 }
-.time-window-field {
+.range-slider-labels {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-  font-size: 11px;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: #333;
+  margin-bottom: 6px;
+}
+.range-slider-labels .range-slider-arrow {
   color: #888;
+  font-size: 11px;
 }
-.time-window-field input[type="month"] {
-  font: inherit;
-  font-size: 13px;
-  padding: 4px 6px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background: #fff;
-  color: #222;
+.range-slider-track {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 30px;
+  height: 4px;
+  background: #d0d4d8;
+  border-radius: 2px;
+  pointer-events: none;
+}
+.range-slider-fill {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: #1f7a3a;
+  border-radius: 2px;
+}
+.range-slider-input {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 22px;
   width: 100%;
-  box-sizing: border-box;
+  height: 20px;
+  margin: 0;
+  background: transparent;
+  pointer-events: none;
+  -webkit-appearance: none;
+  appearance: none;
 }
+.range-slider-input::-webkit-slider-runnable-track {
+  height: 4px;
+  background: transparent;
+  border: none;
+}
+.range-slider-input::-moz-range-track {
+  height: 4px;
+  background: transparent;
+  border: none;
+}
+.range-slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #1f7a3a;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  cursor: pointer;
+  pointer-events: auto;
+  margin-top: -6px;
+}
+.range-slider-input::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #1f7a3a;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  cursor: pointer;
+  pointer-events: auto;
+}
+.range-slider-input:focus { outline: none; }
+.range-slider-input:focus::-webkit-slider-thumb { border-color: #2a9b4a; }
+.range-slider-input:focus::-moz-range-thumb { border-color: #2a9b4a; }
 .time-window-actions {
   display: flex;
   gap: 12px;
   margin-top: 6px;
 }
-#time-window-summary { margin-top: 6px; }
 
 .block-label {
   display: block;

@@ -44,21 +44,22 @@
         <div class="panel-block" id="time-window-block" hidden>
           <span class="block-label">Time window</span>
           <p class="muted small">Filters observation-based wildlife layers (bears, lynx, wolves, butterflies, bumblebees, ticks) by date.</p>
-          <div class="time-window-inputs">
-            <label class="time-window-field">
-              <span>From</span>
-              <input type="month" id="time-window-start" min="2014-01" max="2030-12">
-            </label>
-            <label class="time-window-field">
-              <span>To</span>
-              <input type="month" id="time-window-end" min="2014-01" max="2030-12">
-            </label>
+          <div class="range-slider" id="time-window-slider">
+            <div class="range-slider-labels">
+              <span id="time-window-from-label">-</span>
+              <span class="range-slider-arrow">&rarr;</span>
+              <span id="time-window-to-label">-</span>
+            </div>
+            <div class="range-slider-track" id="time-window-track">
+              <div class="range-slider-fill" id="time-window-fill"></div>
+            </div>
+            <input type="range" id="time-window-start" class="range-slider-input range-slider-input-start" min="0" max="0" step="1" value="0" aria-label="Window start month">
+            <input type="range" id="time-window-end" class="range-slider-input range-slider-input-end" min="0" max="0" step="1" value="0" aria-label="Window end month">
           </div>
           <div class="time-window-actions">
             <button type="button" class="ghost-link" id="time-window-12m">Last 12 months</button>
             <button type="button" class="ghost-link" id="time-window-all">All time</button>
           </div>
-          <p class="muted small" id="time-window-summary"></p>
         </div>
 
         <div class="panel-block" id="geo-class-block">
