@@ -44,6 +44,7 @@ ADAPTERS=(
   bumblebees
   carnivores
   ticks
+  tree_species
   breweries
   archaeology
   heritage
