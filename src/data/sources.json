@@ -420,6 +420,15 @@
       "language": "fi"
     },
     {
+      "id": "natura2000-fi",
+      "title": "Natura 2000 -verkosto (ymparisto.fi)",
+      "url": "https://www.ymparisto.fi/fi/luonto-ja-ilmasto/luonnon-monimuotoisuus/luonnonsuojelu-suomessa/natura-2000-verkosto",
+      "blurb": "Finnish Ministry of the Environment's overview of the EU Natura 2000 network. Many large multi-use recreation areas (e.g. Kytäjä-Usmi) are not themselves a statutory nature reserve but sit inside a much larger Natura boundary - source for the Natura 2000 areas layer.",
+      "category": "destinations",
+      "inline": true,
+      "language": "fi"
+    },
+    {
       "id": "laavu-org",
       "title": "laavu.org",
       "url": "http://laavu.org/",
