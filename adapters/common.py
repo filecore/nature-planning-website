@@ -184,12 +184,16 @@ def polygon_bbox_centroid(geometry: dict) -> tuple[float, float] | None:
     )
 
 
-def _simplify_ring(ring: list, precision: int) -> list:
+def _simplify_ring(ring: list, precision: int, *, close: bool = True) -> list:
     """Round coords to ``precision`` decimals and drop consecutive duplicates.
 
     Crude but good enough to take national-park polygons from megabytes to
     tens of kilobytes without visible loss at country-level zoom. At
     precision=4 (decimals of degrees), ~11 metres at the equator.
+
+    ``close`` re-closes a polygon ring if dedup dropped its closing point.
+    Pass ``close=False`` for open lines (trails, rivers) - forcing those
+    closed would draw a spurious segment back to the start.
     """
     out: list[list[float]] = []
     prev: tuple[float, float] | None = None
@@ -203,8 +207,7 @@ def _simplify_ring(ring: list, precision: int) -> list:
             continue
         out.append([lon, lat])
         prev = (lon, lat)
-    # A polygon ring must close, so re-close if dedup dropped the closing point.
-    if len(out) >= 3 and out[0] != out[-1]:
+    if close and len(out) >= 3 and out[0] != out[-1]:
         out.append(out[0][:])
     return out
 
@@ -229,24 +232,31 @@ def _decimate_ring(ring: list, min_step: float) -> list:
 
 
 def _simplify_geometry(geometry: dict, precision: int = 4, min_step: float = 0.001) -> dict:
-    """Apply ``_simplify_ring`` recursively across Polygon/MultiPolygon."""
+    """Apply ``_simplify_ring`` recursively across Polygon/MultiPolygon/
+    LineString/MultiLineString. Lines are never re-closed into a loop."""
     gtype = geometry.get("type")
     coords = geometry.get("coordinates")
-    def reduce(ring):
+    def reduce(ring, *, close):
         ring = _decimate_ring(ring, min_step)
-        return _simplify_ring(ring, precision)
+        return _simplify_ring(ring, precision, close=close)
 
     if gtype == "Polygon":
-        new_rings = [reduce(r) for r in coords]
+        new_rings = [reduce(r, close=True) for r in coords]
         return {"type": "Polygon", "coordinates": [r for r in new_rings if len(r) >= 4]}
     if gtype == "MultiPolygon":
         new_polys = []
         for poly in coords:
-            rings = [reduce(r) for r in poly]
+            rings = [reduce(r, close=True) for r in poly]
             rings = [r for r in rings if len(r) >= 4]
             if rings:
                 new_polys.append(rings)
         return {"type": "MultiPolygon", "coordinates": new_polys}
+    if gtype == "LineString":
+        new_line = reduce(coords, close=False)
+        return {"type": "LineString", "coordinates": new_line if len(new_line) >= 2 else []}
+    if gtype == "MultiLineString":
+        new_lines = [reduce(line, close=False) for line in coords]
+        return {"type": "MultiLineString", "coordinates": [l for l in new_lines if len(l) >= 2]}
     return geometry
 
 
@@ -273,6 +283,58 @@ def make_polygon_feature(
     country-level zoom.
     """
     if geometry.get("type") not in ("Polygon", "MultiPolygon"):
+        return None
+    centroid = polygon_bbox_centroid(geometry)
+    if not centroid:
+        return None
+    lat, lon = centroid
+    if not in_finland(lat, lon):
+        return None
+    if region is None:
+        region = region_for(lat, lon)
+    geometry = _simplify_geometry(geometry, precision=coord_precision, min_step=min_step)
+    if not geometry.get("coordinates"):
+        return None
+    return {
+        "type": "Feature",
+        "geometry": geometry,
+        "properties": {
+            "id": feature_id,
+            "name": name.strip(),
+            "category": category,
+            "region": region,
+            "description": (description or "").strip(),
+            "features": sorted(set(f for f in features if f)),
+            "source": source,
+            "source_url": source_url,
+            "centroid": [round(lon, 6), round(lat, 6)],
+        },
+    }
+
+
+def make_line_feature(
+    feature_id: str,
+    name: str,
+    geometry: dict,
+    *,
+    category: str,
+    source: str,
+    source_url: str,
+    features: Iterable[str] = (),
+    description: str = "",
+    region: str | None = None,
+    coord_precision: int = 4,
+    min_step: float = 0.0005,
+) -> dict | None:
+    """Emit a LineString/MultiLineString feature with the same property
+    schema as Points/Polygons (trails, rivers - anything linear).
+
+    Same parameters as ``make_polygon_feature``; the lower default
+    ``min_step`` keeps more shape detail since lines have far fewer points
+    per feature than a reserve polygon's ring, so aggressive decimation
+    isn't needed to keep file size down.
+    """
+    if geometry.get("type") not in ("LineString", "MultiLineString"):
         return None
     centroid = polygon_bbox_centroid(geometry)
     if not centroid:
