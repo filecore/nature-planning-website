@@ -46,6 +46,7 @@ ADAPTERS=(
   ticks
   tree_species
   hiking_trails
+  regional_recreation_areas
   breweries
   archaeology
   heritage

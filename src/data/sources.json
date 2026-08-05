@@ -429,6 +429,15 @@
       "language": "en"
     },
     {
+      "id": "lounaistieto-maakuntakaavat",
+      "title": "Lounaistieto: harmonised regional plans (maakuntakaavat)",
+      "url": "https://www.lounaistieto.fi/maakuntakaavat/",
+      "blurb": "Finland's regional councils' land-use plans in a shared data model, filtered to the recreation-area zoning code. Source for the Regional plan recreation areas layer. Coverage is incomplete - see the Data sources tab for which regions are missing or only partially covered.",
+      "category": "destinations",
+      "inline": true,
+      "language": "fi"
+    },
+    {
       "id": "natura2000-fi",
       "title": "Natura 2000 -verkosto (ymparisto.fi)",
       "url": "https://www.ymparisto.fi/fi/luonto-ja-ilmasto/luonnon-monimuotoisuus/luonnonsuojelu-suomessa/natura-2000-verkosto",

@@ -10,6 +10,7 @@
     { id: 'nature-reserves',   file: 'nature-reserves.geojson',   label: 'Nature reserves',                 color: '#3a6b7a', icon: '\u{1F33F}', group: 'hiking' },
     { id: 'natura-2000',      file: 'natura-2000.geojson',      label: 'Natura 2000 areas',                color: '#6b8f3a', icon: '\u{1F310}', group: 'hiking' },
     { id: 'hiking-trails',    file: 'hiking-trails.geojson',    label: 'Hiking trails',                    color: '#c2410c', icon: '\u{1F6B6}', group: 'hiking' },
+    { id: 'regional-recreation-areas', file: 'regional-recreation-areas.geojson', label: 'Regional plan recreation areas', color: '#4d7c0f', icon: '\u{1F9ED}', group: 'hiking' },
     { id: 'tree-species',     file: 'tree-species.geojson',     label: 'Tree species composition',         color: '#2d6a1f', icon: '\u{1F333}', group: 'hiking' },
     { id: 'lean-tos',          file: 'lean-tos.geojson',          label: 'Lean-to shelters',                color: '#7a4a1f', icon: '\u{1F3D5}', group: 'hiking' },
     { id: 'wilderness-huts',   file: 'wilderness-huts.geojson',   label: 'Wilderness huts',                 color: '#4a3520', icon: '\u{1F3E0}', group: 'hiking' },
