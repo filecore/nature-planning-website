@@ -420,6 +420,15 @@
       "language": "fi"
     },
     {
+      "id": "openstreetmap-hiking",
+      "title": "OpenStreetMap (hiking routes)",
+      "url": "https://www.openstreetmap.org/",
+      "blurb": "Community-mapped route=hiking relations, from short local loops to multi-hundred-km regional routes like Hämeen Ilvesreitti. Source for the Hiking trails layer.",
+      "category": "destinations",
+      "inline": true,
+      "language": "en"
+    },
+    {
       "id": "natura2000-fi",
       "title": "Natura 2000 -verkosto (ymparisto.fi)",
       "url": "https://www.ymparisto.fi/fi/luonto-ja-ilmasto/luonnon-monimuotoisuus/luonnonsuojelu-suomessa/natura-2000-verkosto",

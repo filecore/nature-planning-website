@@ -45,6 +45,7 @@ ADAPTERS=(
   carnivores
   ticks
   tree_species
+  hiking_trails
   breweries
   archaeology
   heritage
