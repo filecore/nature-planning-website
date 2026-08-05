@@ -126,12 +126,12 @@ def fetch_features() -> list[dict]:
         total = sum(volumes.values())
         if total <= 0:
             continue
-        shares = {slug: round(v / total * 100, 1) for slug, v in volumes.items()}
+        shares = {slug: round(v / total * 100) for slug, v in volumes.items()}
         dominant_slug = max(volumes, key=volumes.get)
 
         bits = [f"{SPECIES_SLUG_TO_LABEL[slug]} {shares[slug]}%" for slug in SPECIES_ORDER]
         description = (
-            ", ".join(bits)
+            " · ".join(bits)
             + f" of {round(total, 1)} million m³ growing stock (NFI 13/14, 2020-2024)"
         )
 
@@ -155,6 +155,11 @@ def fetch_features() -> list[dict]:
             feature["properties"]["total_million_m3"] = round(total, 1)
             feature["properties"]["dominant_species"] = dominant_slug
             out.append(feature)
+    if len(out) != len(REGION_CODE_TO_NAME):
+        raise RuntimeError(
+            f"expected {len(REGION_CODE_TO_NAME)} regions, got {len(out)} - "
+            "a region was silently dropped (missing centroid or zero volume)"
+        )
     return out
 
 

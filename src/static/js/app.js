@@ -16,7 +16,7 @@
     { id: 'archaeology',      file: 'archaeology.geojson',      label: 'Archaeological sites',             color: '#a0292e', icon: '\u{1F3DB}', group: 'natural-sites' },
     { id: 'open-air-heritage',file: 'open-air-heritage.geojson',label: 'Open-air museums and ruins',       color: '#6b4226', icon: '\u{1F3DB}', group: 'natural-sites' },
     { id: 'sacred-sites',     file: 'sacred-sites.geojson',     label: 'Sacred natural sites',             color: '#5b3a8a', icon: '✨',    group: 'natural-sites' },
-    { id: 'tree-species',     file: 'tree-species.geojson',     label: 'Tree species composition',         color: '#2d6a1f', icon: '\u{1F332}', group: 'natural-sites' },
+    { id: 'tree-species',     file: 'tree-species.geojson',     label: 'Tree species composition',         color: '#2d6a1f', icon: '\u{1F333}', group: 'natural-sites' },
     { id: 'caves',            file: 'caves.geojson',            label: 'Caves',                            color: '#5a4a36', icon: '\u{1F573}️', group: 'geological' },
     { id: 'crags',            file: 'crags.geojson',            label: 'Climbing crags',                   color: '#737373', icon: '\u{1F9D7}', group: 'geological' },
     { id: 'geo-bedrock',      file: 'geo-bedrock.geojson',      label: 'Bedrock and cliffs',               color: '#8b6f47', icon: '\u{26F0}', group: 'geological' },

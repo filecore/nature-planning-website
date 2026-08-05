@@ -519,6 +519,15 @@
       "language": "en"
     },
     {
+      "id": "luke-nfi",
+      "title": "Luke - National Forest Inventory (NFI)",
+      "url": "https://www.luke.fi/en/statistics/forest-resources/results-of-the-national-forest-inventory",
+      "blurb": "Natural Resources Institute Finland's National Forest Inventory: growing-stock volume by tree species and region. Source for the Tree species composition layer.",
+      "category": "wildlife",
+      "inline": true,
+      "language": "en"
+    },
+    {
       "id": "norkko",
       "title": "Norkko (pollen forecast)",
       "url": "https://norkko.fi/",
