@@ -19,7 +19,13 @@ which serves GeoJSON when asked. We pull feature subsets and emit them as
   (herb-rich forest), LPU (strict nature reserves), HYL and MHA. ~1050
   polygons total; we drop anything below ``RESERVE_MIN_AREA_KM2`` and
   apply heavier coordinate simplification to keep the layer file small
-  enough to ship over HTTP without compression.
+  enough to ship over HTTP without compression. Also includes
+  typeNames=...YksityistenMaillaOlevaLuonnonsuojelualue (privately-owned
+  reserves: YSA, LTA, ERA, MRA) in the same category -- ~17,000 features
+  total, almost all small individual-landowner parcels, so the >= 1 km^2
+  filter is pushed server-side via CQL rather than fetched-then-filtered
+  (the WFS server caps unfiltered responses at 10,000 features, which
+  would otherwise silently truncate this typeName).
 * ``natura-2000.geojson``: the EU Natura 2000 network, a distinct (and
   usually larger) designation from the state-owned reserves above. Many
   multi-use recreation areas (e.g. Kytaja-Usmi near Hyvinkaa) are not
@@ -83,6 +89,10 @@ RESERVE_MIN_AREA_KM2 = 1.0
 NATURA_MIN_AREA_KM2 = 1.0
 
 # Friendly labels for the SYKE type-code abbreviations on non-NP polygons.
+# YSA/LTA/ERA/MRA are the private-land equivalents (see PRIVATE_MIN_AREA_KM2
+# below) - a private reserve is legally a different designation
+# (Yksityinen luonnonsuojelualue, LsL 47 §) from a state-owned ESA/SSA/etc,
+# but reads the same tyyppilyhenne field, so one label dict covers both.
 RESERVE_TYPE_LABELS = {
     "ESA": "Other conservation area",
     "SSA": "Mire reserve",
@@ -91,6 +101,10 @@ RESERVE_TYPE_LABELS = {
     "LPU": "Strict nature reserve",
     "HYL": "Other conservation area",
     "MHA": "MH-decision conservation area",
+    "YSA": "Private nature reserve",
+    "LTA": "Protected habitat type",
+    "ERA": "Specially protected species habitat",
+    "MRA": "Temporary protection area",
 }
 
 # Note: SYKE's 'lpalue' field is the Metsähallitus *service area* name, not
@@ -173,13 +187,22 @@ def _description(props: dict) -> str:
     return " · ".join(bits)
 
 
-def _ingest(geo: dict, *, simplify: tuple[int, float] = (4, 0.001), min_area_km2: float = 0.0) -> list[dict]:
+def _ingest(
+    geo: dict,
+    *,
+    simplify: tuple[int, float] = (4, 0.001),
+    min_area_km2: float = 0.0,
+    id_prefix: str = "mh",
+) -> list[dict]:
     """Convert raw SYKE features into our common schema.
 
     ``simplify`` is (coord_precision, min_step) passed through to
     make_polygon_feature. Reserves use heavier simplification because
     there are 1000+ of them. ``min_area_km2`` drops polygons below the
     threshold (their bbox / SYKE-reported area, whichever is available).
+    ``id_prefix`` distinguishes feature ids across WFS feature types that
+    otherwise share the same ``kohdeid`` numbering space (state-owned vs
+    privately-owned reserves are separate typeNames on the same server).
     """
     out: list[dict] = []
     precision, min_step = simplify
@@ -193,7 +216,7 @@ def _ingest(geo: dict, *, simplify: tuple[int, float] = (4, 0.001), min_area_km2
                 continue
         name = (props.get("nimi") or "").strip() or "(unnamed)"
         cat = _category_for(props.get("tyyppilyhenne"), props.get("tyyppinimi"))
-        feature_id = "mh-" + str(props.get("kohdeid") or props.get("lsaluetunnus") or re.sub(r"[^a-z0-9]+", "-", name.lower())[:60])
+        feature_id = id_prefix + "-" + str(props.get("kohdeid") or props.get("lsaluetunnus") or re.sub(r"[^a-z0-9]+", "-", name.lower())[:60])
 
         # Source URL preference:
         # 1. The WFS-supplied paaturl if present (rarely is, and when it is
@@ -354,6 +377,23 @@ def fetch_features() -> tuple[list[dict], list[dict], list[dict], list[dict]]:
     )
     rs_feats = _ingest(rs, simplify=(3, 0.005), min_area_km2=RESERVE_MIN_AREA_KM2)
     print(f"    {len(rs_feats)} nature reserves after filtering")
+
+    print(
+        f"  fetching privately-owned nature reserves via WFS (>= {RESERVE_MIN_AREA_KM2} km²)"
+    )
+    # Filtered server-side (CQL on shape_area): this typeName has ~17,000
+    # features total (mostly small individual-landowner YSA parcels with a
+    # median size of ~0.03 km^2), well past the WFS server's 10,000-feature
+    # response cap, so an unfiltered fetch would silently truncate. Pushing
+    # the >= 1 km^2 threshold into the query avoids that entirely instead of
+    # paginating.
+    priv = _wfs_query(
+        "inspire_ps:PS.ProtectedSitesYksityistenMaillaOlevaLuonnonsuojelualue",
+        cql_filter=f"shape_area >= {int(RESERVE_MIN_AREA_KM2 * 1_000_000)}",
+    )
+    priv_feats = _ingest(priv, simplify=(3, 0.005), id_prefix="private")
+    print(f"    {len(priv_feats)} privately-owned nature reserves after filtering")
+    rs_feats = rs_feats + priv_feats
 
     natura_feats = _fetch_natura()
     print(f"    {len(natura_feats)} Natura 2000 sites total after dedup and filtering")
